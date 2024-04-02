@@ -107,13 +107,13 @@ private:
 	/// </summary>
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	//句柄（用来标识不同的代理处理对象, 是一个 uint64 的ID，接收返回的委托句柄） 用于委托的删除
-	FDelegateHandle CreateSessionCompleteDeletegateHandle;
+	FDelegateHandle CreateSessionCompleteDelegateHandle;
 	/// <summary>
 	/// 会话查找委托
 	/// </summary>
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
 	//句柄
-	FDelegateHandle FindSessionCompleteDelegateHandle;
+	FDelegateHandle FindSessionsCompleteDelegateHandle;
 	/// <summary>
 	/// 会话加入委托
 	/// </summary>

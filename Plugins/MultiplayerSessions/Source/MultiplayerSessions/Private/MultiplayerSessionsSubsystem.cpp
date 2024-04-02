@@ -38,7 +38,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	}
 
 	//会话创建完成的绑定委托，并存储委托句柄，以便稍后可以将其从委托列表中删除
-	CreateSessionCompleteDeletegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
+	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 	
 	//先设置会话
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
@@ -72,7 +72,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	//创建会话，参数：唯一网络ID，会话名称，绘画设置
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings)) {
 		//如果创建失败，则在委托列表中删除创建委托
-		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDeletegateHandle);
+		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 		// 广播自定义的会话创建状态委托到菜单类
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
@@ -89,7 +89,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	}
 
 	//添加委托.一旦找到会话，回调函数就会绑定到这个委托上
-	FindSessionCompleteDelegateHandle=SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+	FindSessionsCompleteDelegateHandle=SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
 	//定义一个会话搜索
 	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
@@ -106,7 +106,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	//查找会话,参数：唯一网络ID，会话搜索
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef())) {
 		//没有找到会话 则删除委托
-		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionCompleteDelegateHandle);
+		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 		if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(
 				-1,
@@ -124,7 +124,7 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 {
 	if (!SessionInterface.IsValid()) {
 		//广播一个 加入失败
-		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::Type::UnknownError);
+		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 		return;
 	}
 	//添加委托.一旦加入会话，回调函数就会绑定到这个委托上
@@ -139,7 +139,7 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 		//清理委托
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
 		//广播加入会话结果
-		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::Type::UnknownError);
+		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 	}
 }
 
@@ -178,7 +178,7 @@ void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, b
 {
 	if (SessionInterface) {
 		//会话创建完成，则删除会话委托
-		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(FindSessionCompleteDelegateHandle);
+		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 	}
 
 	// 广播自定义的会话创建委托状态到菜单类
@@ -192,7 +192,7 @@ void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	if (SessionInterface) {
 		//会话查找完成，则删除会话委托
-		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDeletegateHandle);
+		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 	}
 
 	if (LastSessionSearch->SearchResults.Num() <= 0) {
