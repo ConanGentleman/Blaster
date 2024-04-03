@@ -9,7 +9,7 @@
 //#include "Interfaces/OnlineSessionInterface.h"
 
 void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath) {
-	PathToLobby = FString::Printf(TEXT("%s?listen"),*LobbyPath);
+	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);
 	NumPublicConnections = NumberOfPublicConnections;
 	MatchType = TypeOfMatch;
 	//添加到视口（添加到屏幕）
@@ -42,9 +42,9 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 	}
 	//绑定委托
 	if (MultiplayerSessionsSubsystem) {
-		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this,&ThisClass::OnCreateSession);
+		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
 		//由于MultiplayerOnFindSessionComplete使用的是非动态委托，因此使用AddUObject而不是AddDynamic
-		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionComplete.AddUObject(this, &ThisClass::OnFindSessions);
+		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 		MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &ThisClass::OnDestroySession);
 		MultiplayerSessionsSubsystem->MultiplayerOnStartSessionComplete.AddDynamic(this, &ThisClass::OnStartSession);
@@ -128,14 +128,14 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		//通过键值字符串：MatchType 找到其键值对并保存在变量MatchType中
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
 		if (SettingsValue == MatchType) {//找到了会话
-		/*	if (GEngine) {
+			if (GEngine) {
 				GEngine->AddOnScreenDebugMessage(
 					-1,
 					15.f,
 					FColor::Yellow,
 					FString(TEXT("Session Find successfully!"))
 				);
-			}*/
+			}
 			//加入会话
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
@@ -145,15 +145,15 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		//查找会话失败则重新激活Join按钮
 		JoinButton->SetIsEnabled(true);
 	}
-	//if (GEngine) {
-	//	GEngine->AddOnScreenDebugMessage(
-	//		-1,
-	//		15.f,
-	//		FColor::Yellow,
-	//		//FString(TEXT("Session Find error!%d", SessionResults.Num()))
-	//		FString::Printf(TEXT("Session Find error! %d"), SessionResults.Num())
-	//	);
-	//}
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Yellow,
+			//FString(TEXT("Session Find error!%d", SessionResults.Num()))
+			FString::Printf(TEXT("Session Find error! %d"), SessionResults.Num())
+		);
+	}
 }
 /// <summary>
 /// 来自MultiplayerSessionsSubsystem的会话加入结果回调
@@ -181,37 +181,37 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 				//客户端跳转场景（加入服务器场景）,参数：服务器IP地址，跳转类型
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
-			//if (GEngine) {
-			//	GEngine->AddOnScreenDebugMessage(
-			//		-1,
-			//		15.f,
-			//		FColor::Yellow,
-			//		FString(TEXT("Session Join successfully!"))
-			//	);
-			//}
+			if (GEngine) {
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Yellow,
+					FString(TEXT("Session Join successfully!"))
+				);
+			}
 		}
-		/*if (GEngine) {
+		if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(
 				-1,
 				15.f,
 				FColor::Yellow,
 				FString(TEXT("Session Join error!"))
 			);
-		}*/
+		}
 	}
-	if (Result != EOnJoinSessionCompleteResult::Success) {
-		//加入会话失败则重新激活Join按钮
-		JoinButton->SetIsEnabled(true);
-	}
+	//if (Result != EOnJoinSessionCompleteResult::Success) {
+	//	//加入会话失败则重新激活Join按钮
+	//	JoinButton->SetIsEnabled(true);
+	//}
 
-	/*if (GEngine) {
+	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(
 			-1,
 			15.f,
 			FColor::Yellow,
 			FString(TEXT("Subsystem error!"))
 		);
-	}*/
+	}
 	
 }
 

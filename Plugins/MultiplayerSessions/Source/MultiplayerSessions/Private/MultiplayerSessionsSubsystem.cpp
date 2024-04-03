@@ -33,7 +33,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		LastNumPublicConnections = NumPublicConnections;
 		LastMatchType = MatchType;
 
-		DestroySessions();
+		DestroySession();
 		
 	}
 
@@ -55,9 +55,6 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	//bUsesPresence :Whether to display user presence information or not
 	//显示用户状态，查找所在区域正在进行的会话
 	LastSessionSettings->bUsesPresence = true;
-	//bUseLobbiesIfAvailable ：Whether to prefer lobbies APls if the platform supports them
-	//如果平台支持，是否选择大厅的API(5.0以上不开启可能会无法搜索到会话
-	LastSessionSettings->bUseLobbiesIfAvailable = true;
 	//设置匹配类型(键值对本身不必设定匹配类型，但这里我们使用这个来定义匹配类型)，会话通过在线服务以及ping进行广播
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	//BuildUniqueId是用来防止不同的构建在搜索过程中相互看到，这里设置为1是为了可以让多个用户启动自己的构建和Host
@@ -65,6 +62,9 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	// 我们尝试加入第1个被Host的会话（估计这才是设置为1的目的？）
 	//
 	LastSessionSettings->BuildUniqueId = 1;
+	//bUseLobbiesIfAvailable ：Whether to prefer lobbies APls if the platform supports them
+	//如果平台支持，是否选择大厅的API(5.0以上不开启可能会无法搜索到会话
+	LastSessionSettings->bUseLobbiesIfAvailable = true;
 	
 	
 	//从本地玩家获取唯一网络ID	
@@ -89,7 +89,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	}
 
 	//添加委托.一旦找到会话，回调函数就会绑定到这个委托上
-	FindSessionsCompleteDelegateHandle=SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+	FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
 	//定义一个会话搜索
 	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
@@ -107,16 +107,16 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef())) {
 		//没有找到会话 则删除委托
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Blue,
-				FString::Printf(TEXT("NoFindSessions"))
-			);
-		}
+		//if (GEngine) {
+		//	GEngine->AddOnScreenDebugMessage(
+		//		-1,
+		//		15.f,
+		//		FColor::Blue,
+		//		FString::Printf(TEXT("NoFindSessions"))
+		//	);
+		//}
 		//广播查找会话失败的结果到菜单类， 因此参数传入一个空的结果数组。
-		MultiplayerOnFindSessionComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
+		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 	}
 }
 
@@ -146,7 +146,7 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 /// <summary>
 /// 销毁会话
 /// </summary>
-void UMultiplayerSessionsSubsystem::DestroySessions()
+void UMultiplayerSessionsSubsystem::DestroySession()
 {
 	if (!SessionInterface.IsValid()) {
 		//广播销毁会话
@@ -197,11 +197,11 @@ void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 
 	if (LastSessionSearch->SearchResults.Num() <= 0) {
 		//广播查找会话失败的结果到菜单类， 因此参数传入一个空的结果数组。
-		MultiplayerOnFindSessionComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
+		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 		return;
 	}
 	// 广播自定义的会话查找委托结果到菜单类（查找成功）
-	MultiplayerOnFindSessionComplete.Broadcast(LastSessionSearch->SearchResults ,bWasSuccessful);
+	MultiplayerOnFindSessionsComplete.Broadcast(LastSessionSearch->SearchResults, bWasSuccessful);
 }
 /// <summary>
 /// 会话加入委托回调（对回调成功的处理）

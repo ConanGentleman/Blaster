@@ -18,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete,
 /// 在线会话搜索结果不是一个新的类或者结构体，如果想要动态多播委托，所有的类型都必须与蓝图兼容。因此，在线会话搜索结果不能设置为动态委托
 /// 需使用另一种多播委托,原因就是会话结果变量无法与蓝图兼容。同时该委托与动态委托在参数上还有不同，即类型和名称之间是否有逗号。
 /// 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionsComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
 DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type Result);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool, bWasSuccessful);
@@ -43,7 +43,7 @@ public:
 	/// </summary>
 	/// <param name="NumPublicConnections">玩家数量</param>
 	/// <param name="MatchType">匹配类型</param>
-	void CreateSession(int32 NumPublicConnections,FString MatchType);
+	void CreateSession(int32 NumPublicConnections, FString MatchType);
 	/// <summary>
 	/// 搜索会话
 	/// </summary>
@@ -57,7 +57,7 @@ public:
 	/// <summary>
 	/// 销毁会话
 	/// </summary>
-	void DestroySessions();
+	void DestroySession();
 	/// <summary>
 	/// 开始会话
 	/// </summary>
@@ -67,7 +67,7 @@ public:
 	/// 这是我们为menu类绑定回调的自定义委托
 	/// </summary>
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
-	FMultiplayerOnFindSessionComplete MultiplayerOnFindSessionComplete;
+	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
 	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;

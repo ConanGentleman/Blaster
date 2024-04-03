@@ -16,12 +16,12 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
-		void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")),FString LobbyPath=FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
+	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
 
 protected:
 
 	virtual bool Initialize() override;
-	virtual void OnLevelRemovedFromWorld(ULevel* InLevel,UWorld* InWorld) override;
+	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 	/// <summary>
 	/// MultiplayerSessionsSubsystem的自定义委托回调 加UFUNTION是因为该回调是使用的动态委托，需要与蓝图兼容，则需要加UFUNCTION
@@ -38,7 +38,7 @@ protected:
 	void OnStartSession(bool bWasSuccessful);
 
 private:
-	UPROPERTY(meta=(BindWidget)) //绑定蓝图中的同名（变量名）按钮
+	UPROPERTY(meta = (BindWidget)) //绑定蓝图中的同名（变量名）按钮
 	class UButton* HostButton;
 
 	UPROPERTY(meta = (BindWidget)) //绑定蓝图中的同名（变量名）按钮
