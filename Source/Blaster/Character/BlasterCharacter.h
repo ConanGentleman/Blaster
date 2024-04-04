@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,23 +24,23 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	///¿ØÖÆÈËÎïÒÆ¶¯ºÍĞı×ª
+	///æ§åˆ¶äººç‰©ç§»åŠ¨å’Œæ—‹è½¬
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
 
 private:
-	//µ¯»É±Û×é¼ş (ÏòÇ°ÉùÃ÷
+	//å¼¹ç°§è‡‚ç»„ä»¶ (å‘å‰å£°æ˜
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
-	//Ïà»ú×é¼ş
+	//ç›¸æœºç»„ä»¶
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
 	/// <summary>
-	/// ÓÃÓÚÔÚÈËÎïÍ·¶¥ÉÏÏÔÊ¾µÄĞ¡²¿¼ş¡£
-	/// ²»ÄÜ¶ÔC++ÖĞË½ÓĞµÄ±äÁ¿Ê¹ÓÃÀ¶Í¼Ê¹ÓÃBlueprintReadOnly»òÕßBlueprintReadWrite³ı·Ç
-	/// Ìí¼ÓÁËmeta = (AllowPrivateAccess = "true")£¬ÕâÒâÎ¶×Å½«´Ë±äÁ¿±©Â¶¸øÀ¶Í¼
+	/// ç”¨äºåœ¨äººç‰©å¤´é¡¶ä¸Šæ˜¾ç¤ºçš„å°éƒ¨ä»¶ã€‚
+	/// ä¸èƒ½å¯¹C++ä¸­ç§æœ‰çš„å˜é‡ä½¿ç”¨è“å›¾ä½¿ç”¨BlueprintReadOnlyæˆ–è€…BlueprintReadWriteé™¤é
+	/// æ·»åŠ äº†meta = (AllowPrivateAccess = "true")ï¼Œè¿™æ„å‘³ç€å°†æ­¤å˜é‡æš´éœ²ç»™è“å›¾
 	/// </summary>
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;

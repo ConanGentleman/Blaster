@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MultiplayerSessionsSubsystem.h"
@@ -12,7 +12,7 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	DestroySessionCompleteDelegate(FOnDestroySessionCompleteDelegate::CreateUObject(this, &ThisClass::OnDestroySessionComplete)),
 	StartSessionCompleteDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnStartSessionComplete))
 {
-	//Ò»µ©»ñÈ¡ÁË×ÓÏµÍ³ MultiplayerSessionsµÄÒÀÀµ¹ØÏµ¾Í»áÁ¢¼´²åÈë
+	//ä¸€æ—¦è·å–äº†å­ç³»ç»Ÿ MultiplayerSessionsçš„ä¾èµ–å…³ç³»å°±ä¼šç«‹å³æ’å…¥
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem) {
 		SessionInterface = Subsystem->GetSessionInterface();
@@ -25,10 +25,10 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		return;
 	}
 
-	//Èç¹ûÓĞ»á»°£¬ÎÒÃÇĞèÒªÏú»ÙËü£¬ÒÔ±ãÎÒÃÇ¿ÉÒÔÓÃÊ¹ÓÃËùÓĞÏÖÓĞ»á»°¡£
+	//å¦‚æœæœ‰ä¼šè¯ï¼Œæˆ‘ä»¬éœ€è¦é”€æ¯å®ƒï¼Œä»¥ä¾¿æˆ‘ä»¬å¯ä»¥ç”¨ä½¿ç”¨æ‰€æœ‰ç°æœ‰ä¼šè¯ã€‚
 	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 	if (ExistingSession != nullptr) {
-		//ÏÈ±£´æ´´½¨»á»°µÄÏà¹ØĞÅÏ¢
+		//å…ˆä¿å­˜åˆ›å»ºä¼šè¯çš„ç›¸å…³ä¿¡æ¯
 		bCreateSessionOnDestroy = true;
 		LastNumPublicConnections = NumPublicConnections;
 		LastMatchType = MatchType;
@@ -37,75 +37,75 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		
 	}
 
-	//»á»°´´½¨Íê³ÉµÄ°ó¶¨Î¯ÍĞ£¬²¢´æ´¢Î¯ÍĞ¾ä±ú£¬ÒÔ±ãÉÔºó¿ÉÒÔ½«Æä´ÓÎ¯ÍĞÁĞ±íÖĞÉ¾³ı
+	//ä¼šè¯åˆ›å»ºå®Œæˆçš„ç»‘å®šå§”æ‰˜ï¼Œå¹¶å­˜å‚¨å§”æ‰˜å¥æŸ„ï¼Œä»¥ä¾¿ç¨åå¯ä»¥å°†å…¶ä»å§”æ‰˜åˆ—è¡¨ä¸­åˆ é™¤
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 	
-	//ÏÈÉèÖÃ»á»°
+	//å…ˆè®¾ç½®ä¼šè¯
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
-	//ÊÇ·ñÊÇ¾ÖÓòÍøÁ¬½Ó (IOnlineSubsystem::Get()->GetSubsystemName() Èç¹ûÎ´Ê¹ÓÃÔÚÏß×ÓÏµÍ³Ôò·µ»ØNULL×Ö·û´®£¬Èç¹ûÊÇsteamÔò·µ»Østeam¡£ËùÒÔÊ¹ÓÃ×ÓÏµÍ³ÔòÓÃ¾ÖÓòÍø
+	//æ˜¯å¦æ˜¯å±€åŸŸç½‘è¿æ¥ (IOnlineSubsystem::Get()->GetSubsystemName() å¦‚æœæœªä½¿ç”¨åœ¨çº¿å­ç³»ç»Ÿåˆ™è¿”å›NULLå­—ç¬¦ä¸²ï¼Œå¦‚æœæ˜¯steamåˆ™è¿”å›steamã€‚æ‰€ä»¥ä½¿ç”¨å­ç³»ç»Ÿåˆ™ç”¨å±€åŸŸç½‘
 	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
-	//×î´óÍæ¼ÒÊı£¨Á¬½ÓÊı£©
+	//æœ€å¤§ç©å®¶æ•°ï¼ˆè¿æ¥æ•°ï¼‰
 	LastSessionSettings->NumPublicConnections = NumPublicConnections;
-	//»á»°ÕıÔÚÔËĞĞ£¬ÆäËûÍæ¼ÒÊÇ·ñ¿ÉÒÔ¼ÓÈë¡£
+	//ä¼šè¯æ­£åœ¨è¿è¡Œï¼Œå…¶ä»–ç©å®¶æ˜¯å¦å¯ä»¥åŠ å…¥ã€‚
 	LastSessionSettings->bAllowJoinInProgress = true;
-	//steamÓĞÒ»¸ö½Ğ×´Ì¬µÄ¶«Î÷£¬Õâ¸ö´ò¿ªÊÇÎªÁËÈÃÎÒÃÇµÄÁ¬½ÓÕı³£¹¤×÷
+	//steamæœ‰ä¸€ä¸ªå«çŠ¶æ€çš„ä¸œè¥¿ï¼Œè¿™ä¸ªæ‰“å¼€æ˜¯ä¸ºäº†è®©æˆ‘ä»¬çš„è¿æ¥æ­£å¸¸å·¥ä½œ
 	LastSessionSettings->bAllowJoinViaPresence = true;
-	//¸ÃÆ¥ÅäÊÇ·ñÔÚÔÚÏß·şÎñÉÏ¹«¿ªĞû´«[ÈÃÆäËûÍæ¼ÒÕÒµ½Õâ¸ö»á»°]
+	//è¯¥åŒ¹é…æ˜¯å¦åœ¨åœ¨çº¿æœåŠ¡ä¸Šå…¬å¼€å®£ä¼ [è®©å…¶ä»–ç©å®¶æ‰¾åˆ°è¿™ä¸ªä¼šè¯]
 	LastSessionSettings->bShouldAdvertise = true;
 	//bUsesPresence :Whether to display user presence information or not
-	//ÏÔÊ¾ÓÃ»§×´Ì¬£¬²éÕÒËùÔÚÇøÓòÕıÔÚ½øĞĞµÄ»á»°
+	//æ˜¾ç¤ºç”¨æˆ·çŠ¶æ€ï¼ŒæŸ¥æ‰¾æ‰€åœ¨åŒºåŸŸæ­£åœ¨è¿›è¡Œçš„ä¼šè¯
 	LastSessionSettings->bUsesPresence = true;
-	//ÉèÖÃÆ¥ÅäÀàĞÍ(¼üÖµ¶Ô±¾Éí²»±ØÉè¶¨Æ¥ÅäÀàĞÍ£¬µ«ÕâÀïÎÒÃÇÊ¹ÓÃÕâ¸öÀ´¶¨ÒåÆ¥ÅäÀàĞÍ)£¬»á»°Í¨¹ıÔÚÏß·şÎñÒÔ¼°ping½øĞĞ¹ã²¥
+	//è®¾ç½®åŒ¹é…ç±»å‹(é”®å€¼å¯¹æœ¬èº«ä¸å¿…è®¾å®šåŒ¹é…ç±»å‹ï¼Œä½†è¿™é‡Œæˆ‘ä»¬ä½¿ç”¨è¿™ä¸ªæ¥å®šä¹‰åŒ¹é…ç±»å‹)ï¼Œä¼šè¯é€šè¿‡åœ¨çº¿æœåŠ¡ä»¥åŠpingè¿›è¡Œå¹¿æ’­
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	//BuildUniqueIdÊÇÓÃÀ´·ÀÖ¹²»Í¬µÄ¹¹½¨ÔÚËÑË÷¹ı³ÌÖĞÏà»¥¿´µ½£¬ÕâÀïÉèÖÃÎª1ÊÇÎªÁË¿ÉÒÔÈÃ¶à¸öÓÃ»§Æô¶¯×Ô¼ºµÄ¹¹½¨ºÍHost
-	//ÕâÑùµ±ËÑË÷ÓĞĞ§µÄÓÎÏ·»á»°Ê±£¬ÎÒÃÇ½«¿´µ½ÆäËû»á»°²¢ÄÜ¹»¼ÓÈë£¬·ñÔò½«ÎŞ·¨¿´µ½¡£
-	// ÎÒÃÇ³¢ÊÔ¼ÓÈëµÚ1¸ö±»HostµÄ»á»°£¨¹À¼ÆÕâ²ÅÊÇÉèÖÃÎª1µÄÄ¿µÄ£¿£©
+	//BuildUniqueIdæ˜¯ç”¨æ¥é˜²æ­¢ä¸åŒçš„æ„å»ºåœ¨æœç´¢è¿‡ç¨‹ä¸­ç›¸äº’çœ‹åˆ°ï¼Œè¿™é‡Œè®¾ç½®ä¸º1æ˜¯ä¸ºäº†å¯ä»¥è®©å¤šä¸ªç”¨æˆ·å¯åŠ¨è‡ªå·±çš„æ„å»ºå’ŒHost
+	//è¿™æ ·å½“æœç´¢æœ‰æ•ˆçš„æ¸¸æˆä¼šè¯æ—¶ï¼Œæˆ‘ä»¬å°†çœ‹åˆ°å…¶ä»–ä¼šè¯å¹¶èƒ½å¤ŸåŠ å…¥ï¼Œå¦åˆ™å°†æ— æ³•çœ‹åˆ°ã€‚
+	// æˆ‘ä»¬å°è¯•åŠ å…¥ç¬¬1ä¸ªè¢«Hostçš„ä¼šè¯ï¼ˆä¼°è®¡è¿™æ‰æ˜¯è®¾ç½®ä¸º1çš„ç›®çš„ï¼Ÿï¼‰
 	//
 	LastSessionSettings->BuildUniqueId = 1;
-	//bUseLobbiesIfAvailable £ºWhether to prefer lobbies APls if the platform supports them
-	//Èç¹ûÆ½Ì¨Ö§³Ö£¬ÊÇ·ñÑ¡Ôñ´óÌüµÄAPI(5.0ÒÔÉÏ²»¿ªÆô¿ÉÄÜ»áÎŞ·¨ËÑË÷µ½»á»°
+	//bUseLobbiesIfAvailable ï¼šWhether to prefer lobbies APls if the platform supports them
+	//å¦‚æœå¹³å°æ”¯æŒï¼Œæ˜¯å¦é€‰æ‹©å¤§å…çš„API(5.0ä»¥ä¸Šä¸å¼€å¯å¯èƒ½ä¼šæ— æ³•æœç´¢åˆ°ä¼šè¯
 	LastSessionSettings->bUseLobbiesIfAvailable = true;
 	
 	
-	//´Ó±¾µØÍæ¼Ò»ñÈ¡Î¨Ò»ÍøÂçID	
+	//ä»æœ¬åœ°ç©å®¶è·å–å”¯ä¸€ç½‘ç»œID	
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	//´´½¨»á»°£¬²ÎÊı£ºÎ¨Ò»ÍøÂçID£¬»á»°Ãû³Æ£¬»æ»­ÉèÖÃ
+	//åˆ›å»ºä¼šè¯ï¼Œå‚æ•°ï¼šå”¯ä¸€ç½‘ç»œIDï¼Œä¼šè¯åç§°ï¼Œç»˜ç”»è®¾ç½®
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings)) {
-		//Èç¹û´´½¨Ê§°Ü£¬ÔòÔÚÎ¯ÍĞÁĞ±íÖĞÉ¾³ı´´½¨Î¯ÍĞ
+		//å¦‚æœåˆ›å»ºå¤±è´¥ï¼Œåˆ™åœ¨å§”æ‰˜åˆ—è¡¨ä¸­åˆ é™¤åˆ›å»ºå§”æ‰˜
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
-		// ¹ã²¥×Ô¶¨ÒåµÄ»á»°´´½¨×´Ì¬Î¯ÍĞµ½²Ëµ¥Àà
+		// å¹¿æ’­è‡ªå®šä¹‰çš„ä¼šè¯åˆ›å»ºçŠ¶æ€å§”æ‰˜åˆ°èœå•ç±»
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
 }
 /// <summary>
-/// Ñ°ÕÒ»á»°
+/// å¯»æ‰¾ä¼šè¯
 /// </summary>
 /// <param name="MaxSearchResults"></param>
 void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 {
-	//ÕÒµ½ÓÎÏ·»á»°
+	//æ‰¾åˆ°æ¸¸æˆä¼šè¯
 	if (!SessionInterface.IsValid()) {
 		return;
 	}
 
-	//Ìí¼ÓÎ¯ÍĞ.Ò»µ©ÕÒµ½»á»°£¬»Øµ÷º¯Êı¾Í»á°ó¶¨µ½Õâ¸öÎ¯ÍĞÉÏ
+	//æ·»åŠ å§”æ‰˜.ä¸€æ—¦æ‰¾åˆ°ä¼šè¯ï¼Œå›è°ƒå‡½æ•°å°±ä¼šç»‘å®šåˆ°è¿™ä¸ªå§”æ‰˜ä¸Š
 	FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
-	//¶¨ÒåÒ»¸ö»á»°ËÑË÷
+	//å®šä¹‰ä¸€ä¸ªä¼šè¯æœç´¢
 	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
-	//¶Ô»á»°ËÑË÷½øĞĞÉèÖÃ
-	///ËÑË÷×î´ó½á¹û£¨steamÍ¨ÓÃ²âÊÔIDÎª480£¬ÓĞ¿ÉÄÜÓĞºÜ¶àÈËÔÚÍ¬Ê±²âÊÔ£¬Òò´Ë°ÑÖµÉèÖÃ¸ßÒ»µã£©
+	//å¯¹ä¼šè¯æœç´¢è¿›è¡Œè®¾ç½®
+	///æœç´¢æœ€å¤§ç»“æœï¼ˆsteamé€šç”¨æµ‹è¯•IDä¸º480ï¼Œæœ‰å¯èƒ½æœ‰å¾ˆå¤šäººåœ¨åŒæ—¶æµ‹è¯•ï¼Œå› æ­¤æŠŠå€¼è®¾ç½®é«˜ä¸€ç‚¹ï¼‰
 	LastSessionSearch->MaxSearchResults = MaxSearchResults;
-	// ¹ØÊÇ·ñ¹Ø±Õ¾ÖÓòÍø²éÑ¯¡£IOnlineSubsystem::Get()->GetSubsystemName() Èç¹ûÎ´Ê¹ÓÃÔÚÏß×ÓÏµÍ³Ôò·µ»ØNULL×Ö·û´®£¬Èç¹ûÊÇsteamÔò·µ»Østeam¡£ËùÒÔÊ¹ÓÃ×ÓÏµÍ³ÔòÓÃ¾ÖÓòÍø
+	// å…³æ˜¯å¦å…³é—­å±€åŸŸç½‘æŸ¥è¯¢ã€‚IOnlineSubsystem::Get()->GetSubsystemName() å¦‚æœæœªä½¿ç”¨åœ¨çº¿å­ç³»ç»Ÿåˆ™è¿”å›NULLå­—ç¬¦ä¸²ï¼Œå¦‚æœæ˜¯steamåˆ™è¿”å›steamã€‚æ‰€ä»¥ä½¿ç”¨å­ç³»ç»Ÿåˆ™ç”¨å±€åŸŸç½‘
 	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
-	//²éÑ¯ÉèÖÃ£¬Ö»²éÑ¯´¦ÓÚÊ¹ÓÃ×´Ì¬£¨¼´using presence£© ÖµÎª true µÄ£¬Ò²¾ÍÊÇÕıÔÚÊ¹ÓÃµÄSession
+	//æŸ¥è¯¢è®¾ç½®ï¼ŒåªæŸ¥è¯¢å¤„äºä½¿ç”¨çŠ¶æ€ï¼ˆå³using presenceï¼‰ å€¼ä¸º true çš„ï¼Œä¹Ÿå°±æ˜¯æ­£åœ¨ä½¿ç”¨çš„Session
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
-	//´Ó±¾µØÍæ¼Ò»ñÈ¡Î¨Ò»ÍøÂçID	
+	//ä»æœ¬åœ°ç©å®¶è·å–å”¯ä¸€ç½‘ç»œID	
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	//²éÕÒ»á»°,²ÎÊı£ºÎ¨Ò»ÍøÂçID£¬»á»°ËÑË÷
+	//æŸ¥æ‰¾ä¼šè¯,å‚æ•°ï¼šå”¯ä¸€ç½‘ç»œIDï¼Œä¼šè¯æœç´¢
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef())) {
-		//Ã»ÓĞÕÒµ½»á»° ÔòÉ¾³ıÎ¯ÍĞ
+		//æ²¡æœ‰æ‰¾åˆ°ä¼šè¯ åˆ™åˆ é™¤å§”æ‰˜
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 		//if (GEngine) {
 		//	GEngine->AddOnScreenDebugMessage(
@@ -115,7 +115,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 		//		FString::Printf(TEXT("NoFindSessions"))
 		//	);
 		//}
-		//¹ã²¥²éÕÒ»á»°Ê§°ÜµÄ½á¹ûµ½²Ëµ¥Àà£¬ Òò´Ë²ÎÊı´«ÈëÒ»¸ö¿ÕµÄ½á¹ûÊı×é¡£
+		//å¹¿æ’­æŸ¥æ‰¾ä¼šè¯å¤±è´¥çš„ç»“æœåˆ°èœå•ç±»ï¼Œ å› æ­¤å‚æ•°ä¼ å…¥ä¸€ä¸ªç©ºçš„ç»“æœæ•°ç»„ã€‚
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 	}
 }
@@ -123,44 +123,44 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult& SessionResult)
 {
 	if (!SessionInterface.IsValid()) {
-		//¹ã²¥Ò»¸ö ¼ÓÈëÊ§°Ü
+		//å¹¿æ’­ä¸€ä¸ª åŠ å…¥å¤±è´¥
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 		return;
 	}
-	//Ìí¼ÓÎ¯ÍĞ.Ò»µ©¼ÓÈë»á»°£¬»Øµ÷º¯Êı¾Í»á°ó¶¨µ½Õâ¸öÎ¯ÍĞÉÏ
+	//æ·»åŠ å§”æ‰˜.ä¸€æ—¦åŠ å…¥ä¼šè¯ï¼Œå›è°ƒå‡½æ•°å°±ä¼šç»‘å®šåˆ°è¿™ä¸ªå§”æ‰˜ä¸Š
 	JoinSessionCompleteDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
 
-	//´Ó±¾µØÍæ¼Ò»ñÈ¡Î¨Ò»ÍøÂçID	
+	//ä»æœ¬åœ°ç©å®¶è·å–å”¯ä¸€ç½‘ç»œID	
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	//¼ÓÈë»á»°.²ÎÊı£ºÎ¨Ò»ÍøÂçID£¬»á»°Ãû³Æ£¬»á»°ËÑË÷½á¹û
+	//åŠ å…¥ä¼šè¯.å‚æ•°ï¼šå”¯ä¸€ç½‘ç»œIDï¼Œä¼šè¯åç§°ï¼Œä¼šè¯æœç´¢ç»“æœ
 	if (!SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionResult)) {
-		//Èç¹û¼ÓÈë»á»°Ê§°Ü
+		//å¦‚æœåŠ å…¥ä¼šè¯å¤±è´¥
 
-		//ÇåÀíÎ¯ÍĞ
+		//æ¸…ç†å§”æ‰˜
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
-		//¹ã²¥¼ÓÈë»á»°½á¹û
+		//å¹¿æ’­åŠ å…¥ä¼šè¯ç»“æœ
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 	}
 }
 
 /// <summary>
-/// Ïú»Ù»á»°
+/// é”€æ¯ä¼šè¯
 /// </summary>
 void UMultiplayerSessionsSubsystem::DestroySession()
 {
 	if (!SessionInterface.IsValid()) {
-		//¹ã²¥Ïú»Ù»á»°
+		//å¹¿æ’­é”€æ¯ä¼šè¯
 		MultiplayerOnDestroySessionComplete.Broadcast(false);
 		return;
 	}
-	//Ìí¼ÓÎ¯ÍĞ.Ò»µ©¼ÓÈë»á»°£¬»Øµ÷º¯Êı¾Í»á°ó¶¨µ½Õâ¸öÎ¯ÍĞÉÏ
+	//æ·»åŠ å§”æ‰˜.ä¸€æ—¦åŠ å…¥ä¼šè¯ï¼Œå›è°ƒå‡½æ•°å°±ä¼šç»‘å®šåˆ°è¿™ä¸ªå§”æ‰˜ä¸Š
 	DestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegate);
 	
-	//Ïú»Ù»á»°¡£²ÎÊı£º»á»°Ãû³Æ
+	//é”€æ¯ä¼šè¯ã€‚å‚æ•°ï¼šä¼šè¯åç§°
 	if (!SessionInterface->DestroySession(NAME_GameSession)) {
-		//ÇåÀíÎ¯ÍĞ
+		//æ¸…ç†å§”æ‰˜
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
-		//¹ã²¥Ïú»Ù»á»°
+		//å¹¿æ’­é”€æ¯ä¼šè¯
 		MultiplayerOnDestroySessionComplete.Broadcast(false);
 	}
 }
@@ -170,48 +170,48 @@ void UMultiplayerSessionsSubsystem::StartSession()
 }
 
 /// <summary>
-/// »á»°´´½¨Î¯ÍĞ»Øµ÷£¨¶Ô»Øµ÷³É¹¦µÄ´¦Àí£©
+/// ä¼šè¯åˆ›å»ºå§”æ‰˜å›è°ƒï¼ˆå¯¹å›è°ƒæˆåŠŸçš„å¤„ç†ï¼‰
 /// </summary>
 /// <param name="SessionName"></param>
 /// <param name="bWasSuccessful"></param>
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (SessionInterface) {
-		//»á»°´´½¨Íê³É£¬ÔòÉ¾³ı»á»°Î¯ÍĞ
+		//ä¼šè¯åˆ›å»ºå®Œæˆï¼Œåˆ™åˆ é™¤ä¼šè¯å§”æ‰˜
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 	}
 
-	// ¹ã²¥×Ô¶¨ÒåµÄ»á»°´´½¨Î¯ÍĞ×´Ì¬µ½²Ëµ¥Àà
+	// å¹¿æ’­è‡ªå®šä¹‰çš„ä¼šè¯åˆ›å»ºå§”æ‰˜çŠ¶æ€åˆ°èœå•ç±»
 	MultiplayerOnCreateSessionComplete.Broadcast(bWasSuccessful);
 }
 /// <summary>
-/// »á»°²éÕÒÎ¯ÍĞ»Øµ÷£¨¶Ô»Øµ÷³É¹¦µÄ´¦Àí£©
+/// ä¼šè¯æŸ¥æ‰¾å§”æ‰˜å›è°ƒï¼ˆå¯¹å›è°ƒæˆåŠŸçš„å¤„ç†ï¼‰
 /// </summary>
 /// <param name="bWasSuccessful"></param>
 void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	if (SessionInterface) {
-		//»á»°²éÕÒÍê³É£¬ÔòÉ¾³ı»á»°Î¯ÍĞ
+		//ä¼šè¯æŸ¥æ‰¾å®Œæˆï¼Œåˆ™åˆ é™¤ä¼šè¯å§”æ‰˜
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 	}
 
 	if (LastSessionSearch->SearchResults.Num() <= 0) {
-		//¹ã²¥²éÕÒ»á»°Ê§°ÜµÄ½á¹ûµ½²Ëµ¥Àà£¬ Òò´Ë²ÎÊı´«ÈëÒ»¸ö¿ÕµÄ½á¹ûÊı×é¡£
+		//å¹¿æ’­æŸ¥æ‰¾ä¼šè¯å¤±è´¥çš„ç»“æœåˆ°èœå•ç±»ï¼Œ å› æ­¤å‚æ•°ä¼ å…¥ä¸€ä¸ªç©ºçš„ç»“æœæ•°ç»„ã€‚
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 		return;
 	}
-	// ¹ã²¥×Ô¶¨ÒåµÄ»á»°²éÕÒÎ¯ÍĞ½á¹ûµ½²Ëµ¥Àà£¨²éÕÒ³É¹¦£©
+	// å¹¿æ’­è‡ªå®šä¹‰çš„ä¼šè¯æŸ¥æ‰¾å§”æ‰˜ç»“æœåˆ°èœå•ç±»ï¼ˆæŸ¥æ‰¾æˆåŠŸï¼‰
 	MultiplayerOnFindSessionsComplete.Broadcast(LastSessionSearch->SearchResults, bWasSuccessful);
 }
 /// <summary>
-/// »á»°¼ÓÈëÎ¯ÍĞ»Øµ÷£¨¶Ô»Øµ÷³É¹¦µÄ´¦Àí£©
+/// ä¼šè¯åŠ å…¥å§”æ‰˜å›è°ƒï¼ˆå¯¹å›è°ƒæˆåŠŸçš„å¤„ç†ï¼‰
 /// </summary>
 /// <param name="SessionName"></param>
 /// <param name="Result"></param>
 void UMultiplayerSessionsSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
 	if (SessionInterface) {
-		//ÇåÀíÎ¯ÍĞ
+		//æ¸…ç†å§”æ‰˜
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
 	}
 
@@ -223,10 +223,10 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 	if (SessionInterface) {
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
 	}
-	//Ïú»Ù³É¹¦²¢ÇÒÖ®Ç°´æÔÚ´´½¨»á»°µÄÇëÇó
+	//é”€æ¯æˆåŠŸå¹¶ä¸”ä¹‹å‰å­˜åœ¨åˆ›å»ºä¼šè¯çš„è¯·æ±‚
 	if (bWasSuccessful && bCreateSessionOnDestroy) {
 		bCreateSessionOnDestroy = false;
-		//´´½¨»á»°
+		//åˆ›å»ºä¼šè¯
 		CreateSession(LastNumPublicConnections, LastMatchType);
 	}
 	MultiplayerOnDestroySessionComplete.Broadcast(bWasSuccessful);

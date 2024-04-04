@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Menu.h"
@@ -12,38 +12,38 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);
 	NumPublicConnections = NumberOfPublicConnections;
 	MatchType = TypeOfMatch;
-	//Ìí¼Óµ½ÊÓ¿Ú£¨Ìí¼Óµ½ÆÁÄ»£©
+	//æ·»åŠ åˆ°è§†å£ï¼ˆæ·»åŠ åˆ°å±å¹•ï¼‰
 	AddToViewport();
-	//ÉèÖÃ¿É¼ûĞÔ
+	//è®¾ç½®å¯è§æ€§
 	SetVisibility(ESlateVisibility::Visible);
-	//Èç¹û½«´Ë±êÖ¾ÉèÖÃÎªtrue£¬ÔòÔÊĞí¸Ã²¿¼şÔÚµ¥»÷»òµ¼º½µ½Ê±½ÓÊÜ½¹µã.ÕâĞĞ´úÂëÉèÖÃÁËÒ»¸ö²¼¶û±äÁ¿ bIsFocusable Îª true£¬±íÊ¾²Ëµ¥¿ÉÒÔ½ÓÊÜÊäÈë½¹µã¡£
+	//å¦‚æœå°†æ­¤æ ‡å¿—è®¾ç½®ä¸ºtrueï¼Œåˆ™å…è®¸è¯¥éƒ¨ä»¶åœ¨å•å‡»æˆ–å¯¼èˆªåˆ°æ—¶æ¥å—ç„¦ç‚¹.è¿™è¡Œä»£ç è®¾ç½®äº†ä¸€ä¸ªå¸ƒå°”å˜é‡ bIsFocusable ä¸º trueï¼Œè¡¨ç¤ºèœå•å¯ä»¥æ¥å—è¾“å…¥ç„¦ç‚¹ã€‚
 	bIsFocusable = true;
 
 	UWorld* World = GetWorld();
 	if (World) {
 		APlayerController* PlayerController = World->GetFirstPlayerController();
 		if (PlayerController) {
-			FInputModeUIOnly InputModeData;//¸ÃÄ£Ê½²»»á½«ÊäÈëÓ¦ÓÃÓÚÊÀ½çÉÏµÄÈÎºÎÆå×Ó£¬Ö»¹Ø×¢ÓÃ»§½çÃæ
-			//ÕâĞĞ´úÂëÉèÖÃ InputModeData µÄ½¹µãĞ¡²¿¼şÎªµ±Ç°²Ëµ¥¡£TakeWidget ·½·¨ÓÃÓÚ»ñÈ¡µ±Ç°²Ëµ¥µÄ UI ²¿¼ş
+			FInputModeUIOnly InputModeData;//è¯¥æ¨¡å¼ä¸ä¼šå°†è¾“å…¥åº”ç”¨äºä¸–ç•Œä¸Šçš„ä»»ä½•æ£‹å­ï¼Œåªå…³æ³¨ç”¨æˆ·ç•Œé¢
+			//è¿™è¡Œä»£ç è®¾ç½® InputModeData çš„ç„¦ç‚¹å°éƒ¨ä»¶ä¸ºå½“å‰èœå•ã€‚TakeWidget æ–¹æ³•ç”¨äºè·å–å½“å‰èœå•çš„ UI éƒ¨ä»¶
 			InputModeData.SetWidgetToFocus(TakeWidget());
-			//Ëø¶¨Êó±êµ½ÊÓ¿Ú£¨²ÎÊıÎª²»ÒªËø¶¨-Êó±ê¹â±ê²»»áËø¶¨ÔÚÊÓ¿ÚÉÏ
+			//é”å®šé¼ æ ‡åˆ°è§†å£ï¼ˆå‚æ•°ä¸ºä¸è¦é”å®š-é¼ æ ‡å…‰æ ‡ä¸ä¼šé”å®šåœ¨è§†å£ä¸Š
 			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			//ÉèÖÃÊäÈëÄ£Ê½¡£
+			//è®¾ç½®è¾“å…¥æ¨¡å¼ã€‚
 			PlayerController->SetInputMode(InputModeData);
-			//ÉèÖÃ¹â±êÎªÏÔÊ¾
+			//è®¾ç½®å…‰æ ‡ä¸ºæ˜¾ç¤º
 			PlayerController->SetShowMouseCursor(true);
 		}
 	}
 
 	UGameInstance* GameInstance = GetGameInstance();
 	if (GameInstance) {
-		//»ñÈ¡×ÓÏµÍ³
+		//è·å–å­ç³»ç»Ÿ
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 	}
-	//°ó¶¨Î¯ÍĞ
+	//ç»‘å®šå§”æ‰˜
 	if (MultiplayerSessionsSubsystem) {
 		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
-		//ÓÉÓÚMultiplayerOnFindSessionCompleteÊ¹ÓÃµÄÊÇ·Ç¶¯Ì¬Î¯ÍĞ£¬Òò´ËÊ¹ÓÃAddUObject¶ø²»ÊÇAddDynamic
+		//ç”±äºMultiplayerOnFindSessionCompleteä½¿ç”¨çš„æ˜¯éåŠ¨æ€å§”æ‰˜ï¼Œå› æ­¤ä½¿ç”¨AddUObjectè€Œä¸æ˜¯AddDynamic
 		MultiplayerSessionsSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 		MultiplayerSessionsSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
 		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &ThisClass::OnDestroySession);
@@ -53,30 +53,30 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 
 bool UMenu::Initialize()
 {
-	if (!Super::Initialize()) {//Èç¹û¸¸Àà·µ»Øfalse
+	if (!Super::Initialize()) {//å¦‚æœçˆ¶ç±»è¿”å›false
 		return false;
 	}
 
 	if (HostButton) {
-		//°ó¶¨µã»÷¼àÌı
+		//ç»‘å®šç‚¹å‡»ç›‘å¬
 		HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
 	}
 	if (JoinButton) {
-		//°ó¶¨µã»÷¼àÌı
+		//ç»‘å®šç‚¹å‡»ç›‘å¬
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
 
 	return true;
 }
 /// <summary>
-/// µ±¹Ø¿¨´ÓÊÀ½çÖĞÒÆ³ıÊ±£¬ËùÓĞUUserWidget»áµ÷ÓÃ´Ëº¯Êı£¨Èç³¡¾°Ìø×ª£©
+/// å½“å…³å¡ä»ä¸–ç•Œä¸­ç§»é™¤æ—¶ï¼Œæ‰€æœ‰UUserWidgetä¼šè°ƒç”¨æ­¤å‡½æ•°ï¼ˆå¦‚åœºæ™¯è·³è½¬ï¼‰
 /// </summary>
 /// <param name="InLevel"></param>
 /// <param name="InWorld"></param>
 void UMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	MenuTearDown();
-	//µ÷ÓÃ¸¸Àà
+	//è°ƒç”¨çˆ¶ç±»
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
 
@@ -94,7 +94,7 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 
 		UWorld* World = GetWorld();
 		if (World) {
-			//»á»°´´½¨³É¹¦ºó£¬Ìø×ªµ½´óÌü
+			//ä¼šè¯åˆ›å»ºæˆåŠŸåï¼Œè·³è½¬åˆ°å¤§å…
 			World->ServerTravel(PathToLobby);
 		}
 	}
@@ -107,12 +107,12 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 				FString(TEXT("Failed to create session!"))
 			);
 		}
-		//´´½¨»á»°Ê§°ÜÔòÖØĞÂ¼¤»îHost°´Å¥
+		//åˆ›å»ºä¼šè¯å¤±è´¥åˆ™é‡æ–°æ¿€æ´»HostæŒ‰é’®
 		HostButton->SetIsEnabled(true);
 	}
 }
 /// <summary>
-/// À´×ÔMultiplayerSessionsSubsystemµÄ»á»°²éÕÒ½á¹û»Øµ÷
+/// æ¥è‡ªMultiplayerSessionsSubsystemçš„ä¼šè¯æŸ¥æ‰¾ç»“æœå›è°ƒ
 /// </summary>
 /// <param name="SessionResults"></param>
 /// <param name="bWasSuccessful"></param>
@@ -125,9 +125,9 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		//FString Id = Result.GetSessionIdStr();
 		//FString User = Result.Session.OwningUserName;
 		FString SettingsValue;
-		//Í¨¹ı¼üÖµ×Ö·û´®£ºMatchType ÕÒµ½Æä¼üÖµ¶Ô²¢±£´æÔÚ±äÁ¿MatchTypeÖĞ
+		//é€šè¿‡é”®å€¼å­—ç¬¦ä¸²ï¼šMatchType æ‰¾åˆ°å…¶é”®å€¼å¯¹å¹¶ä¿å­˜åœ¨å˜é‡MatchTypeä¸­
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
-		if (SettingsValue == MatchType) {//ÕÒµ½ÁË»á»°
+		if (SettingsValue == MatchType) {//æ‰¾åˆ°äº†ä¼šè¯
 			if (GEngine) {
 				GEngine->AddOnScreenDebugMessage(
 					-1,
@@ -136,13 +136,13 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 					FString(TEXT("Session Find successfully!"))
 				);
 			}
-			//¼ÓÈë»á»°
+			//åŠ å…¥ä¼šè¯
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
 		}
 	}
 	if (!bWasSuccessful || SessionResults.Num() == 0) {
-		//²éÕÒ»á»°Ê§°ÜÔòÖØĞÂ¼¤»îJoin°´Å¥
+		//æŸ¥æ‰¾ä¼šè¯å¤±è´¥åˆ™é‡æ–°æ¿€æ´»JoinæŒ‰é’®
 		JoinButton->SetIsEnabled(true);
 	}
 	if (GEngine) {
@@ -156,29 +156,29 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 	}
 }
 /// <summary>
-/// À´×ÔMultiplayerSessionsSubsystemµÄ»á»°¼ÓÈë½á¹û»Øµ÷
+/// æ¥è‡ªMultiplayerSessionsSubsystemçš„ä¼šè¯åŠ å…¥ç»“æœå›è°ƒ
 /// </summary>
 /// <param name="Result"></param>
 void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 {
-	//¼ÓÈë»á»°ĞèÒª»ñÈ¡ÕıÈ·µÄipµØÖ·£¬ĞèÒªÊ¹ÓÃ»á»°½Ó¿Ú²¢µ÷ÓÃ»ñÈ¡½âÎöµÄÁ¬½Ó×Ö·û´®£¬ËùÒÔĞèÒª·ÃÎÊÔÚÏß»á»°½Ó¿Ú£¨OnlineSessionInterface)
-		//Ò»µ©»ñÈ¡ÁË×ÓÏµÍ³ MultiplayerSessionsµÄÒÀÀµ¹ØÏµ¾Í»áÁ¢¼´²åÈë
+	//åŠ å…¥ä¼šè¯éœ€è¦è·å–æ­£ç¡®çš„ipåœ°å€ï¼Œéœ€è¦ä½¿ç”¨ä¼šè¯æ¥å£å¹¶è°ƒç”¨è·å–è§£æçš„è¿æ¥å­—ç¬¦ä¸²ï¼Œæ‰€ä»¥éœ€è¦è®¿é—®åœ¨çº¿ä¼šè¯æ¥å£ï¼ˆOnlineSessionInterface)
+		//ä¸€æ—¦è·å–äº†å­ç³»ç»Ÿ MultiplayerSessionsçš„ä¾èµ–å…³ç³»å°±ä¼šç«‹å³æ’å…¥
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem) {
 		IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
 
 		if (SessionInterface.IsValid()) {
 
-			//IPµØÖ·
+			//IPåœ°å€
 			FString Address;
-			//·µ»ØÓÃÓÚ¼ÓÈëÆ¥ÅäµÄÌØ¶¨ÓÚÆ½Ì¨µÄÁ¬½ÓĞÅÏ¢,²ÎÊı£º»á»°Ãû£¬½ÓÊÕIPµÄ¾Ö²¿±äÁ¿
+			//è¿”å›ç”¨äºåŠ å…¥åŒ¹é…çš„ç‰¹å®šäºå¹³å°çš„è¿æ¥ä¿¡æ¯,å‚æ•°ï¼šä¼šè¯åï¼Œæ¥æ”¶IPçš„å±€éƒ¨å˜é‡
 			SessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
 
-			//ÓÉÓÚ²Ëµ¥Àà²»ÔÚ½ÇÉ«»òÕßpawnÉÏ£¬ĞèÊ¹ÓÃGetGameInstance()»ñÈ¡
-			//»ñÈ¡Íæ¼Ò¿ØÖÆÆ÷
+			//ç”±äºèœå•ç±»ä¸åœ¨è§’è‰²æˆ–è€…pawnä¸Šï¼Œéœ€ä½¿ç”¨GetGameInstance()è·å–
+			//è·å–ç©å®¶æ§åˆ¶å™¨
 			APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
 			if (PlayerController) {
-				//¿Í»§¶ËÌø×ª³¡¾°£¨¼ÓÈë·şÎñÆ÷³¡¾°£©,²ÎÊı£º·şÎñÆ÷IPµØÖ·£¬Ìø×ªÀàĞÍ
+				//å®¢æˆ·ç«¯è·³è½¬åœºæ™¯ï¼ˆåŠ å…¥æœåŠ¡å™¨åœºæ™¯ï¼‰,å‚æ•°ï¼šæœåŠ¡å™¨IPåœ°å€ï¼Œè·³è½¬ç±»å‹
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
 			if (GEngine) {
@@ -200,7 +200,7 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 		}
 	}
 	//if (Result != EOnJoinSessionCompleteResult::Success) {
-	//	//¼ÓÈë»á»°Ê§°ÜÔòÖØĞÂ¼¤»îJoin°´Å¥
+	//	//åŠ å…¥ä¼šè¯å¤±è´¥åˆ™é‡æ–°æ¿€æ´»JoinæŒ‰é’®
 	//	JoinButton->SetIsEnabled(true);
 	//}
 
@@ -225,7 +225,7 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 
 void UMenu::HostButtonClicked()
 {
-	//½ûÓÃ°´Å¥£¨±ÜÃâ¶à´Îµã»÷
+	//ç¦ç”¨æŒ‰é’®ï¼ˆé¿å…å¤šæ¬¡ç‚¹å‡»
 	HostButton->SetIsEnabled(false);
 	if (MultiplayerSessionsSubsystem) {
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
@@ -234,28 +234,28 @@ void UMenu::HostButtonClicked()
 
 void UMenu::JoinButtonClicked()
 {
-	//½ûÓÃ°´Å¥£¨±ÜÃâ¶à´Îµã»÷
+	//ç¦ç”¨æŒ‰é’®ï¼ˆé¿å…å¤šæ¬¡ç‚¹å‡»
 	JoinButton->SetIsEnabled(false);
 	if (MultiplayerSessionsSubsystem) {
-		//ÒòÎª¿ÉÄÜ´æÔÚºÜ¶àÈËÊ¹ÓÃsteamµÄ¿ª·¢ID £º 480 £¬ËùÒÔ½«ËÑË÷½á¹ûÊıÁ¿ÉèÖÃ´óÒ»µã£¬ÒÔ·ÀÕÒ²»µ½ÎÒÃÇ×Ô¼ºµÄ
+		//å› ä¸ºå¯èƒ½å­˜åœ¨å¾ˆå¤šäººä½¿ç”¨steamçš„å¼€å‘ID ï¼š 480 ï¼Œæ‰€ä»¥å°†æœç´¢ç»“æœæ•°é‡è®¾ç½®å¤§ä¸€ç‚¹ï¼Œä»¥é˜²æ‰¾ä¸åˆ°æˆ‘ä»¬è‡ªå·±çš„
 		MultiplayerSessionsSubsystem->FindSessions(10000);
 	}
 }
 
 /// <summary>
-/// ½«Íæ¼Ò¿ØÖÆÈ¨´Ó½çÃæ²Ù×÷×ª»Øµ½ÈËÎï²Ù×÷
+/// å°†ç©å®¶æ§åˆ¶æƒä»ç•Œé¢æ“ä½œè½¬å›åˆ°äººç‰©æ“ä½œ
 /// </summary>
 void UMenu::MenuTearDown()
 {
-	//É¾³ıÊÓ¿Ú£¨ÒÆ³ıUI£©
+	//åˆ é™¤è§†å£ï¼ˆç§»é™¤UIï¼‰
 	RemoveFromParent();
 	UWorld* World = GetWorld();
 	if (World) {
 		APlayerController* PlayerController = World->GetFirstPlayerController();
 		if (PlayerController) {
-			FInputModeGameOnly InputModeData;//FInputModeGameOnlyÄ¬ÈÏÖµ¾ÍÊÇÈËÎï¿ØÖÆ£¬ËùÒÔ²»ÔÙ½øĞĞÉèÖÃ
+			FInputModeGameOnly InputModeData;//FInputModeGameOnlyé»˜è®¤å€¼å°±æ˜¯äººç‰©æ§åˆ¶ï¼Œæ‰€ä»¥ä¸å†è¿›è¡Œè®¾ç½®
 			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(false);//ÉèÖÃ¹â±ê
+			PlayerController->SetShowMouseCursor(false);//è®¾ç½®å…‰æ ‡
 		}
 	}
 }

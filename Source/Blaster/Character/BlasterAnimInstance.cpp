@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BlasterAnimInstance.h"
@@ -7,7 +7,7 @@
 
 void UBlasterAnimInstance::NativeInitializeAnimation() {
 	Super::NativeInitializeAnimation();
-	//ÉèÖÃ½ÇÉ« £¬½«Pawn×ª»»ÎªBlasterCharacter
+	//è®¾ç½®è§’è‰² ï¼Œå°†Pawnè½¬æ¢ä¸ºBlasterCharacter
 	BlasterCharacter = Cast<ABlasterCharacter>(TryGetPawnOwner());
 }
 void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
@@ -18,13 +18,13 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		BlasterCharacter = Cast<ABlasterCharacter>(TryGetPawnOwner());
 	}
 	if (BlasterCharacter == nullptr) return;
-	//»ñÈ¡ËÙ¶È
+	//è·å–é€Ÿåº¦
 	FVector Velocity = BlasterCharacter->GetVelocity();
-	//²»¹ØĞÄzÖµ
+	//ä¸å…³å¿ƒzå€¼
 	Velocity.Z = 0.f;
 	Speed = Velocity.Size();
-	//Ö±½ÓÍ¨¹ıAPI»ñÈ¡
+	//ç›´æ¥é€šè¿‡APIè·å–
 	bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
-	//¼ÓËÙ¶È´óÓÚ0ÔòÊÇ¼ÓËÙ
+	//åŠ é€Ÿåº¦å¤§äº0åˆ™æ˜¯åŠ é€Ÿ
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 }

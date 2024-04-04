@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BlasterCharacter.h"
@@ -13,29 +13,29 @@ ABlasterCharacter::ABlasterCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//´´½¨Ä¬ÈÏ¶ÔÏó²¢ÃüÃûÎªCameraBoom
+	//åˆ›å»ºé»˜è®¤å¯¹è±¡å¹¶å‘½åä¸ºCameraBoom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	//½«µ¯»É±ÛÁ¬½Óµ½Íø¸ñ×é¼ş£¨Í¨³£ÊÇ¸ú×é¼ş£¬µ«ÊÇÈËÎïÓĞ¶×ÏÂ²Ù×÷£¬»á¸Ä±ä½ºÄÒÌåµÄ´óĞ¡£¬ÕâÑùtan'huan
+	//å°†å¼¹ç°§è‡‚è¿æ¥åˆ°ç½‘æ ¼ç»„ä»¶ï¼ˆé€šå¸¸æ˜¯è·Ÿç»„ä»¶ï¼Œä½†æ˜¯äººç‰©æœ‰è¹²ä¸‹æ“ä½œï¼Œä¼šæ”¹å˜èƒ¶å›Šä½“çš„å¤§å°ï¼Œè¿™æ ·tan'huan
 	CameraBoom->SetupAttachment(GetMesh());
-	//Éè¼Æµ¯»É±Û³¤
+	//è®¾è®¡å¼¹ç°§è‡‚é•¿
 	CameraBoom->TargetArmLength = 600.f;
-	//ÊÇ·ñÓÉPawn¿ØÖÆĞı×ª (ÕâÑùÓÃÓÚÊó±êÊäÈë¿ØÖÆ
+	//æ˜¯å¦ç”±Pawnæ§åˆ¶æ—‹è½¬ (è¿™æ ·ç”¨äºé¼ æ ‡è¾“å…¥æ§åˆ¶
 	CameraBoom->bUsePawnControlRotation = true;
 
-	//´´½¨Ïà»ú
+	//åˆ›å»ºç›¸æœº
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	//½«Ïà»úÁ¬½Óµ½µ¯»É±ÛÉÏµÄÏà»ú²å²ÛÉÏ
+	//å°†ç›¸æœºè¿æ¥åˆ°å¼¹ç°§è‡‚ä¸Šçš„ç›¸æœºæ’æ§½ä¸Š
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	//²»ĞèÒªÊ¹ÓÃPawn¿ØÖÆĞı×ª£¬ÒòÎªÁ¬½Óµ½ÁË
+	//ä¸éœ€è¦ä½¿ç”¨Pawnæ§åˆ¶æ—‹è½¬ï¼Œå› ä¸ºè¿æ¥åˆ°äº†
 	FollowCamera->bUsePawnControlRotation = false;
 
-	//²»ÈÃ½ÇÉ«Ëæ×Å¿ØÖÆÆ÷Ò»ÆğĞı×ª(ÒÔÃâºóĞøÎäÆ÷Ãé×¼¸üÎª¸´ÔÓ£©
+	//ä¸è®©è§’è‰²éšç€æ§åˆ¶å™¨ä¸€èµ·æ—‹è½¬(ä»¥å…åç»­æ­¦å™¨ç„å‡†æ›´ä¸ºå¤æ‚ï¼‰
 	bUseControllerRotationYaw = false;
-	//ÈÃ½ÇÉ«³¯Ïò×Ô¼ºµÄÔË¶¯·½Ïò
+	//è®©è§’è‰²æœå‘è‡ªå·±çš„è¿åŠ¨æ–¹å‘
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	//½«ĞÅÏ¢½çÃæÏÔÊ¾ÔÚ½ÇÉ«ÉÏ
+	//å°†ä¿¡æ¯ç•Œé¢æ˜¾ç¤ºåœ¨è§’è‰²ä¸Š
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
-	//Ìí¼Óµ½¸ú×é¼şÉÏ
+	//æ·»åŠ åˆ°è·Ÿç»„ä»¶ä¸Š
 	OverheadWidget->SetupAttachment(RootComponent);
 }
 
@@ -49,10 +49,10 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	//°ó¶¨×Ô´øµÄÌøÔ¾º¯Êı
+	//ç»‘å®šè‡ªå¸¦çš„è·³è·ƒå‡½æ•°
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
-	//¶ÔÓ¦µÄÊäÈëÃû³Æ£¬¶ÔÏó£¬º¯ÊıµØÖ·
+	//å¯¹åº”çš„è¾“å…¥åç§°ï¼Œå¯¹è±¡ï¼Œå‡½æ•°åœ°å€
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABlasterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ABlasterCharacter::Turn);
@@ -63,36 +63,36 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f) {
-		//ÕÒµ½¿ØÖÆÆ÷µÄĞı×ªÊäÈë£¬ÄÃµ½ÈÆzÖáĞı×ªµÄ·½ÏòÒ²¾ÍÊÇ¿ØÖÆÆ÷µÄ³¯Ïò·½Ïò
+		//æ‰¾åˆ°æ§åˆ¶å™¨çš„æ—‹è½¬è¾“å…¥ï¼Œæ‹¿åˆ°ç»•zè½´æ—‹è½¬çš„æ–¹å‘ä¹Ÿå°±æ˜¯æ§åˆ¶å™¨çš„æœå‘æ–¹å‘
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
-		//Í¨¹ıFRotationMatrix(YawRotation)´´½¨Ğı×ª¾ØÕó¡£
-		//Êµ¼ÊÉÏ¾ÍÊÇ½«ÈËÎïÄ¿Ç°µÄpitchºÍroll½Ç¹éÁã£¬ÒÔ±£Ö¤ÏòÁ¿Æ½ĞĞÓÚµØÃæ£¬Óë¿ØÖÆÆ÷·½ÏòÒ»Ö±
-		//ÒÔ±ã»ñÈ¡µÃµ½ÈËÎï´ËÊ±µÄÇ°ÏòÁ¿
+		//é€šè¿‡FRotationMatrix(YawRotation)åˆ›å»ºæ—‹è½¬çŸ©é˜µã€‚
+		//å®é™…ä¸Šå°±æ˜¯å°†äººç‰©ç›®å‰çš„pitchå’Œrollè§’å½’é›¶ï¼Œä»¥ä¿è¯å‘é‡å¹³è¡Œäºåœ°é¢ï¼Œä¸æ§åˆ¶å™¨æ–¹å‘ä¸€ç›´
+		//ä»¥ä¾¿è·å–å¾—åˆ°äººç‰©æ­¤æ—¶çš„å‰å‘é‡
 		//https://blog.csdn.net/weixin_51940803/article/details/130467309
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
-		//Ôö¼ÓÊäÈë
-		//µ±ÎÒÃÇŞôÏÂA»òDµÄÊ±ºò£¬ValueµÄÖµ¾Í²»ÊÇ0£¬¾Í»á°´ÕÕÉãÏñ»úµÄ·½ÏòµÄ×óÓÒ½øĞĞÒÆ¶¯
-		//µ±ÎÒÃÇŞôÏÂW»òSµÄÊ±ºòÒ²ÊÇ¡£
+		//å¢åŠ è¾“å…¥
+		//å½“æˆ‘ä»¬æ‘ä¸‹Aæˆ–Dçš„æ—¶å€™ï¼ŒValueçš„å€¼å°±ä¸æ˜¯0ï¼Œå°±ä¼šæŒ‰ç…§æ‘„åƒæœºçš„æ–¹å‘çš„å·¦å³è¿›è¡Œç§»åŠ¨
+		//å½“æˆ‘ä»¬æ‘ä¸‹Wæˆ–Sçš„æ—¶å€™ä¹Ÿæ˜¯ã€‚
 		AddMovementInput(Direction, Value);
-		//Õâ±ßÊäÈëºóÔÚBlasterAnimInstanceÖĞÍ¨¹ıGetVelocity¾ÍÄÜ¹»»ñÈ¡µ½ÈËÎïµÄÒÆ¶¯ËÙ¶È
+		//è¿™è¾¹è¾“å…¥ååœ¨BlasterAnimInstanceä¸­é€šè¿‡GetVelocityå°±èƒ½å¤Ÿè·å–åˆ°äººç‰©çš„ç§»åŠ¨é€Ÿåº¦
 	}
 }
 
 void ABlasterCharacter::MoveRight(float Value)
 {
 	if (Controller != nullptr && Value != 0.f) {
-		//ÕÒµ½¿ØÖÆÆ÷µÄĞı×ªÊäÈë£¬ÄÃµ½ÈÆzÖáĞı×ªµÄ·½ÏòÒ²¾ÍÊÇ¿ØÖÆÆ÷µÄ³¯Ïò·½Ïò
+		//æ‰¾åˆ°æ§åˆ¶å™¨çš„æ—‹è½¬è¾“å…¥ï¼Œæ‹¿åˆ°ç»•zè½´æ—‹è½¬çš„æ–¹å‘ä¹Ÿå°±æ˜¯æ§åˆ¶å™¨çš„æœå‘æ–¹å‘
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
-		//Í¨¹ıFRotationMatrix(YawRotation)´´½¨Ğı×ª¾ØÕó¡£
-		//Êµ¼ÊÉÏ¾ÍÊÇ½«ÈËÎïÄ¿Ç°µÄpitchºÍroll½Ç¹éÁã£¬ÒÔ±£Ö¤ÏòÁ¿Æ½ĞĞÓÚµØÃæ£¬Óë¿ØÖÆÆ÷·½ÏòÒ»Ö±
-		//ÒÔ±ã»ñÈ¡µÃµ½ÈËÎï´ËÊ±µÄÇ°ÏòÁ¿
+		//é€šè¿‡FRotationMatrix(YawRotation)åˆ›å»ºæ—‹è½¬çŸ©é˜µã€‚
+		//å®é™…ä¸Šå°±æ˜¯å°†äººç‰©ç›®å‰çš„pitchå’Œrollè§’å½’é›¶ï¼Œä»¥ä¿è¯å‘é‡å¹³è¡Œäºåœ°é¢ï¼Œä¸æ§åˆ¶å™¨æ–¹å‘ä¸€ç›´
+		//ä»¥ä¾¿è·å–å¾—åˆ°äººç‰©æ­¤æ—¶çš„å‰å‘é‡
 		//https://blog.csdn.net/weixin_51940803/article/details/130467309
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
-		//Ôö¼ÓÊäÈë
-		//µ±ÎÒÃÇŞôÏÂA»òDµÄÊ±ºò£¬ValueµÄÖµ¾Í²»ÊÇ0£¬¾Í»á°´ÕÕÉãÏñ»úµÄ·½ÏòµÄ×óÓÒ½øĞĞÒÆ¶¯
-		//µ±ÎÒÃÇŞôÏÂW»òSµÄÊ±ºòÒ²ÊÇ¡£
+		//å¢åŠ è¾“å…¥
+		//å½“æˆ‘ä»¬æ‘ä¸‹Aæˆ–Dçš„æ—¶å€™ï¼ŒValueçš„å€¼å°±ä¸æ˜¯0ï¼Œå°±ä¼šæŒ‰ç…§æ‘„åƒæœºçš„æ–¹å‘çš„å·¦å³è¿›è¡Œç§»åŠ¨
+		//å½“æˆ‘ä»¬æ‘ä¸‹Wæˆ–Sçš„æ—¶å€™ä¹Ÿæ˜¯ã€‚
 		AddMovementInput(Direction, Value);
-		//Õâ±ßÊäÈëºóÔÚBlasterAnimInstanceÖĞÍ¨¹ıGetVelocity¾ÍÄÜ¹»»ñÈ¡µ½ÈËÎïµÄÒÆ¶¯ËÙ¶È
+		//è¿™è¾¹è¾“å…¥ååœ¨BlasterAnimInstanceä¸­é€šè¿‡GetVelocityå°±èƒ½å¤Ÿè·å–åˆ°äººç‰©çš„ç§»åŠ¨é€Ÿåº¦
 	}
 }
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -9,14 +9,14 @@
 #include "MultiplayerSessionsSubsystem.generated.h"
 
 //
-// ÉùÃ÷×Ô¼ºµÄ×Ô¶¨ÒåÎ¯ÍĞÓÃÓÚ½«»Øµ÷°ó¶¨µ½²Ëµ¥Àà
-//£¨¶à²¥MULTICAST ÒâÎ¶×ÅÒ»µ©¹ã²¥£¬¶à¸öÀàÄÜ¹»½«Æäº¯Êı°ó¶¨µ½¸ÃÎ¯ÍĞ£©
-//£¨¶¯Ì¬DYNAMIC ÒâÎ¶×Å¿ÉÒÔĞòÁĞ»¯Î¯ÍĞ£¬²¢ÇÒ¿ÉÒÔ´ÓÀ¶Í¼ÖĞ±£´æ»òÕß¼ÓÔØËûÃÇ
-//ÖµµÃ×¢ÒâµÄÊÇÒòÎªÆäÊÇ¶¯Ì¬µÄ£¬ÒâÎ¶×Å°ó¶¨µ½ËûµÄº¯Êı±ØĞëÊÇUFUNTION£¬²»È»ÎŞ·¨°ó¶¨³É¹¦
+// å£°æ˜è‡ªå·±çš„è‡ªå®šä¹‰å§”æ‰˜ç”¨äºå°†å›è°ƒç»‘å®šåˆ°èœå•ç±»
+//ï¼ˆå¤šæ’­MULTICAST æ„å‘³ç€ä¸€æ—¦å¹¿æ’­ï¼Œå¤šä¸ªç±»èƒ½å¤Ÿå°†å…¶å‡½æ•°ç»‘å®šåˆ°è¯¥å§”æ‰˜ï¼‰
+//ï¼ˆåŠ¨æ€DYNAMIC æ„å‘³ç€å¯ä»¥åºåˆ—åŒ–å§”æ‰˜ï¼Œå¹¶ä¸”å¯ä»¥ä»è“å›¾ä¸­ä¿å­˜æˆ–è€…åŠ è½½ä»–ä»¬
+//å€¼å¾—æ³¨æ„çš„æ˜¯å› ä¸ºå…¶æ˜¯åŠ¨æ€çš„ï¼Œæ„å‘³ç€ç»‘å®šåˆ°ä»–çš„å‡½æ•°å¿…é¡»æ˜¯UFUNTIONï¼Œä¸ç„¶æ— æ³•ç»‘å®šæˆåŠŸ
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool, bWasSuccessful);
 ///
-/// ÔÚÏß»á»°ËÑË÷½á¹û²»ÊÇÒ»¸öĞÂµÄÀà»òÕß½á¹¹Ìå£¬Èç¹ûÏëÒª¶¯Ì¬¶à²¥Î¯ÍĞ£¬ËùÓĞµÄÀàĞÍ¶¼±ØĞëÓëÀ¶Í¼¼æÈİ¡£Òò´Ë£¬ÔÚÏß»á»°ËÑË÷½á¹û²»ÄÜÉèÖÃÎª¶¯Ì¬Î¯ÍĞ
-/// ĞèÊ¹ÓÃÁíÒ»ÖÖ¶à²¥Î¯ÍĞ,Ô­Òò¾ÍÊÇ»á»°½á¹û±äÁ¿ÎŞ·¨ÓëÀ¶Í¼¼æÈİ¡£Í¬Ê±¸ÃÎ¯ÍĞÓë¶¯Ì¬Î¯ÍĞÔÚ²ÎÊıÉÏ»¹ÓĞ²»Í¬£¬¼´ÀàĞÍºÍÃû³ÆÖ®¼äÊÇ·ñÓĞ¶ººÅ¡£
+/// åœ¨çº¿ä¼šè¯æœç´¢ç»“æœä¸æ˜¯ä¸€ä¸ªæ–°çš„ç±»æˆ–è€…ç»“æ„ä½“ï¼Œå¦‚æœæƒ³è¦åŠ¨æ€å¤šæ’­å§”æ‰˜ï¼Œæ‰€æœ‰çš„ç±»å‹éƒ½å¿…é¡»ä¸è“å›¾å…¼å®¹ã€‚å› æ­¤ï¼Œåœ¨çº¿ä¼šè¯æœç´¢ç»“æœä¸èƒ½è®¾ç½®ä¸ºåŠ¨æ€å§”æ‰˜
+/// éœ€ä½¿ç”¨å¦ä¸€ç§å¤šæ’­å§”æ‰˜,åŸå› å°±æ˜¯ä¼šè¯ç»“æœå˜é‡æ— æ³•ä¸è“å›¾å…¼å®¹ã€‚åŒæ—¶è¯¥å§”æ‰˜ä¸åŠ¨æ€å§”æ‰˜åœ¨å‚æ•°ä¸Šè¿˜æœ‰ä¸åŒï¼Œå³ç±»å‹å’Œåç§°ä¹‹é—´æ˜¯å¦æœ‰é€—å·ã€‚
 /// 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionsComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
 DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type Result);
@@ -35,36 +35,36 @@ public:
 	UMultiplayerSessionsSubsystem();
 
 	//
-	// ´¦Àí»á»°¹¦ÄÜ¡£ ²Ëµ¥Àà¿ÉÒÔµ÷ÓÃËüÃÇ
+	// å¤„ç†ä¼šè¯åŠŸèƒ½ã€‚ èœå•ç±»å¯ä»¥è°ƒç”¨å®ƒä»¬
 	//
 	
 	/// <summary>
-	/// ´´½¨»á»°
+	/// åˆ›å»ºä¼šè¯
 	/// </summary>
-	/// <param name="NumPublicConnections">Íæ¼ÒÊıÁ¿</param>
-	/// <param name="MatchType">Æ¥ÅäÀàĞÍ</param>
+	/// <param name="NumPublicConnections">ç©å®¶æ•°é‡</param>
+	/// <param name="MatchType">åŒ¹é…ç±»å‹</param>
 	void CreateSession(int32 NumPublicConnections, FString MatchType);
 	/// <summary>
-	/// ËÑË÷»á»°
+	/// æœç´¢ä¼šè¯
 	/// </summary>
-	/// <param name="MaxSearchResults">×î´óËÑË÷½á¹ûÊıÁ¿</param>
+	/// <param name="MaxSearchResults">æœ€å¤§æœç´¢ç»“æœæ•°é‡</param>
 	void FindSessions(int32 MaxSearchResults);
 	/// <summary>
-	/// ¼ÓÈë»á»°
+	/// åŠ å…¥ä¼šè¯
 	/// </summary>
 	/// <param name="SessionResult"></param>
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 	/// <summary>
-	/// Ïú»Ù»á»°
+	/// é”€æ¯ä¼šè¯
 	/// </summary>
 	void DestroySession();
 	/// <summary>
-	/// ¿ªÊ¼»á»°
+	/// å¼€å§‹ä¼šè¯
 	/// </summary>
 	void StartSession();
 
 	/// <summary>
-	/// ÕâÊÇÎÒÃÇÎªmenuÀà°ó¶¨»Øµ÷µÄ×Ô¶¨ÒåÎ¯ÍĞ
+	/// è¿™æ˜¯æˆ‘ä»¬ä¸ºmenuç±»ç»‘å®šå›è°ƒçš„è‡ªå®šä¹‰å§”æ‰˜
 	/// </summary>
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
 	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
@@ -75,8 +75,8 @@ public:
 protected:
 
 	//
-	// ¶ÔÓÚÎ¯ÍĞµÄÄÚ²¿»Øµ÷½«Ìí¼Óµ½OnlineSessionInterfaceµÄÎ¯ÍĞÁĞ±í
-	// ÕâĞ©²»ĞèÒªÔÚÀàÍâµ÷ÓÃ
+	// å¯¹äºå§”æ‰˜çš„å†…éƒ¨å›è°ƒå°†æ·»åŠ åˆ°OnlineSessionInterfaceçš„å§”æ‰˜åˆ—è¡¨
+	// è¿™äº›ä¸éœ€è¦åœ¨ç±»å¤–è°ƒç”¨
 	//
 
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
@@ -87,62 +87,62 @@ protected:
 
 private:
 	/// <summary>
-	/// »á»°½Ó¿Ú
+	/// ä¼šè¯æ¥å£
 	/// </summary>
 	IOnlineSessionPtr SessionInterface;
-	//´æ´¢×îºóµÄ»á»°ÉèÖÃ£¨ÒòÎªÔÙ´´½¨»á»°Ê±£¬Èô´æÔÚ»á»°£¬Ôò»áÏÈÏú»ÙÔÙ´´½¨ÔÙÉèÖÃ£¬ËùÒÔÊÇ×îºóµÄ»á»°£©
+	//å­˜å‚¨æœ€åçš„ä¼šè¯è®¾ç½®ï¼ˆå› ä¸ºå†åˆ›å»ºä¼šè¯æ—¶ï¼Œè‹¥å­˜åœ¨ä¼šè¯ï¼Œåˆ™ä¼šå…ˆé”€æ¯å†åˆ›å»ºå†è®¾ç½®ï¼Œæ‰€ä»¥æ˜¯æœ€åçš„ä¼šè¯ï¼‰
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
 	/// <summary>
-	/// »á»°ËÑË÷
+	/// ä¼šè¯æœç´¢
 	/// </summary>
 	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
 	//
-	// Ìí¼Óµ½ÔÚÏß»á»°½Ó¿ÚÎ¯ÍĞÁĞ±í
-	// ½«MultiplayerSessionsSubsystem ÄÚ²¿»Øµ÷µ½°ó¶¨ÕâÀï
-	// £¨ps:ÏÂÃæ¾ÍÊÇÒ»Ğ©Î¯ÍĞ
+	// æ·»åŠ åˆ°åœ¨çº¿ä¼šè¯æ¥å£å§”æ‰˜åˆ—è¡¨
+	// å°†MultiplayerSessionsSubsystem å†…éƒ¨å›è°ƒåˆ°ç»‘å®šè¿™é‡Œ
+	// ï¼ˆps:ä¸‹é¢å°±æ˜¯ä¸€äº›å§”æ‰˜
 
 	/// <summary>
-	/// »á»°´´½¨Î¯ÍĞ
+	/// ä¼šè¯åˆ›å»ºå§”æ‰˜
 	/// </summary>
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
-	//¾ä±ú£¨ÓÃÀ´±êÊ¶²»Í¬µÄ´úÀí´¦Àí¶ÔÏó, ÊÇÒ»¸ö uint64 µÄID£¬½ÓÊÕ·µ»ØµÄÎ¯ÍĞ¾ä±ú£© ÓÃÓÚÎ¯ÍĞµÄÉ¾³ı
+	//å¥æŸ„ï¼ˆç”¨æ¥æ ‡è¯†ä¸åŒçš„ä»£ç†å¤„ç†å¯¹è±¡, æ˜¯ä¸€ä¸ª uint64 çš„IDï¼Œæ¥æ”¶è¿”å›çš„å§”æ‰˜å¥æŸ„ï¼‰ ç”¨äºå§”æ‰˜çš„åˆ é™¤
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
 	/// <summary>
-	/// »á»°²éÕÒÎ¯ÍĞ
+	/// ä¼šè¯æŸ¥æ‰¾å§”æ‰˜
 	/// </summary>
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
-	//¾ä±ú
+	//å¥æŸ„
 	FDelegateHandle FindSessionsCompleteDelegateHandle;
 	/// <summary>
-	/// »á»°¼ÓÈëÎ¯ÍĞ
+	/// ä¼šè¯åŠ å…¥å§”æ‰˜
 	/// </summary>
 	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
-	//¾ä±ú
+	//å¥æŸ„
 	FDelegateHandle JoinSessionCompleteDelegateHandle;
 	/// <summary>
-	/// »á»°Ïú»ÙÎ¯ÍĞ
+	/// ä¼šè¯é”€æ¯å§”æ‰˜
 	/// </summary>
 	FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegate;
-	//¾ä±ú
+	//å¥æŸ„
 	FDelegateHandle DestroySessionCompleteDelegateHandle;
 	/// <summary>
-	/// »á»°¿ªÊ¼Î¯ÍĞ
+	/// ä¼šè¯å¼€å§‹å§”æ‰˜
 	/// </summary>
 	FOnStartSessionCompleteDelegate StartSessionCompleteDelegate;
-	//¾ä±ú
+	//å¥æŸ„
 	FDelegateHandle StartSessionCompleteDelegateHandle;
 
 	/// <summary>
-	/// ÓÃÒÔ±ê¼ÇÏú»Ù»á»°ÊÇ·ñÍê³É£¨Ïú»Ù»á»°ĞèÒªÒ»¶¨µÄÊ±¼ä£©
+	/// ç”¨ä»¥æ ‡è®°é”€æ¯ä¼šè¯æ˜¯å¦å®Œæˆï¼ˆé”€æ¯ä¼šè¯éœ€è¦ä¸€å®šçš„æ—¶é—´ï¼‰
 	/// </summary>
 	bool bCreateSessionOnDestroy{ false };
 	/// <summary>
-	/// ÓÃÓÚÏú»Ù»á»°¹ı³ÌÖĞ£¬Èç¹ûµã»÷ÁË´´½¨»á»°£¬ÔòÏÈ±£´æÕâĞ©ĞÅÏ¢£¬µÈÏú»Ù»á»°Íê³Éºó£¬Ê¹ÓÃ¸ÃĞÅÏ¢´´½¨ĞÂµÄ»á»°
+	/// ç”¨äºé”€æ¯ä¼šè¯è¿‡ç¨‹ä¸­ï¼Œå¦‚æœç‚¹å‡»äº†åˆ›å»ºä¼šè¯ï¼Œåˆ™å…ˆä¿å­˜è¿™äº›ä¿¡æ¯ï¼Œç­‰é”€æ¯ä¼šè¯å®Œæˆåï¼Œä½¿ç”¨è¯¥ä¿¡æ¯åˆ›å»ºæ–°çš„ä¼šè¯
 	/// </summary>
 	int32 LastNumPublicConnections;
 	/// <summary>
-	/// ÓÃÓÚÏú»Ù»á»°¹ı³ÌÖĞ£¬Èç¹ûµã»÷ÁË´´½¨»á»°£¬ÔòÏÈ±£´æÕâĞ©ĞÅÏ¢£¬µÈÏú»Ù»á»°Íê³Éºó£¬Ê¹ÓÃ¸ÃĞÅÏ¢´´½¨ĞÂµÄ»á»°
+	/// ç”¨äºé”€æ¯ä¼šè¯è¿‡ç¨‹ä¸­ï¼Œå¦‚æœç‚¹å‡»äº†åˆ›å»ºä¼šè¯ï¼Œåˆ™å…ˆä¿å­˜è¿™äº›ä¿¡æ¯ï¼Œç­‰é”€æ¯ä¼šè¯å®Œæˆåï¼Œä½¿ç”¨è¯¥ä¿¡æ¯åˆ›å»ºæ–°çš„ä¼šè¯
 	/// </summary>
 	FString LastMatchType;
 };

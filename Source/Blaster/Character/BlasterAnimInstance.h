@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,26 +14,26 @@ class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 public:
-	//ÀàËÆÓÚbeginplay
+	//ç±»ä¼¼äºbeginplay
 	virtual void NativeInitializeAnimation() override;
-	//ÀàËÆÓÚTick
+	//ç±»ä¼¼äºTick
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 private:
-	//ÓÉÓÚ²»ÄÜÔÚË½ÓĞ±äÁ¿ÉÏÊ¹ÓÃBlueprintReadOnly,Òò´ËĞèÒªÍ¨¹ımetaÀ´Ö¸¶¨ÔÊĞíË½ÓĞ·ÃÎÊ£©
+	//ç”±äºä¸èƒ½åœ¨ç§æœ‰å˜é‡ä¸Šä½¿ç”¨BlueprintReadOnly,å› æ­¤éœ€è¦é€šè¿‡metaæ¥æŒ‡å®šå…è®¸ç§æœ‰è®¿é—®ï¼‰
 	UPROPERTY(BlueprintReadOnly,Category=Character,meta=(AllowPrivateAccess="true"))
 	class ABlasterCharacter* BlasterCharacter;
 	/// <summary>
-	/// ÈËÎïËÙ¶È
+	/// äººç‰©é€Ÿåº¦
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float Speed;
 	/// <summary>
-	/// ÊÇ·ñÔÚ¿ÕÖĞ
+	/// æ˜¯å¦åœ¨ç©ºä¸­
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 	/// <summary>
-	/// ÊÇ·ñÕıÔÚ¼ÓËÙ£¨¼ÓËÙ¶È£©
+	/// æ˜¯å¦æ­£åœ¨åŠ é€Ÿï¼ˆåŠ é€Ÿåº¦ï¼‰
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsAccelerating;

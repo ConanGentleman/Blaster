@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,7 +24,7 @@ protected:
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 	/// <summary>
-	/// MultiplayerSessionsSubsystemµÄ×Ô¶¨ÒåÎ¯ÍĞ»Øµ÷ ¼ÓUFUNTIONÊÇÒòÎª¸Ã»Øµ÷ÊÇÊ¹ÓÃµÄ¶¯Ì¬Î¯ÍĞ£¬ĞèÒªÓëÀ¶Í¼¼æÈİ£¬ÔòĞèÒª¼ÓUFUNCTION
+	/// MultiplayerSessionsSubsystemçš„è‡ªå®šä¹‰å§”æ‰˜å›è°ƒ åŠ UFUNTIONæ˜¯å› ä¸ºè¯¥å›è°ƒæ˜¯ä½¿ç”¨çš„åŠ¨æ€å§”æ‰˜ï¼Œéœ€è¦ä¸è“å›¾å…¼å®¹ï¼Œåˆ™éœ€è¦åŠ UFUNCTION
 	/// </summary>
 	UFUNCTION()
 	void OnCreateSession(bool bWasSuccessful);
@@ -38,32 +38,32 @@ protected:
 	void OnStartSession(bool bWasSuccessful);
 
 private:
-	UPROPERTY(meta = (BindWidget)) //°ó¶¨À¶Í¼ÖĞµÄÍ¬Ãû£¨±äÁ¿Ãû£©°´Å¥
+	UPROPERTY(meta = (BindWidget)) //ç»‘å®šè“å›¾ä¸­çš„åŒåï¼ˆå˜é‡åï¼‰æŒ‰é’®
 	class UButton* HostButton;
 
-	UPROPERTY(meta = (BindWidget)) //°ó¶¨À¶Í¼ÖĞµÄÍ¬Ãû£¨±äÁ¿Ãû£©°´Å¥
+	UPROPERTY(meta = (BindWidget)) //ç»‘å®šè“å›¾ä¸­çš„åŒåï¼ˆå˜é‡åï¼‰æŒ‰é’®
 	UButton* JoinButton;
 
 	UFUNCTION()
-	void HostButtonClicked();//À¶Í¼ÖĞµã»÷HostButtonÏìÓ¦µÄº¯Êı
+	void HostButtonClicked();//è“å›¾ä¸­ç‚¹å‡»HostButtonå“åº”çš„å‡½æ•°
 
 	UFUNCTION()
 	void JoinButtonClicked();
 
 	void MenuTearDown();
 
-	//Ê¹ÓÃ£¨×Ô¶¨ÒåµÄ£©¶àÈË»á»°×ÓÏµÍ³£¬ËüÊÇÒ»¸öÉè¼ÆÓÃÓÚ´¦ÀíËùÓĞÔÚÏß»á»°¹¦ÄÜµÄ×ÓÏµÍ³
+	//ä½¿ç”¨ï¼ˆè‡ªå®šä¹‰çš„ï¼‰å¤šäººä¼šè¯å­ç³»ç»Ÿï¼Œå®ƒæ˜¯ä¸€ä¸ªè®¾è®¡ç”¨äºå¤„ç†æ‰€æœ‰åœ¨çº¿ä¼šè¯åŠŸèƒ½çš„å­ç³»ç»Ÿ
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 	/// <summary>
-	/// ×î´ó¹«¹²Á¬½ÓÊı {4}´ú±íÉèÖÃÄ¬ÈÏÖµÎª4
+	/// æœ€å¤§å…¬å…±è¿æ¥æ•° {4}ä»£è¡¨è®¾ç½®é»˜è®¤å€¼ä¸º4
 	/// </summary>
 	int32 NumPublicConnections{4};
 	/// <summary>
-	/// Æ¥ÅäÀàĞÍ
+	/// åŒ¹é…ç±»å‹
 	/// </summary>
 	FString MatchType{TEXT("FreeForAll")};
 	/// <summary>
-	/// ÓÎÏ·´óÌüÂ·¾¶
+	/// æ¸¸æˆå¤§å…è·¯å¾„
 	/// </summary>
 	FString PathToLobby{TEXT("")};
 };

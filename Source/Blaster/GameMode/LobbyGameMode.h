@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -15,7 +15,7 @@ class BLASTER_API ALobbyGameMode : public AGameMode
 	GENERATED_BODY()
 public:
 	/// <summary>
-	/// Ã¿µ±ÓĞÈË¼ÓÈëÓÎÏ·Ê±¾Í»áµ÷ÓÃ¸Ãº¯Êı
+	/// æ¯å½“æœ‰äººåŠ å…¥æ¸¸æˆæ—¶å°±ä¼šè°ƒç”¨è¯¥å‡½æ•°
 	/// </summary>
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 };

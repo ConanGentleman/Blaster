@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "OverheadWidget.h"
 #include "Components/TextBlock.h"
 /// <summary>
-/// ÉèÖÃÎÄ±¾ÄÚÈİ
+/// è®¾ç½®æ–‡æœ¬å†…å®¹
 /// </summary>
 /// <param name="TextToDisplay"></param>
 void UOverheadWidget::SetDisplayText(FString TextToDisplay)
@@ -15,15 +15,15 @@ void UOverheadWidget::SetDisplayText(FString TextToDisplay)
 }
 void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 {
-	//GetLocalRole»òÕßGetRemoteRole»á¸ù¾İµ÷ÓÃËüµÄ»úÆ÷µÄ²»Í¬µ¼ÖÂ·µ»Ø²»Í¬µÄ½á¹û
+	//GetLocalRoleæˆ–è€…GetRemoteRoleä¼šæ ¹æ®è°ƒç”¨å®ƒçš„æœºå™¨çš„ä¸åŒå¯¼è‡´è¿”å›ä¸åŒçš„ç»“æœ
 	ENetRole RemoteRole = InPawn->GetRemoteRole();
 	FString Role;
-	switch (RemoteRole) {//Ïà¹ØÀàĞÍºÍËµÃ÷ ²é¿´£ºhttps://blog.csdn.net/m0_53278265/article/details/129503448
-	case ENetRole::ROLE_Authority: //ÔÚ±¾µØÍøÂç½ÇÉ«GetLocalRole()ÖĞ£¬·şÎñÆ÷ÉÏ´æÔÚµÄËùÓĞPawn¶¼½«ÎªAuthority
-		Role = FString("Authority"); //ÔÚÔ¶³ÌÍøÂç½ÇÉ«RemoteRole()ÖĞ£¬ÔòÏà·´£¬·şÎñÆ÷ÉÏµÄËù¿ØÖÆµÄ½ÇÉ«ÎªAutonomous Proxy£¬¶øËù¿´µ½µÄÆäËû½ÇÉ«ÎªROLE_SimulatedProxy
+	switch (RemoteRole) {//ç›¸å…³ç±»å‹å’Œè¯´æ˜ æŸ¥çœ‹ï¼šhttps://blog.csdn.net/m0_53278265/article/details/129503448
+	case ENetRole::ROLE_Authority: //åœ¨æœ¬åœ°ç½‘ç»œè§’è‰²GetLocalRole()ä¸­ï¼ŒæœåŠ¡å™¨ä¸Šå­˜åœ¨çš„æ‰€æœ‰Pawnéƒ½å°†ä¸ºAuthority
+		Role = FString("Authority"); //åœ¨è¿œç¨‹ç½‘ç»œè§’è‰²RemoteRole()ä¸­ï¼Œåˆ™ç›¸åï¼ŒæœåŠ¡å™¨ä¸Šçš„æ‰€æ§åˆ¶çš„è§’è‰²ä¸ºAutonomous Proxyï¼Œè€Œæ‰€çœ‹åˆ°çš„å…¶ä»–è§’è‰²ä¸ºROLE_SimulatedProxy
 		break;
-	case ENetRole::ROLE_AutonomousProxy://ÔÚ±¾µØÍøÂç½ÇÉ«ÖĞ£¬¿Í»§¶ËÉÏµÄËù¿ØÖÆµÄ½ÇÉ«ÎªAutonomous Proxy£¬¶ø¿Í»§¶ËËù¿´µ½µÄÆäËû½ÇÉ«ÎªROLE_SimulatedProxy
-		Role = FString("Autonomous Proxy");//ÔÚÔ¶³ÌÍøÂç½ÇÉ«RemoteRole()ÖĞ£¬ÔòÏà·´£¬¿Í»§¶ËÉÏ´æÔÚµÄËùÓĞPawn¶¼ÎªAuthority
+	case ENetRole::ROLE_AutonomousProxy://åœ¨æœ¬åœ°ç½‘ç»œè§’è‰²ä¸­ï¼Œå®¢æˆ·ç«¯ä¸Šçš„æ‰€æ§åˆ¶çš„è§’è‰²ä¸ºAutonomous Proxyï¼Œè€Œå®¢æˆ·ç«¯æ‰€çœ‹åˆ°çš„å…¶ä»–è§’è‰²ä¸ºROLE_SimulatedProxy
+		Role = FString("Autonomous Proxy");//åœ¨è¿œç¨‹ç½‘ç»œè§’è‰²RemoteRole()ä¸­ï¼Œåˆ™ç›¸åï¼Œå®¢æˆ·ç«¯ä¸Šå­˜åœ¨çš„æ‰€æœ‰Pawnéƒ½ä¸ºAuthority
 		break;
 	case ENetRole::ROLE_SimulatedProxy:
 		Role = FString("Simulated Proxy");
@@ -31,23 +31,23 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 	case ENetRole::ROLE_None:
 		Role = FString("None");
 		break;
-	}//Í¨¹ıÉÏÊö·½Ê½¿ÉÒÔÈ·¶¨·şÎñÆ÷ÊÇÄÄÒ»¸ö
+	}//é€šè¿‡ä¸Šè¿°æ–¹å¼å¯ä»¥ç¡®å®šæœåŠ¡å™¨æ˜¯å“ªä¸€ä¸ª
 	FString RemoteRoleString = FString::Printf(TEXT("Remote Role: %s"), *Role);
 	SetDisplayText(RemoteRoleString);
 
-	///ÏÂÃæÁ½ĞĞÊÇÓÃÓÚÏÔÊ¾Íæ¼ÒĞÕÃûµÄ£¬ÓëÔ­ÓĞÄÚÈİÎŞ¹Ø¡£»òÕßËµÊÇ43µÄ¿ÉÑ¡ÌôÕ½
+	///ä¸‹é¢ä¸¤è¡Œæ˜¯ç”¨äºæ˜¾ç¤ºç©å®¶å§“åçš„ï¼Œä¸åŸæœ‰å†…å®¹æ— å…³ã€‚æˆ–è€…è¯´æ˜¯43çš„å¯é€‰æŒ‘æˆ˜
 	FString Name = InPawn->GetName();
 	SetDisplayText(Name);
 	///
 }
 /// <summary>
-/// µ±¹ı¶Éµ½²»Í¬µÄ¹Ø¿¨»òÀë¿ª¹Ø¿¨Ê±µ÷ÓÃ
+/// å½“è¿‡æ¸¡åˆ°ä¸åŒçš„å…³å¡æˆ–ç¦»å¼€å…³å¡æ—¶è°ƒç”¨
 /// </summary>
 /// <param name="InLevel"></param>
 /// <param name="InWorld"></param>
 void UOverheadWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
-	//´ÓÊÓ¿ÚÉ¾³ı
+	//ä»è§†å£åˆ é™¤
 	RemoveFromParent();
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
