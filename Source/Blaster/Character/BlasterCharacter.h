@@ -37,6 +37,13 @@ private:
 	//相机组件
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
+	/// <summary>
+	/// 用于在人物头顶上显示的小部件。
+	/// 不能对C++中私有的变量使用蓝图使用BlueprintReadOnly或者BlueprintReadWrite除非
+	/// 添加了meta = (AllowPrivateAccess = "true")，这意味着将此变量暴露给蓝图
+	/// </summary>
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* OverheadWidget;
 public:	
 
 
