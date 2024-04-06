@@ -36,8 +36,8 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 	SetDisplayText(RemoteRoleString);
 
 	///下面两行是用于显示玩家姓名的，与原有内容无关。或者说是43的可选挑战
-	FString Name = InPawn->GetName();
-	SetDisplayText(Name);
+	//FString Name = InPawn->GetName();
+	//SetDisplayText(Name);
 	///
 }
 /// <summary>

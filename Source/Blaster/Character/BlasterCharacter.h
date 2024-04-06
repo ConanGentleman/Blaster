@@ -20,7 +20,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	/// <summary>
+	/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
+	/// </summary>
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -44,7 +47,31 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
-public:	
 
+	/// <summary>
+	/// 希望replicate该变量，意味这当他在服务器上发生变更时，它可以在所有客户端上同步更改。
+	/// 所以我们可以复制指向武器的指针
+	/// 因此需要添加一个UPROPERTY(Replicated),这表示将OverlappingWeapon设置为复制变量。
+	/// 当然完成上述操作后，还需要在计划赋值变量的任何类中重写函数GetLifetimeReplicatedProps
+	/// 变量只会在更改的时候才会复制，并不在每一帧或者每个网络更新复制！！！
+	/// </summary>
+	//UPROPERTY(Replicated)
+	///ReplicatedUsing 表示在客户端的变量接收到服务器的改变时，在客户端上调用绑定好的回调函数(函数名一般以OnRep开头)
+	UPROPERTY(ReplicatedUsing = OnRep_OverleappingWeapon)
+	class AWeapon* OverlappingWeapon;
+
+
+	UFUNCTION()
+	/// <summary>
+	/// 当绑定重叠武器复制前调用的函数可以无参也可以有一个参数（该参数为复制变量）
+	/// </summary>
+	/// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
+	void OnRep_OverleappingWeapon(AWeapon* LastWeapon);
+public:	
+	/// <summary>
+	/// 用于在武器类中设置复制变量OverlappingWeapon
+	/// FORCEINLINE表示内敛函数
+	/// </summary>
+	void SetOverlappingWeapon(AWeapon* Weapon);
 
 };

@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "Blaster/Weapon/Weapon.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -38,13 +40,42 @@ ABlasterCharacter::ABlasterCharacter()
 	//添加到跟组件上
 	OverheadWidget->SetupAttachment(RootComponent);
 }
+/// <summary>
+/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
+/// </summary>
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//注册要replicated（复制）的OverlappingWeapon.
+	//DOREPLIFETIME参数：指定角色类（具有复制变量的类），复制变量
+	//在角色这里设置OverlappingWeapon为空，并在武器类中的重叠函数中使用本类中的SetOverlappingWeapon设置它,
+	//因此一旦重叠武器（OverlappingWeapon）的值发生变化，他就会在各个客户端上复制，
+	//DOREPLIFETIME(ABlasterCharacter, OverlappingWeapon);
+// 
+	//可使用DOREPLIFETIME_CONDITION来指定向那些客户端复制变量
+	//DOREPLIFETIME_CONDITION参数：指定角色类（具有复制变量的类），复制变量，条件（这里COND_OwnerOnly，如果你在机器上控制Pawn，那么就是Pawn的Owner
+	//当条件设为COND_OwnerOnly，意味着重叠武器将仅复制到当前控制的BlasterCharacter所对应的客户端
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon,COND_OwnerOnly);
+}
 
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
+// Called every frame
+void ABlasterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
+	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
+	//if (OverlappingWeapon) {
+	//	//设置武器的提示文字的显隐
+	//	OverlappingWeapon->ShowPickupWidget(true);
+	//}
+}
+
 // Called to bind functionality to input
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -105,13 +136,42 @@ void ABlasterCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
-
-// Called every frame
-void ABlasterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+/// <summary>
+/// 用于在武器类中设置复制变量OverlappingWeapon
+/// </summary>
+/// <param name="Weapon"></param>
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
+	//如果OverlappingWeapon为空(其实就是代表上一次武器不为空，这次就为空了)，则隐藏提示
+	if (OverlappingWeapon) {
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	//判断是否是本地控制。主要是由于变量赋值的条件为COND_OwnerOnly，因此检测重叠只有在客户端上才会显示pickup，而服务器上无法显示，即OnRep_OverleappingWeapon没有被调用
+	if (IsLocallyControlled()) {//由于SetOverlappingWeapon是在服务器上才会被调用，因此只有当控制者是服务器时IsLocallyControlled会返回true
+		if (OverlappingWeapon) {
+			//设置提示文字显隐
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
 }
+/// <summary>
+/// 当绑定重叠武器复制前调用的函数可以无参也可以有一个参数（该参数为复制变量）
+/// </summary>
+/// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
+void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon) {
+		//设置提示文字显隐
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	//上一次的值不为空，说明这一次的值为空，为空则表示离开武器所在范围，隐藏提示.
+	//为什么不直接判断OverlappingWeapon为不为空，因为如果OverlappingWeapon为空了无法调用ShowPickupWidget，所以得通过这个LastWeapon来调用）
+	//同理SetOverlappingWeapon中的情况 仍需要对于服务器单独处理，那么把处理方式也放在SetOverlappingWeapon中
+	if (LastWeapon) {
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
 
 
 
