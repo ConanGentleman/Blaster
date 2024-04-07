@@ -24,6 +24,7 @@ public:
 	/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -32,7 +33,8 @@ protected:
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
-
+	//武器装备或切换
+	void EquipButtonPressed();
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -60,13 +62,18 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_OverleappingWeapon)
 	class AWeapon* OverlappingWeapon;
 
-
-	UFUNCTION()
 	/// <summary>
 	/// 当绑定重叠武器复制前调用的函数可以无参也可以有一个参数（该参数为复制变量）
 	/// </summary>
 	/// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
+	UFUNCTION()
 	void OnRep_OverleappingWeapon(AWeapon* LastWeapon);
+
+	/// <summary>
+	/// 战斗组件，用于处理角色所有雨战斗相关的功能（也是一个可以被复制的变量
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

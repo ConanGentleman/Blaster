@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Blaster/Weapon/Weapon.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -39,6 +40,10 @@ ABlasterCharacter::ABlasterCharacter()
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	//添加到跟组件上
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
+	Combat->SetIsReplicated(true);
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
@@ -88,9 +93,19 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ABlasterCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ABlasterCharacter::LookUp);
-
+	//绑定输入和函数
+	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
 }
-
+/// <summary>
+/// 在创建对象并且其所有组件都已注册和初始化时调用
+/// </summary>
+void ABlasterCharacter::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+	if (Combat) 
+	{
+		Combat->Character = this;
+	}
+}
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f) {
@@ -135,6 +150,15 @@ void ABlasterCharacter::Turn(float Value)
 void ABlasterCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
+}
+/// <summary>
+/// 装备武器和捡起武器（需要服务器来负责处理
+/// </summary>
+void ABlasterCharacter::EquipButtonPressed()
+{
+	if (Combat && HasAuthority()) {
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
 }
 /// <summary>
 /// 用于在武器类中设置复制变量OverlappingWeapon

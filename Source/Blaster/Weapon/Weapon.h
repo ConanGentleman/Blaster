@@ -91,6 +91,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
 public:	
-
+	///设置武器状态 FORCEINLINE表示内联函数
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State; }
 
 };
