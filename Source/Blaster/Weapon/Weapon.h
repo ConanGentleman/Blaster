@@ -18,7 +18,7 @@ enum class EWeaponState : uint8
 	/// </summary>
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	/// <summary>
-	/// 被捡起
+	/// 被捡起或者被装备
 	/// </summary>
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
 	/// <summary>
@@ -43,6 +43,10 @@ public:
 	AWeapon();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	/// <summary>
+	/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
+	/// </summary>
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickupWidget(bool bShowWidget);
 protected:
 	// Called when the game starts or when spawned
@@ -80,10 +84,16 @@ private:
 	class USphereComponent* AreaSphere;
 
 	/// <summary>
-	/// 武器状态（初始化、捡起、扔下）
+	/// 武器状态（初始化、捡起、扔下） 是一个复制变量
 	/// </summary>
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
+
+	/// <summary>
+	/// 当绑定的武器状态 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
+	/// </summary>
+	UFUNCTION()
+	void OnRep_WeaponState();
 
 	/// <summary>
 	/// 用于提示操作捡起物体的UI
@@ -91,7 +101,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
 public:	
-	///设置武器状态 FORCEINLINE表示内联函数
-	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State; }
+	///设置武器状态 
+	void SetWeaponState(EWeaponState State);
+	//FORCEINLINE表示内联函数
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 
 };

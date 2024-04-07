@@ -63,7 +63,7 @@ private:
 	class AWeapon* OverlappingWeapon;
 
 	/// <summary>
-	/// 当绑定重叠武器复制前调用的函数可以无参也可以有一个参数（该参数为复制变量）
+	/// 当绑定的重叠武器 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
 	/// </summary>
 	/// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
 	UFUNCTION()
@@ -74,6 +74,13 @@ private:
 	/// </summary>
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
+
+	//远程过程调用（RPC）具有在一台机器上调用并在另一台机器上执行的功能。例如可以从客户端上调用，并在服务器上执行对应函数
+	//这里的函数打算在客户端调用并在服务器上执行
+	//需要选择是可靠Reliable还是不可靠的执行，不可靠可能存在丢弃的问题。当服务器收到 RBC 时，客户端将收到确认，如果它没有发送确认，RBC 将再次发送
+	//RPC函数名在CPP中的定义会在.h中的声明多加_Implementation，这是因为虚幻在幕后做了一些工作
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

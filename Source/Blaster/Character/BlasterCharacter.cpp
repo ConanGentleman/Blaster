@@ -156,11 +156,29 @@ void ABlasterCharacter::LookUp(float Value)
 /// </summary>
 void ABlasterCharacter::EquipButtonPressed()
 {
-	if (Combat && HasAuthority()) {
+	if (Combat) {
+		if(HasAuthority()){
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else {
+			//没有服务器权限，说明是由客户端调用的武器装备，因此使用RPC来调用服务器执行
+			ServerEquipButtonPressed();
+		}
+	}
+}
+/// <summary>
+/// 由于在装备武器时，使用if (HasAuthority())进行判断有服务器权限才能装备，基于此方法则只能在服务器上装备
+/// 因此使用RPC来解决这样的问题
+/// RPC 用于客户端调用服务器执行的函数。函数命名会比.h中的函数名多_Implementation
+/// </summary>
+void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat) {//去除 HasAuthority() 因为RPC只会在服务器上执行
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
 }
 /// <summary>
+/// (用在服务器上的-自己的理解）
 /// 用于在武器类中设置复制变量OverlappingWeapon
 /// </summary>
 /// <param name="Weapon"></param>
@@ -169,7 +187,7 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
 	if (OverlappingWeapon) {
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
-	OverlappingWeapon = Weapon;
+	OverlappingWeapon = Weapon; //这里设置后会导致OnRep_OverleappingWeapon被调用！！！！
 	//判断是否是本地控制。主要是由于变量赋值的条件为COND_OwnerOnly，因此检测重叠只有在客户端上才会显示pickup，而服务器上无法显示，即OnRep_OverleappingWeapon没有被调用
 	if (IsLocallyControlled()) {//由于SetOverlappingWeapon是在服务器上才会被调用，因此只有当控制者是服务器时IsLocallyControlled会返回true
 		if (OverlappingWeapon) {
@@ -179,7 +197,8 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
 	}
 }
 /// <summary>
-/// 当绑定重叠武器复制前调用的函数可以无参也可以有一个参数（该参数为复制变量）
+/// (用在客户端上的-自己的理解）
+/// 当绑定的重叠武器 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
 /// </summary>
 /// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
 void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
@@ -195,7 +214,6 @@ void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
 		LastWeapon->ShowPickupWidget(false);
 	}
 }
-
 
 
 

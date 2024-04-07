@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -72,6 +73,15 @@ void AWeapon::Tick(float DeltaTime)
 }
 
 /// <summary>
+/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
+/// </summary>
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//将武器状态注册为复制变量
+	DOREPLIFETIME(AWeapon, WeaponState);
+}
+
+/// <summary>
 /// 碰撞体重叠函数回调（该函数应当只在服务端调用）。可见是在BeginPlay中的if(HasAuthority)后添加的委托，所以是保证了在服务器端调用的。
 /// 但是目前只能保证在服务器上看到对PickupWidget的可见性修改，客户端上还无法看到，所以要使用到复制（replicaton）来进行
 /// </summary>
@@ -106,6 +116,38 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	{
 		//PickupWidget->SetVisibility(true);
 		BlasterCharacter->SetOverlappingWeapon(nullptr);//设置OverlappingWeapon，因为离开了 所以为空
+	}
+}
+/// <summary>
+/// (用在服务器上的-自己的理解）
+/// 设置武器状态
+/// </summary>
+/// <param name="State"></param>
+void AWeapon::SetWeaponState(EWeaponState State) {
+	WeaponState = State; //这里设置后会导致OnRep_WeaponState被调用！！！！
+	switch (WeaponState) {
+	case EWeaponState::EWS_Equipped://说明武器当前为装备状态
+		//装备武器后，隐藏其文字提示
+		ShowPickupWidget(false);
+		//装备武器后，禁用球体碰撞器（避免装备上的武器仍然能够检测重叠）
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
+}
+/// <summary>
+/// (用在客户端上的-自己的理解）
+/// 当绑定的武器状态 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
+/// 将武器状态设置为复制变量的原因是因为 发现在BlasterCharacter中使用RPC函数ServerEquipButtonPressed调用CombatComponent中的EquipWeapon时
+/// 没有执行ShowPickupWidget，估计是PickupWidget不是复制变量。因此才通过武器状态来设置文字提醒的显隐
+/// </summary>
+void AWeapon::OnRep_WeaponState()
+{
+	switch (WeaponState) {//这里的WeaponState是复制之后的
+	case EWeaponState::EWS_Equipped://说明武器当前为装备状态
+		//隐藏文字提示
+		ShowPickupWidget(false);
+		//不用像CombatComponent再设置Owener。因为本身Owener也用ReplicatedUsing标记了，所以在服务器上设置时，客户端也同步了
+		break;
 	}
 }
 

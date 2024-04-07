@@ -5,6 +5,7 @@
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -46,7 +47,5 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	//设置武器的所有者
 	EquippedWeapon->SetOwner(Character);
-	//装备武器后，隐藏其文字提示
-	EquippedWeapon->ShowPickupWidget(false);
 }
 
