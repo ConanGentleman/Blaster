@@ -196,6 +196,7 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
 		}
 	}
 }
+
 /// <summary>
 /// (用在客户端上的-自己的理解）
 /// 当绑定的重叠武器 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
@@ -213,6 +214,15 @@ void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
 	if (LastWeapon) {
 		LastWeapon->ShowPickupWidget(false);
 	}
+}
+/// <summary>
+/// 用于BlasterAnimInstance中访问判断是否装备武器，以播放相应的动画
+/// </summary>
+/// <returns></returns>
+bool ABlasterCharacter::IsWeaponEquipped()
+{
+	//战斗组件以及战斗组件上装备的武器不为空，则装备了武器
+	return (Combat && Combat->EquippedWeapon);
 }
 
 

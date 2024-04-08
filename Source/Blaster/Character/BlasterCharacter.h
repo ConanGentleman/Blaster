@@ -87,5 +87,10 @@ public:
 	/// FORCEINLINE表示内敛函数
 	/// </summary>
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	/// <summary>
+	/// 用于BlasterAnimInstance中访问判断是否装备武器，以播放相应的动画
+	/// </summary>
+	/// <returns></returns>
+	bool IsWeaponEquipped();
 
 };

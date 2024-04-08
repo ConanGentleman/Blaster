@@ -37,4 +37,10 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsAccelerating;
+
+	/// <summary>
+	/// 是否装备有武器(便于在蓝图中判断进而切换到装备时的动画
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bWeaponEquipped;
 };
