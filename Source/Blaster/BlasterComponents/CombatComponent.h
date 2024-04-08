@@ -44,4 +44,9 @@ private:
 	/// </summary>
 	UPROPERTY(Replicated)
 	class AWeapon* EquippedWeapon;
+
+	/// <summary>
+	/// 是否正在瞄准
+	/// </summary>
+	bool bAiming;
 };

@@ -44,6 +44,8 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
 	Combat->SetIsReplicated(true);
+	//将该变量设置为true才能正常蹲下，因为Crouch函数会依据这个
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
@@ -95,6 +97,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUp", this, &ABlasterCharacter::LookUp);
 	//绑定输入和函数
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimButtonPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterCharacter::AimButtonReleased);
 }
 /// <summary>
 /// 在创建对象并且其所有组件都已注册和初始化时调用
@@ -178,6 +183,40 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 /// <summary>
+/// 蹲起
+/// </summary>
+void ABlasterCharacter::CrouchButtonPressed()
+{
+	//Character自带有蹲下和蹲起的函数，蹲下成功会将变量bWantsToCrouch设置为true,并且自动调整胶囊体的大小，bWantsToCrouch是表示将要开始蹲下。
+	//此外，Character还存在有bIsCrouched变量，且为复制变量，且能通知OnRep_IsCrouched，因此每当服务器上设置bIsCrouched，该值就恢复知道客户端
+	//因此可以在动画蓝图中使用bIsCrouched
+	if (bIsCrouched) {//这里为bIsCrouched是代表当前状态为蹲下，但是又按了蹲下建 因此要把状态改为蹲起
+		UnCrouch();//蹲起
+	}
+	else {
+		Crouch();//蹲下
+	}
+	
+}
+/// <summary>
+/// 瞄准
+/// </summary>
+void ABlasterCharacter::AimButtonPressed()
+{
+	if (Combat) {
+		Combat->bAiming = true;
+	}
+}
+/// <summary>
+/// 取消瞄准
+/// </summary>
+void ABlasterCharacter::AimButtonReleased()
+{
+	if (Combat) {
+		Combat->bAiming = false;
+	}
+}
+/// <summary>
 /// (用在服务器上的-自己的理解）
 /// 用于在武器类中设置复制变量OverlappingWeapon
 /// </summary>
@@ -223,6 +262,12 @@ bool ABlasterCharacter::IsWeaponEquipped()
 {
 	//战斗组件以及战斗组件上装备的武器不为空，则装备了武器
 	return (Combat && Combat->EquippedWeapon);
+}
+
+bool ABlasterCharacter::IsAiming()
+{
+	//战斗组件以及战斗组件上的瞄准状态
+	return (Combat && Combat->bAiming);
 }
 
 

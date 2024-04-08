@@ -35,6 +35,13 @@ protected:
 	void LookUp(float Value);
 	//武器装备或切换
 	void EquipButtonPressed();
+	//蹲下
+	void CrouchButtonPressed();
+	//瞄准
+	void AimButtonPressed();
+	//取消瞄准
+	void AimButtonReleased();
+
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -92,5 +99,11 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	bool IsWeaponEquipped();
+
+	/// <summary>
+	/// 是否瞄准状态
+	/// </summary>
+	/// <returns></returns>
+	bool IsAiming();
 
 };
