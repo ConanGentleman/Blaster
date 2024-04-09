@@ -55,4 +55,15 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bAiming;
+
+	/// <summary>
+	/// 控制人物拿着装备的移动的混合动画值（混合动画中的水平坐标
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float YawOffset;
+	/// <summary>
+	/// 控制人物拿着装备的倾斜的混合动画值（混合动画中的垂直坐标
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float Lean;
 };

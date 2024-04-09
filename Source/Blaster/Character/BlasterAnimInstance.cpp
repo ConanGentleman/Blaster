@@ -4,6 +4,7 @@
 #include "BlasterAnimInstance.h"
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation() {
 	Super::NativeInitializeAnimation();
@@ -32,4 +33,19 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//是否蹲下
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
+	//设置拿着装备的混合动画值
+	//自带的获取基础目标旋转的函数
+	//AimRotation.Yaw为全局的，与控制的角色无关。类似于东南西北一样的提前固定好的角度，这个输出看一下就清楚了。
+	//相机直视世界x轴方向则AimRotation.Yaw为0（这里参照是BlasterCharacter上的相机，也就是人物朝向不变，但是相机朝向变化就会影响GetBaseAimRotation的值，这里涉及的都是Yaw的值
+	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
+	//该函数通常用来制作一些特殊的旋转效果。根据你指定的方向,计算出在世界坐标下的相对旋转.
+	//通过给定的X轴，构建一个rotator，Y和Z不需要指定（其实引擎会指定一个隐式的Z轴（0,0,1），用来保证XYZ三个轴向的平面正交
+	//另外的解释：MakeRotFromX 就是给定一个方向的actor 以这个方向作为一个物体的forward方向 需要在世界坐标的旋转rotator
+	//还有的解释：设置物体rotation的时候，由向量差得到x轴的朝向，无论物体怎么移动，这个物体的x轴的朝向始终是这个向量差，可以得到一个物体始终朝向另一个物体；最多设置一个物体两个朝向；
+	//经过如上的转换使得MovementRotation的参照物变成了BlasterCharacter上的人物角色，也就是人物角色的朝向影响了MovementRotation的值，这里涉及的都是Yaw的值
+	//所以根据MovementRotation的角度就能设置混合动画的值进行动画的变化 
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
+	//计算从MovementRotation到AimRotation方向的一个旋转差
+	YawOffset = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+	//UE_LOG(LogTemp, Warning, TEXT("AimRotation Yaw %f:"), AimRotation.Yaw);
 }

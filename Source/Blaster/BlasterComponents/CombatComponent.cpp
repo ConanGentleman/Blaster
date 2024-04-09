@@ -7,6 +7,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -71,5 +72,9 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	//设置武器的所有者
 	EquippedWeapon->SetOwner(Character);
+	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+	Character->bUseControllerRotationYaw = true;
 }
 
