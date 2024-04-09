@@ -22,6 +22,22 @@ void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
+void UCombatComponent::SetAiming(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+	//如果没有服务器权限，则表示是客户端调用的，因此需要调用RPC函数。由于RPC函数的特性，在服务器上调用ServerSetAiming也是在服务器上执行ServerSetAiming；在客户端调用也是在服务器上执行ServerSetAiming
+	//所以就直接去掉了HasAuthority()的判断
+	//把上一行bAiming = bIsAiming;留下来的原因是，在客户端调用RPC必须等待RPC到达服务器并且将bAiming复制回来，存在一定时间，我们可以立即将其设置，反正复制回来的Aiming的值是一致的
+	ServerSetAiming(bIsAiming);
+}
+/// <summary>
+/// 用于客户端调用服务器执行的函数
+/// </summary>
+/// <param name="bIsAiming"></param>
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+}
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -31,6 +47,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
 }
 /// <summary>
 /// 装备(捡起)武器

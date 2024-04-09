@@ -30,6 +30,18 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	/// <summary>
+	/// 设置瞄准状态
+	/// </summary>
+	/// <param name="bIsAiming"></param>
+	void SetAiming(bool bIsAiming);
+
+	/// <summary>
+	/// RPC用于客户端调用服务器执行的函数，保证客户端同样能够瞄准
+	/// 同理，见BlasterCharacter中的ServerEquipButtonPressed函数说明
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerSetAiming(bool bIsAiming);
 private:
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 
@@ -46,7 +58,8 @@ private:
 	class AWeapon* EquippedWeapon;
 
 	/// <summary>
-	/// 是否正在瞄准
+	/// 是否正在瞄准(由于跟EquippedWeapon一样需要将服务器瞄准的操作同步到客户端，因此设置为复制变量
 	/// </summary>
+	UPROPERTY(Replicated)
 	bool bAiming;
 };

@@ -204,7 +204,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 void ABlasterCharacter::AimButtonPressed()
 {
 	if (Combat) {
-		Combat->bAiming = true;
+		Combat->SetAiming(true);
 	}
 }
 /// <summary>
@@ -213,7 +213,7 @@ void ABlasterCharacter::AimButtonPressed()
 void ABlasterCharacter::AimButtonReleased()
 {
 	if (Combat) {
-		Combat->bAiming = false;
+		Combat->SetAiming(false);
 	}
 }
 /// <summary>
