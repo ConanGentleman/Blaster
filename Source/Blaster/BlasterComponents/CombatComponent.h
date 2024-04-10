@@ -42,6 +42,12 @@ protected:
 	/// </summary>
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bIsAiming);
+
+	/// <summary>
+	/// 用于复制变量发生改变（被赋值），服务器通知客户端调用的函数
+	/// </summary>
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
 private:
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 
@@ -53,8 +59,10 @@ private:
 	/// ，然后在EquipWeapon中对EquippedWeapon变量赋值，然而EquippedWeapon之前并没有设置为Replicated变量
 	/// 因此这里将EquippedWeapon设置为Replicated以便在其改变时，复制到客户端。
 	/// 注意Replicated变量一定要在GetLifetimeReplicatedProps函数在里面注册该变量
+	/// 然后由于目前装备武器时的移动动画没有能够同步，因此使用ReplicatedUsing来使得服务器通知客户端调用OnRep_EquippedWeapon函数，
+	/// OnRep_EquippedWeapon则用于对角色移动朝向的同步
 	/// </summary>
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	class AWeapon* EquippedWeapon;
 
 	/// <summary>

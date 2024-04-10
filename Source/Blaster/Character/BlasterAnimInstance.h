@@ -66,4 +66,17 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float Lean;
+
+	/// <summary>
+	/// 角色上一帧的旋转值
+	/// </summary>
+	FRotator CharacterRotationLastFrame;
+	/// <summary>
+	/// 角色旋转值。利用CharacterRotationLastFrame和CharacterRotation来控制角色的动画的倾斜程度
+	/// </summary>
+	FRotator CharacterRotation;
+	/// <summary>
+	/// 用于混合动画EquippedRun更加平滑的过度
+	/// </summary>
+	FRotator DeltaRotation;
 };

@@ -45,7 +45,24 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//经过如上的转换使得MovementRotation的参照物变成了BlasterCharacter上的人物角色，也就是人物角色的朝向影响了MovementRotation的值，这里涉及的都是Yaw的值
 	//所以根据MovementRotation的角度就能设置混合动画的值进行动画的变化 
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
-	//计算从MovementRotation到AimRotation方向的一个旋转差
-	YawOffset = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+	//计算从MovementRotation到AimRotation方向的一个旋转差。
+	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
 	//UE_LOG(LogTemp, Warning, TEXT("AimRotation Yaw %f:"), AimRotation.Yaw);
+	//用于旋转的插值函数。返回值为从“当前值”过渡到“期望的目标值”的一个中间值。参数：当前值；期望的目标值，时间变化值，插值速度
+	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 5.f);
+	//YawOffset用于扫射移动的动画
+	YawOffset = DeltaRotation.Yaw;
+	
+	//Lean用于角色移动倾斜的动画
+	CharacterRotationLastFrame = CharacterRotation;
+	CharacterRotation = BlasterCharacter->GetActorRotation();
+	//获取两帧之间的旋转差值
+	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRotationLastFrame);
+	//由于Delta值过小，因此将其放大
+	const float Target = Delta.Yaw / DeltaTime;
+	//FInterpTo一般在tick事件中使用。返回值为从“当前值”过渡到“期望的目标值”的一个中间值。参数：当前值；期望的目标值，时间变化值，插值速度
+	const float Interp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.f);
+	//把Interp的值限制在-90到90
+	Lean = FMath::Clamp(Interp, -90.f, 90.f);
+
 }

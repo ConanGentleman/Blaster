@@ -33,6 +33,18 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	ServerSetAiming(bIsAiming);
 }
 /// <summary>
+/// 用于武器
+/// </summary>
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && Character) {
+		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+		Character->bUseControllerRotationYaw = true;
+	}
+}
+/// <summary>
 /// 用于客户端调用服务器执行的函数
 /// </summary>
 /// <param name="bIsAiming"></param>
