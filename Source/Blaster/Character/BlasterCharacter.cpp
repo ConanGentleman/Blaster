@@ -243,22 +243,17 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	float Speed = Velocity.Size();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
-	FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-	//与静止前的旋转角的差
-	FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-	AO_Yaw = DeltaAimRotation.Yaw;
-
 	if (Speed == 0.f && !bIsInAir) {//速度为0，并且没有在跳跃
-		//FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		////与静止前的旋转角的差
-		//FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-		//AO_Yaw = DeltaAimRotation.Yaw;
-		//bUseControllerRotationYaw = false;
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		//与静止前的旋转角的差
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
 	}
 	if (Speed > 0.f || bIsInAir) { //在保持角色静止前
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //静止前的旋转情况
-		//AO_Yaw = 0.f; //一旦移动或者跳跃就设置为0  不设置为0 并且 上面bUseControllerRotationYaw不设置为false 应该是我喜欢的那种
-		//bUseControllerRotationYaw = true;
+		AO_Yaw = 0.f; //一旦移动或者跳跃就设置为0
+		bUseControllerRotationYaw = true;
 
 	}
 
