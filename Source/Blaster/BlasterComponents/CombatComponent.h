@@ -70,4 +70,15 @@ private:
 	/// </summary>
 	UPROPERTY(Replicated)
 	bool bAiming;
+
+	/// <summary>
+	/// 行走速度
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float BaseWalkSpeed;
+	/// <summary>
+	/// 瞄准行走速度
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float AimWalkSpeed;
 };

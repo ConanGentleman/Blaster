@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -44,8 +45,14 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
 	Combat->SetIsReplicated(true);
+
 	//将该变量设置为true才能正常蹲下，因为Crouch函数会依据这个
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	///下面两行防止两个角色相交时，胶囊体碰撞导致相机视角改变
+	//解决胶囊与相机碰撞的问题
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//解决网格与相机的碰撞问题
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
@@ -106,7 +113,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 /// </summary>
 void ABlasterCharacter::PostInitializeComponents() {
 	Super::PostInitializeComponents();
-	if (Combat) 
+	if (Combat)
 	{
 		Combat->Character = this;
 	}
@@ -162,12 +169,15 @@ void ABlasterCharacter::LookUp(float Value)
 void ABlasterCharacter::EquipButtonPressed()
 {
 	if (Combat) {
-		if(HasAuthority()){
+		if (HasAuthority()) {
+			UE_LOG(LogTemp, Warning, TEXT("HasAuthority : %d"), OverlappingWeapon != nullptr);
 			Combat->EquipWeapon(OverlappingWeapon);
 		}
 		else {
+			UE_LOG(LogTemp, Warning, TEXT("NoHasAuthority : %d"), OverlappingWeapon != nullptr);
 			//没有服务器权限，说明是由客户端调用的武器装备，因此使用RPC来调用服务器执行
 			ServerEquipButtonPressed();
+
 		}
 	}
 }
@@ -217,7 +227,7 @@ void ABlasterCharacter::AimButtonReleased()
 	}
 }
 /// <summary>
-/// (用在服务器上的-自己的理解）
+/// 客户端和服务器都会调用
 /// 用于在武器类中设置复制变量OverlappingWeapon
 /// </summary>
 /// <param name="Weapon"></param>
@@ -226,7 +236,9 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
 	if (OverlappingWeapon) {
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
-	OverlappingWeapon = Weapon; //这里设置后会导致OnRep_OverleappingWeapon被调用！！！！
+	//这里设置后会导致OnRep_OverleappingWeapon被调用！！！！，我输出看了一下好像是复制完才调用的OnRep_OverlappingWeapon，但是OnRep_OverlappingWeapon的参数又是复制前的OverlappingWeapon。
+	OverlappingWeapon = Weapon;
+	//UE_LOG(LogTemp, Warning, TEXT("OverlappingWeapon : %d"), OverlappingWeapon != nullptr);
 	//判断是否是本地控制。主要是由于变量赋值的条件为COND_OwnerOnly，因此检测重叠只有在客户端上才会显示pickup，而服务器上无法显示，即OnRep_OverleappingWeapon没有被调用
 	if (IsLocallyControlled()) {//由于SetOverlappingWeapon是在服务器上才会被调用，因此只有当控制者是服务器时IsLocallyControlled会返回true
 		if (OverlappingWeapon) {
@@ -237,12 +249,13 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon) {
 }
 
 /// <summary>
-/// (用在客户端上的-自己的理解）
+/// （服务器通知客户端调用的函数）
 /// 当绑定的重叠武器 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
 /// </summary>
 /// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
-void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("OverlappingWeapon2 : %d"), OverlappingWeapon!=nullptr);
 	if (OverlappingWeapon) {
 		//设置提示文字显隐
 		OverlappingWeapon->ShowPickupWidget(true);
@@ -260,6 +273,8 @@ void ABlasterCharacter::OnRep_OverleappingWeapon(AWeapon* LastWeapon)
 /// <returns></returns>
 bool ABlasterCharacter::IsWeaponEquipped()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Combat : %d"), Combat!=nullptr);
+	UE_LOG(LogTemp, Warning, TEXT("Combat->EquippedWeapon : %d"), Combat->EquippedWeapon!=nullptr);
 	//战斗组件以及战斗组件上装备的武器不为空，则装备了武器
 	return (Combat && Combat->EquippedWeapon);
 }

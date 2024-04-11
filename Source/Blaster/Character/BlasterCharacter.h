@@ -54,7 +54,7 @@ private:
 	/// 不能对C++中私有的变量使用蓝图使用BlueprintReadOnly或者BlueprintReadWrite除非
 	/// 添加了meta = (AllowPrivateAccess = "true")，这意味着将此变量暴露给蓝图
 	/// </summary>
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
 
 	/// <summary>
@@ -66,7 +66,7 @@ private:
 	/// </summary>
 	//UPROPERTY(Replicated)
 	///ReplicatedUsing 表示在客户端的变量接收到服务器的改变时，在客户端上调用绑定好的回调函数(函数名一般以OnRep开头)
-	UPROPERTY(ReplicatedUsing = OnRep_OverleappingWeapon)
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
 	class AWeapon* OverlappingWeapon;
 
 	/// <summary>
@@ -74,7 +74,7 @@ private:
 	/// </summary>
 	/// <param name="LastWeapon">为变量被复制之前的最后一个值</param>
 	UFUNCTION()
-	void OnRep_OverleappingWeapon(AWeapon* LastWeapon);
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	/// <summary>
 	/// 战斗组件，用于处理角色所有雨战斗相关的功能（也是一个可以被复制的变量

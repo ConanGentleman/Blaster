@@ -13,6 +13,7 @@ void UBlasterAnimInstance::NativeInitializeAnimation() {
 }
 void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
+
 	Super::NativeUpdateAnimation(DeltaTime);
 
 	if (BlasterCharacter == nullptr) {
@@ -30,6 +31,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 	//是否装备了武器
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
+	
 	//是否蹲下
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
@@ -49,7 +51,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
 	//UE_LOG(LogTemp, Warning, TEXT("AimRotation Yaw %f:"), AimRotation.Yaw);
 	//用于旋转的插值函数。返回值为从“当前值”过渡到“期望的目标值”的一个中间值。参数：当前值；期望的目标值，时间变化值，插值速度
-	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 5.f);
+	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 6.f);
 	//YawOffset用于扫射移动的动画
 	YawOffset = DeltaRotation.Yaw;
 	

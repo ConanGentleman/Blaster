@@ -119,7 +119,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	}
 }
 /// <summary>
-/// (用在服务器上的-自己的理解）
+/// 客户端、服务器都会调用
 /// 设置武器状态
 /// </summary>
 /// <param name="State"></param>
@@ -135,7 +135,7 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 	}
 }
 /// <summary>
-/// (用在客户端上的-自己的理解）
+/// 服务器通知客户端调用
 /// 当绑定的武器状态 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
 /// 将武器状态设置为复制变量的原因是因为 发现在BlasterCharacter中使用RPC函数ServerEquipButtonPressed调用CombatComponent中的EquipWeapon时
 /// 没有执行ShowPickupWidget，估计是PickupWidget不是复制变量。因此才通过武器状态来设置文字提醒的显隐
