@@ -10,6 +10,7 @@
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -82,6 +83,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AimOffset(DeltaTime);
 	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
 	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
 	//if (OverlappingWeapon) {
@@ -225,6 +227,43 @@ void ABlasterCharacter::AimButtonReleased()
 	if (Combat) {
 		Combat->SetAiming(false);
 	}
+}
+/// <summary>
+/// 动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
+/// 视频规定：只会在角色静止（没有在跑或者跳跃）且装备武器时影响角色动画。（但个人不合理，后续有时间进行修改）
+/// </summary>
+/// <param name="DeltaTime"></param>
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+	//获取速度
+	FVector Velocity = GetVelocity();
+	//不关心z值
+	Velocity.Z = 0.f;
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+	//与静止前的旋转角的差
+	FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+	AO_Yaw = DeltaAimRotation.Yaw;
+
+	if (Speed == 0.f && !bIsInAir) {//速度为0，并且没有在跳跃
+		//FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		////与静止前的旋转角的差
+		//FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		//AO_Yaw = DeltaAimRotation.Yaw;
+		//bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir) { //在保持角色静止前
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //静止前的旋转情况
+		//AO_Yaw = 0.f; //一旦移动或者跳跃就设置为0  不设置为0 并且 上面bUseControllerRotationYaw不设置为false 应该是我喜欢的那种
+		//bUseControllerRotationYaw = true;
+
+	}
+
+	//当前的任何状态不影响上下朝向
+	AO_Pitch = GetBaseAimRotation().Pitch;
 }
 /// <summary>
 /// 客户端和服务器都会调用

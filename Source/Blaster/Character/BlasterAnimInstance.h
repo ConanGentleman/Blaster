@@ -79,4 +79,16 @@ private:
 	/// 用于混合动画EquippedRun更加平滑的过度
 	/// </summary>
 	FRotator DeltaRotation;
+
+	/// <summary>
+	/// 用于目标偏移动画（叠加动画），也就是控制角色枪口方向的参数。 并且只会在角色静止（没有在跑或者跳跃）且装备武器时才会产生动画效果（视频规定的，避免移动时又倾斜身子，又转动身子，但我觉得并不合理）
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float AO_Yaw;
+
+	/// <summary>
+	/// 用于目标偏移动画（叠加动画），也就是控制角色枪口方向的参数。并且只会在角色静止（没有在跑或者跳跃）且装备武器时才会产生动画效果（视频规定的，避免移动时又倾斜身子，又转动身子，但我觉得并不合理）
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float AO_Pitch;
 };

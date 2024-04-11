@@ -41,6 +41,8 @@ protected:
 	void AimButtonPressed();
 	//取消瞄准
 	void AimButtonReleased();
+	//动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
+	void AimOffset(float DeltaTime);
 
 private:
 	//弹簧臂组件 (向前声明
@@ -88,6 +90,20 @@ private:
 	//RPC函数名在CPP中的定义会在.h中的声明多加_Implementation，这是因为虚幻在幕后做了一些工作
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
+
+	/// <summary>
+	/// 方便赋值给BlasterAnimInstance中的同名变量
+	/// </summary>
+	float AO_Yaw;
+	/// <summary>
+	/// 方便赋值给BlasterAnimInstance中的同名变量
+	/// </summary>
+	float AO_Pitch;
+
+	/// <summary>
+	/// 角色静止前的旋转（每帧都会储存
+	/// </summary>
+	FRotator StartingAimRotation;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
@@ -105,5 +121,11 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	bool IsAiming();
+
+	/// <summary>
+	/// 返回给BlasterAnimInstance AO_Yaw变量的值
+	/// </summary>
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 
 };
