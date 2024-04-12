@@ -268,9 +268,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		//使用自带的映射函数
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("GetBaseAimRotation().Yaw: %f"), GetBaseAimRotation().Yaw);
-	UE_LOG(LogTemp, Warning, TEXT(" GetBaseAimRotation().Pitch;: %f"), GetBaseAimRotation().Pitch);
-	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
 	//if (!HasAuthority() && IsLocallyControlled()) { //该条件表示客户端在客户端计算机上本地控制的角色。也就是客户端上的角色
 	//	UE_LOG(LogTemp,Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
 	//}
