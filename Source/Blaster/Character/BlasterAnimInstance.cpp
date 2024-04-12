@@ -5,6 +5,7 @@
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Blaster/Weapon/Weapon.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation() {
 	Super::NativeInitializeAnimation();
@@ -31,7 +32,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 	//是否装备了武器
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
-	
+	//设置武器
+	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 	//是否蹲下
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
@@ -69,4 +71,17 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
 	AO_Pitch = BlasterCharacter->GetAO_Pitch();
+
+	if(bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh()){
+		//获取武器上的名为LeftHandSocket的在世界空间上的transform信息
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		//将一个位置和旋转从世界空间转换到骨骼空间。这个函数在需要将世界空间的变换应用到骨骼空间，并且是相对于右手的骨骼空间位置. 注：骨骼名不区分大小写.
+		//参数：表示要转换的骨骼的名称,转换前的位置，转换前的旋转（这里用0代替），转换后的位置（引用），转换后的旋转（引用）
+		FVector OutPosition;
+		FRotator OutRotation;
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(),FRotator::ZeroRotator, OutPosition, OutRotation);
+		//得到最终左手插槽的骨骼空间的位置
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }

@@ -43,6 +43,11 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bWeaponEquipped;
+	
+	/// <summary>
+	/// 所装备的武器，用于左手固定到武器的特定位置上
+	/// </summary>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+	class AWeapon* EquippedWeapon;
 
 	/// <summary>
 	/// 是否是蹲下状态
@@ -91,4 +96,10 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float AO_Pitch;
+
+	/// <summary>
+	/// 用于放置左手的位置 因为在各个动画中，没有去固定左手的位置，而是只固定了右手
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	FTransform LeftHandTransform;
 };

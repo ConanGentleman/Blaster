@@ -105,5 +105,5 @@ public:
 	void SetWeaponState(EWeaponState State);
 	//FORCEINLINE表示内联函数
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
-
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 };
