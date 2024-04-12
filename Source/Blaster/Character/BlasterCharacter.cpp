@@ -172,11 +172,9 @@ void ABlasterCharacter::EquipButtonPressed()
 {
 	if (Combat) {
 		if (HasAuthority()) {
-			UE_LOG(LogTemp, Warning, TEXT("HasAuthority : %d"), OverlappingWeapon != nullptr);
 			Combat->EquipWeapon(OverlappingWeapon);
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("NoHasAuthority : %d"), OverlappingWeapon != nullptr);
 			//没有服务器权限，说明是由客户端调用的武器装备，因此使用RPC来调用服务器执行
 			ServerEquipButtonPressed();
 
@@ -244,11 +242,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
 	if (Speed == 0.f && !bIsInAir) {//速度为0，并且没有在跳跃
+		///！！！！！经过多次确认发现GetBaseAimRotation().Yaw无法进行服务器到客户端的同步，但是GetBaseAimRotation().Pitch是同步的，估计视频后续会有解决方案？
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		
 		//与静止前的旋转角的差
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+		bUseControllerRotationYaw = false;//取消角色整个随鼠标旋转
 	}
 	if (Speed > 0.f || bIsInAir) { //在保持角色静止前
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //静止前的旋转情况
@@ -256,9 +256,27 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 
 	}
-
+	
 	//当前的任何状态不影响上下朝向
 	AO_Pitch = GetBaseAimRotation().Pitch;
+
+	//虚幻通过网络发送Yaw和Pitch时进行了压缩，转变为了无符号整型类型。因此，我们需要对超过90的情况进行处理，不然两端会产生不一致的动作
+	if (AO_Pitch > 90.f && !IsLocallyControlled()) {
+		//映射[270,360) 到 [-90,0) 的 pitch
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		//使用自带的映射函数
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("GetBaseAimRotation().Yaw: %f"), GetBaseAimRotation().Yaw);
+	UE_LOG(LogTemp, Warning, TEXT(" GetBaseAimRotation().Pitch;: %f"), GetBaseAimRotation().Pitch);
+	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
+	//if (!HasAuthority() && IsLocallyControlled()) { //该条件表示客户端在客户端计算机上本地控制的角色。也就是客户端上的角色
+	//	UE_LOG(LogTemp,Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
+	//}
+	//if (HasAuthority() && !IsLocallyControlled()) { //该条件表示服务器看到的从客户端计算机上控制的角色。也就是服务器上模拟的客户端的角色
+	//	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
+	//}
 }
 /// <summary>
 /// 客户端和服务器都会调用
@@ -307,8 +325,6 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 /// <returns></returns>
 bool ABlasterCharacter::IsWeaponEquipped()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Combat : %d"), Combat!=nullptr);
-	UE_LOG(LogTemp, Warning, TEXT("Combat->EquippedWeapon : %d"), Combat->EquippedWeapon!=nullptr);
 	//战斗组件以及战斗组件上装备的武器不为空，则装备了武器
 	return (Combat && Combat->EquippedWeapon);
 }
