@@ -54,6 +54,12 @@ ABlasterCharacter::ABlasterCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	//解决网格与相机的碰撞问题
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//初始化转向为不转
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+	//设置网络更新的频率（也就是每秒总共发送多少帧数据）
+	NetUpdateFrequency = 66.f; //默认是100；
+	//设置最小网络更新频率（用于决定在复制属性很少发生变化时的节流率
+	MinNetUpdateFrequency = 33.f;//默认是2
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
@@ -248,13 +254,18 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		//与静止前的旋转角的差
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;//取消角色整个随鼠标旋转
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning) {
+			InterpAO_Yaw = AO_Yaw; //人物静止时 记录角色转向角度
+		}
+
+		bUseControllerRotationYaw = true;
+		TurnInPlace(DeltaTime);
 	}
 	if (Speed > 0.f || bIsInAir) { //在保持角色静止前
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //静止前的旋转情况
 		AO_Yaw = 0.f; //一旦移动或者跳跃就设置为0
 		bUseControllerRotationYaw = true;
-
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 	
 	//当前的任何状态不影响上下朝向
@@ -274,6 +285,25 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	//if (HasAuthority() && !IsLocallyControlled()) { //该条件表示服务器看到的从客户端计算机上控制的角色。也就是服务器上模拟的客户端的角色
 	//	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
 	//}
+}
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("AO_Yaw : %f"), AO_Yaw);
+	if (AO_Yaw > 90.f) {
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f) {
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning) { //如果正在左转或者右转
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+		AO_Yaw = InterpAO_Yaw;
+		//如果转动角度不超过15度，则不属于转动状态，即不转动整个角色，而是只使用动画蓝图，播放上半身动画，也就是把转动状态设置为未转动
+		if (FMath::Abs(AO_Yaw) < 15.f) {
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
 }
 /// <summary>
 /// 客户端和服务器都会调用

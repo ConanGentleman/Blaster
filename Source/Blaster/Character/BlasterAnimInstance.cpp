@@ -35,8 +35,13 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//设置武器
 	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 	//是否蹲下
-	bIsCrouched = BlasterCharacter->bIsCrouched;
+	bIsCrouched = BlasterCharacter->bIsCrouched; 
 	bAiming = BlasterCharacter->IsAiming();
+	//角色转向
+	TurningInPlace = BlasterCharacter->GetTurningInPlace();
+
+
+
 	//设置拿着装备的混合动画值
 	//自带的获取基础目标旋转的函数
 	//AimRotation.Yaw为全局的，与控制的角色无关。类似于东南西北一样的提前固定好的角度，这个输出看一下就清楚了。

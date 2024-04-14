@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -95,6 +96,12 @@ private:
 	/// 方便赋值给BlasterAnimInstance中的同名变量
 	/// </summary>
 	float AO_Yaw;
+
+	/// <summary>
+	/// 用于记录角色插值转向角度
+	/// </summary>
+	float InterpAO_Yaw;
+
 	/// <summary>
 	/// 方便赋值给BlasterAnimInstance中的同名变量
 	/// </summary>
@@ -104,6 +111,17 @@ private:
 	/// 角色静止前的旋转（每帧都会储存
 	/// </summary>
 	FRotator StartingAimRotation;
+
+	/// <summary>
+	/// 角色转向状态
+	/// </summary>
+	ETurningInPlace TurningInPlace;
+
+	/// <summary>
+	/// 实时更新角色转向状态
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void TurnInPlace(float DeltaTime);
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
@@ -128,4 +146,5 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };
