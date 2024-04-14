@@ -44,7 +44,7 @@ protected:
 	void AimButtonReleased();
 	//动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
 	void AimOffset(float DeltaTime);
-
+	virtual void Jump() override;
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)

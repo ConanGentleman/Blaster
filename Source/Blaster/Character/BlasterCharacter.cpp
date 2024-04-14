@@ -54,6 +54,8 @@ ABlasterCharacter::ABlasterCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	//解决网格与相机的碰撞问题
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//设置角色的旋转速度
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
 	//初始化转向为不转
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	//设置网络更新的频率（也就是每秒总共发送多少帧数据）
@@ -103,7 +105,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	//绑定自带的跳跃函数
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABlasterCharacter::Jump);
 
 	//对应的输入名称，对象，函数地址
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABlasterCharacter::MoveForward);
@@ -285,6 +287,15 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	//if (HasAuthority() && !IsLocallyControlled()) { //该条件表示服务器看到的从客户端计算机上控制的角色。也就是服务器上模拟的客户端的角色
 	//	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
 	//}
+}
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched) { //如果在蹲下的时候跳跃
+		UnCrouch();
+	}
+	else {
+		Super::Jump();
+	}
 }
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
