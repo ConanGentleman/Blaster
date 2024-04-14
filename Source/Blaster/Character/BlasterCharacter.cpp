@@ -299,7 +299,8 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
 		AO_Yaw = InterpAO_Yaw;
 		//如果转动角度不超过15度，则不属于转动状态，即不转动整个角色，而是只使用动画蓝图，播放上半身动画，也就是把转动状态设置为未转动
-		if (FMath::Abs(AO_Yaw) < 15.f) {
+		if (FMath::Abs(AO_Yaw) < 15.f) 
+		{
 			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
