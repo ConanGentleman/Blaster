@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Projectile.h"
@@ -9,17 +9,17 @@ AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//³õÊ¼»¯Åö×²ºĞ
+	//åˆå§‹åŒ–ç¢°æ’ç›’
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>("CollisionBox");
-	//ÉèÖÃ¸ù×é¼ş
+	//è®¾ç½®æ ¹ç»„ä»¶
 	SetRootComponent(CollisionBox);
-	//¸ü¸Ä´Ë¶ÔÏóÒÆ¶¯Ê±Ê¹ÓÃµÄÅö×²Í¨µÀ¡£ÓÉÓÚ×Óµ¯ÄÜ¹»ÔÚ¿ÕÖĞ·ÉĞĞ£¬ËùÒÔÉèÖÃÎªECC_WorldDynamic
+	//æ›´æ”¹æ­¤å¯¹è±¡ç§»åŠ¨æ—¶ä½¿ç”¨çš„ç¢°æ’é€šé“ã€‚ç”±äºå­å¼¹èƒ½å¤Ÿåœ¨ç©ºä¸­é£è¡Œï¼Œæ‰€ä»¥è®¾ç½®ä¸ºECC_WorldDynamic
 	CollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	//ÆôÓÃÅö×²
+	//å¯ç”¨ç¢°æ’
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	//ÏÈºöÂÔËùÓĞÍ¨µÀµÄÅö×²£¬ÔÙµ¥¶ÀÉèÖÃÒªÅö×²µÄÍ¨µÀ
+	//å…ˆå¿½ç•¥æ‰€æœ‰é€šé“çš„ç¢°æ’ï¼Œå†å•ç‹¬è®¾ç½®è¦ç¢°æ’çš„é€šé“
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	//ÉèÖÃÈÎºÎ¿É¼ûĞÔºÍÊÀ½ç¾²Ö¹ÎïÌå£¨ÈçÇ½¡¢µØ°å£©Îª¿ÉÅö×²Í¨µÀ
+	//è®¾ç½®ä»»ä½•å¯è§æ€§å’Œä¸–ç•Œé™æ­¢ç‰©ä½“ï¼ˆå¦‚å¢™ã€åœ°æ¿ï¼‰ä¸ºå¯ç¢°æ’é€šé“
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 }

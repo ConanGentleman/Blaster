@@ -48,6 +48,11 @@ protected:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+	/// <summary>
+	/// 用于武器开火
+	/// </summary>
+	/// <param name="bPressed"></param>
+	void FireButtonPressed(bool bPressed);
 private:
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 
@@ -81,4 +86,9 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+	/// <summary>
+	/// 武器是否开火
+	/// </summary>
+	bool bFireButtonPressed;
 };

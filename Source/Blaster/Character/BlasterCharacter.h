@@ -26,6 +26,10 @@ public:
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	/// <summary>
+	/// 播放开火蒙太奇动画
+	/// </summary>
+	void PlayFireMontage(bool bAiming);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +49,8 @@ protected:
 	//动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
 	void AimOffset(float DeltaTime);
 	virtual void Jump() override;
+	void FireButtonPressed();
+	void FireButtonReleased();
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -122,6 +128,12 @@ private:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	void TurnInPlace(float DeltaTime);
+
+	/// <summary>
+	/// 开火动画的蒙太奇动画
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* FireWeaponMontage;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

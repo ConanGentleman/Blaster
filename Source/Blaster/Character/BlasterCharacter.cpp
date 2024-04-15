@@ -11,6 +11,7 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BlasterAnimInstance.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -117,6 +118,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 }
 /// <summary>
 /// 在创建对象并且其所有组件都已注册和初始化时调用
@@ -128,6 +131,26 @@ void ABlasterCharacter::PostInitializeComponents() {
 		Combat->Character = this;
 	}
 }
+
+/// <summary>
+/// 播放开火蒙太奇动画
+/// </summary>
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	///获取动画实例
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireWeaponMontage) {
+		//播放蒙太奇动画
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		//用来选择播放蒙太奇动画里面瞄准的开火还是不瞄准的开火动画
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		//转换到对应蒙太奇动画的蒙太奇片段上
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f) {
@@ -295,6 +318,18 @@ void ABlasterCharacter::Jump()
 	}
 	else {
 		Super::Jump();
+	}
+}
+void ABlasterCharacter::FireButtonPressed() 
+{
+	if (Combat) {
+		Combat->FireButtonPressed(true);
+	}
+}
+void ABlasterCharacter::FireButtonReleased()
+{
+	if (Combat) {
+		Combat->FireButtonPressed(false);
 	}
 }
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
