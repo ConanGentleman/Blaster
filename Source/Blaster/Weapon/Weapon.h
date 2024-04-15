@@ -48,6 +48,8 @@ public:
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickupWidget(bool bShowWidget);
+	//开火
+	void Fire();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -100,6 +102,12 @@ private:
 	/// </summary>
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
+
+	/// <summary>
+	/// 武器开火火焰动画（特效）
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	class UAnimationAsset* FireAnimation;
 public:	
 	///设置武器状态 
 	void SetWeaponState(EWeaponState State);

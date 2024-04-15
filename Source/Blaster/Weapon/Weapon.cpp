@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -155,6 +157,16 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if (PickupWidget) {
 		PickupWidget->SetVisibility(bShowWidget);
+	}
+}
+/// <summary>
+/// 武器开火
+/// </summary>
+void AWeapon::Fire()
+{
+	if (FireAnimation) {
+		//使用武器网格播放动画.参数：所播放的动画（UAnimationAsset类），是否循环播放
+		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
 }
 
