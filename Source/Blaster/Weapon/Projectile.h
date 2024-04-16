@@ -25,6 +25,11 @@ private:
 	//子弹碰撞体
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
+	/// <summary>
+	/// 子弹运动组件(用来做抛物线或者子弹的组件)
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
 public:	
 	
 };

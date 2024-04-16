@@ -111,4 +111,9 @@ private:
 	/// 武器是否开火
 	/// </summary>
 	bool bFireButtonPressed;
+
+	/// <summary>
+	/// 射线检测命中的目标的位置
+	/// </summary>
+	FVector HitTarget;
 };

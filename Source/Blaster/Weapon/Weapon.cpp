@@ -162,7 +162,8 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 /// <summary>
 /// 武器开火
 /// </summary>
-void AWeapon::Fire()
+/// <param name="HitTarget">命中目标</param>
+void AWeapon::Fire(const FVector& HitTarget)
 {
 	if (FireAnimation) {
 		//使用武器网格播放动画.参数：所播放的动画（UAnimationAsset类），是否循环播放

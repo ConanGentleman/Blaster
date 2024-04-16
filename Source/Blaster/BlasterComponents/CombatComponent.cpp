@@ -134,9 +134,13 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
 		{
 			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
+			HitTarget = End;
 		}
 		else //碰撞检测到了
 		{
+			//设置射线检测命中的目标位置
+			HitTarget = TraceHitResult.ImpactPoint;
+
 			DrawDebugSphere(//用于调试的 射线绘制查看
 				GetWorld(),
 				TraceHitResult.ImpactPoint,
@@ -163,7 +167,7 @@ void UCombatComponent::MulticastFire_Implementation()
 	if (EquippedWeapon == nullptr) return;
 	if (Character) {
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire();
+		EquippedWeapon->Fire(HitTarget);
 	}
 }
 

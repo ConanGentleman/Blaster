@@ -48,8 +48,11 @@ public:
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickupWidget(bool bShowWidget);
-	//开火
-	void Fire();
+	/// <summary>
+	/// 开火
+	/// </summary>
+	/// <param name="HitTarget">已通过射线检测（或其他方法）得到的命中目标的位置</param>
+	virtual void Fire(const FVector& HitTarget);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
