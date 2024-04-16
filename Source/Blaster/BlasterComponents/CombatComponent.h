@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
+//射线检测的距离长度
+#define TRACE_LENGTH 80000.f
 
 ///战斗组件
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -53,6 +55,24 @@ protected:
 	/// </summary>
 	/// <param name="bPressed"></param>
 	void FireButtonPressed(bool bPressed);
+
+	/// <summary>
+	/// 开火RPC。用于客户端调用，服务器执行的武器开火函数。在定义时需在函数名后补充_Implementation
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
+
+	/// <summary>
+	/// 开火 多播RPC。如果在服务器上调用多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire();
+
+	/// <summary>
+	/// 从屏幕中心发射射线，进行用于射击的射线检测
+	/// </summary>
+	/// <param name="TraceHitResult">命中信息</param>
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 private:
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 

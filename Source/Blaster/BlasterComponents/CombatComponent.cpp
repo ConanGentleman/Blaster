@@ -8,6 +8,8 @@
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -15,12 +17,19 @@ UCombatComponent::UCombatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	//设为false则表示每帧不会执行TickComponent
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	//bReplicates = true;//由于改变量为私有 无法直接在代码更改，原视频中在角色蓝图中没有说明要勾选CombatComponent组件的“组件复制”,
 	//不然服务器无法将复制变量复制到各个客户端
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
+}
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
 }
 
 // Called when the game starts
@@ -72,26 +81,101 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->bUseControllerRotationYaw = true;
 	}
 }
+/// <summary>
+/// 按下开火键，调用开火
+/// </summary>
+/// <param name="bPressed"></param>
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 
+	if (bFireButtonPressed) {
+		ServerFire();
+	}
+	
+}
+/// <summary>
+/// 从屏幕中心发射射线，进行用于射击的射线检测
+/// </summary>
+/// <param name="TraceHitResult">命中信息</param>
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	//为了从屏幕中心进行追踪，需要视口大小
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)//检查游戏视口是否有效
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	//准星中心屏幕坐标位置 
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	//将准星的屏幕坐标转换为世界坐标位置。 返回值：转换是否成功
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),//当前控制的玩家。参数：世界；第几个控制器
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+	//进行射线检测
+	if (bScreenToWorld)
+	{
+		//射线起始点 
+		FVector Start = CrosshairWorldPosition;
+		//射线终点
+		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+		//调用射线检测。参数：检测结果，开始位置，结束位置，碰撞通道
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
+		{
+			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
+		}
+		else //碰撞检测到了
+		{
+			DrawDebugSphere(//用于调试的 射线绘制查看
+				GetWorld(),
+				TraceHitResult.ImpactPoint,
+				12.f, //碰撞点的球体半径
+				12, //碰撞点的球体的段数
+				FColor::Red //颜色
+			);
+		}
+	}
+}
+/// <summary>
+/// 开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
+/// </summary>
+void UCombatComponent::ServerFire_Implementation()
+{
+	MulticastFire();
+}
+/// <summary>
+/// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
+/// 多播RPC被执行时，会在服务器和所有客户端上执行函数
+/// </summary>
+void UCombatComponent::MulticastFire_Implementation()
+{
 	if (EquippedWeapon == nullptr) return;
-	if (Character && bFireButtonPressed) {
+	if (Character) {
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire();
 	}
 }
+
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+
+
+	FHitResult HitResult;
+	//准星绘制及射线检测
+	TraceUnderCrosshairs(HitResult);
 }
 /// <summary>
 /// 装备(捡起)武器
