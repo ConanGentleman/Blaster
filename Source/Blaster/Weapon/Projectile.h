@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 
 
 /// <summary>
-/// ×Óµ¯Àà
+/// å­å¼¹ç±»
 /// </summary>
 UCLASS()
 class BLASTER_API AProjectile : public AActor
@@ -22,14 +22,25 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	//×Óµ¯Åö×²Ìå
+	//å­å¼¹ç¢°æ’ä½“
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
 	/// <summary>
-	/// ×Óµ¯ÔË¶¯×é¼ş(ÓÃÀ´×öÅ×ÎïÏß»òÕß×Óµ¯µÄ×é¼ş)
+	/// å­å¼¹è¿åŠ¨ç»„ä»¶(ç”¨æ¥åšæŠ›ç‰©çº¿æˆ–è€…å­å¼¹çš„ç»„ä»¶)
 	/// </summary>
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
+
+	/// <summary>
+	/// å­å¼¹è½¨è¿¹ç²’å­ç‰¹æ•ˆ
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* Tracer;
+
+	/// <summary>
+	/// ç”¨ä»¥å­˜å‚¨åŸºäºTracerç”Ÿæˆåçš„ç²’å­é™„åŠ å™¨
+	/// </summary>
+	class UParticleSystemComponent* TracerComponent;
 public:	
 	
 };

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ProjectileWeapon.h"
@@ -6,40 +6,44 @@
 #include "Projectile.h"
 
 /// <summary>
-/// ÎäÆ÷¿ª»ğ
+/// æ­¦å™¨å¼€ç«ç”Ÿæˆå­å¼¹
 /// </summary>
-/// <param name="HitTarget">ÒÑÍ¨¹ıÉäÏß¼ì²â£¨»òÆäËû·½·¨£©µÃµ½µÄÃüÖĞÄ¿±êµÄÎ»ÖÃ</param>
+/// <param name="HitTarget">å·²é€šè¿‡å°„çº¿æ£€æµ‹ï¼ˆæˆ–å…¶ä»–æ–¹æ³•ï¼‰å¾—åˆ°çš„å‘½ä¸­ç›®æ ‡çš„ä½ç½®</param>
 void AProjectileWeapon::Fire(const FVector& HitTarget) {
 	Super::Fire(HitTarget);
+
+	if (!HasAuthority()) return;//ä¿è¯ä»…å…è®¸ç”±æœåŠ¡å™¨æ¥ç”Ÿæˆå­å¼¹
+
+	//å¯ä»¥ç†è§£ä¸ºä½¿ç”¨å­å¼¹çš„æ‰€æœ‰è€…çš„æ‰€æœ‰è€…
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-	//»ñÈ¡ÎäÆ÷Íø¸ñÉÏÃûÎªMuzzleFlashµÄ²å²Û£¨Ò²¾ÍÊÇÇ¹¿Ú´¦£©
+	//è·å–æ­¦å™¨ç½‘æ ¼ä¸Šåä¸ºMuzzleFlashçš„æ’æ§½ï¼ˆä¹Ÿå°±æ˜¯æªå£å¤„ï¼‰
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
 	if (MuzzleFlashSocket)
 	{
-		//»ñÈ¡Ç¹¿Ú²å²ÛµÄ±ä»»ĞÅÏ¢¡£²ÎÊı£ºËùÊôµÄÍø¸ñ
+		//è·å–æªå£æ’æ§½çš„å˜æ¢ä¿¡æ¯ã€‚å‚æ•°ï¼šæ‰€å±çš„ç½‘æ ¼
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		// From muzzle flash socket to hit location from TraceUnderCrosshairs
-		//´ÓÇ¹¿Ú²å²Ûµ½×¼ĞÇÉäÏß¼ì²âµÄÃüÖĞÎ»ÖÃ
+		//ä»æªå£æ’æ§½åˆ°å‡†æ˜Ÿå°„çº¿æ£€æµ‹çš„å‘½ä¸­ä½ç½®
 		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-		//×Óµ¯µÄ·½Ïò
+		//å­å¼¹çš„æ–¹å‘
 		FRotator TargetRotation = ToTarget.Rotation();
 		if (ProjectileClass && InstigatorPawn)
 		{
-			//SpawnActor´«²Î£¬OwnerºÍInstigatorº¬Òå¡£ ¾Ù¸öÀı×Ó£ºÍæ¼ÒÔÚÌ¹¿ËÖĞ¿ªÅÚ£¬ÃüÖĞÁËµĞÈË¡£ÕâÀïÅÚµ¯µÄOwnerÊÇÌ¹¿Ë£¬InstigatorÊÇÍæ¼Ò¡£
-			//Éú³ÉActorµÄ²ÎÊı
+			//SpawnActorä¼ å‚ï¼ŒOwnerå’ŒInstigatorå«ä¹‰ã€‚ ä¸¾ä¸ªä¾‹å­ï¼šç©å®¶åœ¨å¦å…‹ä¸­å¼€ç‚®ï¼Œå‘½ä¸­äº†æ•Œäººã€‚è¿™é‡Œç‚®å¼¹çš„Owneræ˜¯å¦å…‹ï¼ŒInstigatoræ˜¯ç©å®¶ã€‚
+			//ç”ŸæˆActorçš„å‚æ•°
 			FActorSpawnParameters SpawnParams;
-			//ÉèÖÃÉú³ÉµÄ×Óµ¯ActorµÄËùÓĞÕß Ò²¾ÍÊÇÎäÆ÷
+			//è®¾ç½®ç”Ÿæˆçš„å­å¼¹Actorçš„æ‰€æœ‰è€… ä¹Ÿå°±æ˜¯æ­¦å™¨
 			SpawnParams.Owner = GetOwner();
-			//¿ÉÒÔÀí½âÎªÊ¹ÓÃ×Óµ¯µÄËùÓĞÕßµÄËùÓĞÕß
+			//å¯ä»¥ç†è§£ä¸ºä½¿ç”¨å­å¼¹çš„æ‰€æœ‰è€…çš„æ‰€æœ‰è€…
 			SpawnParams.Instigator = InstigatorPawn;
 			UWorld* World = GetWorld();
 			if (World)
 			{
-				//»ùÓÚ×Óµ¯Àà¶¯Ì¬´´½¨Actor
+				//åŸºäºå­å¼¹ç±»åŠ¨æ€åˆ›å»ºActor
 				World->SpawnActor<AProjectile>(
 					ProjectileClass,
-					SocketTransform.GetLocation(), //×Óµ¯Éú³ÉµÄÎ»ÖÃ
-					TargetRotation, //×Óµ¯Éú³ÉµÄ·½Ïò
+					SocketTransform.GetLocation(), //å­å¼¹ç”Ÿæˆçš„ä½ç½®
+					TargetRotation, //å­å¼¹ç”Ÿæˆçš„æ–¹å‘
 					SpawnParams
 					);
 			}

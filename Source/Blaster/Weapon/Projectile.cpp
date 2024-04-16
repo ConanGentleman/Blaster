@@ -4,12 +4,17 @@
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	//该Actor组件被网络复制（让子弹在客户端上生成但仍由服务器控制
+	bReplicates = true;
 	//初始化碰撞盒
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>("CollisionBox");
 	//设置根组件
@@ -33,6 +38,19 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	/// 子弹生成时，生成特效并存储。
+	if (Tracer)
+	{
+		//创建粒子附加器（附加例子特效）
+		TracerComponent = UGameplayStatics::SpawnEmitterAttached(
+			Tracer,  //粒子系统
+			CollisionBox, //附加对象
+			FName(),
+			GetActorLocation(), //位置
+			GetActorRotation(), //旋转
+			EAttachLocation::KeepWorldPosition //附加方式  KeepWorldPosition：将在CollisionBox的位置生成并跟随CollisionBox
+		);
+	}
 }
 void AProjectile::Tick(float DeltaTime)
 {

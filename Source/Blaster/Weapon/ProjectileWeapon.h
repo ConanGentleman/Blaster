@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,9 +18,9 @@ public:
 	virtual void Fire(const FVector& HitTarget) override;
 
 private:
-	//TSubclassOf ÊÇÌá¹© UClass ÀàĞÍ°²È«ĞÔµÄÄ£°åÀà¡£ÀıÈçÄúÔÚ´´½¨Ò»¸öÍ¶ÉäÎïÀà£¬ÔÊĞíÉè¼ÆÕßÖ¸¶¨ÉËº¦ÀàĞÍ¡£
-	//Äú¿ÉÖ»´´½¨Ò»¸ö UClass ÀàĞÍµÄ UPROPERTY£¬ÈÃÉè¼ÆÕßÖ¸¶¨ÅÉÉú×Ô UDamageType µÄÀà£»»òÕßÄú¿ÉÊ¹ÓÃ TSubclassOf Ä£°åÇ¿ÖÆÒªÇó´ËÑ¡Ôñ
-	//Äã¿ÉÒÔ½« TSubclassOf ÓÃÓÚ´æ´¢¶ÔÄ³¸öÀà£¨»òÆä×ÓÀà£©µÄÒıÓÃ¡£
+	//TSubclassOf æ˜¯æä¾› UClass ç±»å‹å®‰å…¨æ€§çš„æ¨¡æ¿ç±»ã€‚ä¾‹å¦‚æ‚¨åœ¨åˆ›å»ºä¸€ä¸ªæŠ•å°„ç‰©ç±»ï¼Œå…è®¸è®¾è®¡è€…æŒ‡å®šä¼¤å®³ç±»å‹ã€‚
+	//æ‚¨å¯åªåˆ›å»ºä¸€ä¸ª UClass ç±»å‹çš„ UPROPERTYï¼Œè®©è®¾è®¡è€…æŒ‡å®šæ´¾ç”Ÿè‡ª UDamageType çš„ç±»ï¼›æˆ–è€…æ‚¨å¯ä½¿ç”¨ TSubclassOf æ¨¡æ¿å¼ºåˆ¶è¦æ±‚æ­¤é€‰æ‹©
+	//ä½ å¯ä»¥å°† TSubclassOf ç”¨äºå­˜å‚¨å¯¹æŸä¸ªç±»ï¼ˆæˆ–å…¶å­ç±»ï¼‰çš„å¼•ç”¨ã€‚
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> ProjectileClass;
 };
