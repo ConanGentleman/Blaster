@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -51,10 +52,47 @@ void AProjectile::BeginPlay()
 			EAttachLocation::KeepWorldPosition //附加方式  KeepWorldPosition：将在CollisionBox的位置生成并跟随CollisionBox
 		);
 	}
+	//仅允许在服务器上进行子弹的碰撞检测
+	if (HasAuthority())
+	{
+		//注册碰撞检测事件
+		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
+}
+/// <summary>
+/// 子弹碰撞的函数回调
+/// </summary>
+/// <param name="HitComp">进行碰撞的组件（这里就是CollisionBox）</param>
+/// <param name="OtherActor"></param>
+/// <param name="OtherComp">被击中的另一个组件</param>
+/// <param name="NormalImpulse">垂直于被击中表面的方向上生成的</param>
+/// <param name="Hit">击中结果</param>
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//撞击后销毁子弹
+	Destroy();
 }
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
+/// <summary>
+/// 子弹是一个复制的actor，在服务器上销毁一个复制的actor的行为会传播到所有客户端
+/// 销毁Actor（子弹销毁) ，也会在网络上通知本 Actor被摧毁，通知服务器在服务端和各客户端之间删除当前 Actor。即能够同步调用所有的客户端上的摧毁
+/// </summary>
+void AProjectile::Destroyed()
+{
+	Super::Destroyed();
 
+	if (ImpactParticles)
+	{
+		//播放特效
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	}
+	if (ImpactSound)
+	{
+		//播放音效
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+}

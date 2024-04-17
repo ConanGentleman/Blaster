@@ -18,9 +18,25 @@ class BLASTER_API AProjectile : public AActor
 public:	
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
+	/// <summary>
+	/// 子弹是一个复制的actor，在服务器上销毁一个复制的actor的行为会传播到所有客户端
+	/// 销毁Actor（这里即子弹销毁）。也会在网络上通知本 Actor被摧毁，通知服务器在服务端和各客户端之间删除当前 Actor。即能够同步调用所有的客户端上的摧毁
+	/// </summary>
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
 
+	
+	UFUNCTION()
+	/// <summary>
+	/// 子弹碰撞函数
+	/// </summary>
+	/// <param name="HitComp">进行碰撞的组件（这里就是CollisionBox）</param>
+	/// <param name="OtherActor">触发事件的主体</param>
+	/// <param name="OtherComp">被击中的另一个组件</param>
+	/// <param name="NormalImpulse">垂直于被击中表面的方向上生成的<矢量（估计就是法线吧）/param>
+	/// <param name="Hit">击中结果</param>
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 private:
 	//子弹碰撞体
 	UPROPERTY(EditAnywhere)
@@ -41,6 +57,18 @@ private:
 	/// 用以存储基于Tracer生成后的粒子附加器
 	/// </summary>
 	class UParticleSystemComponent* TracerComponent;
+
+	/// <summary>
+	/// 撞击特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles;
+
+	/// <summary>
+	/// 撞击音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
 public:	
 	
 };
