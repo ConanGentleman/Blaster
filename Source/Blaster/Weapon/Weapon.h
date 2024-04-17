@@ -111,6 +111,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	class UAnimationAsset* FireAnimation;
+
+	/// <summary>
+	/// 武器开火后用于生成的掉落的弹壳
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACasing> CasingClass;
 public:	
 	///设置武器状态 
 	void SetWeaponState(EWeaponState State);
