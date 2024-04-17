@@ -82,7 +82,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	}
 }
 /// <summary>
-/// 按下开火键，调用开火
+/// 按下开火键，调用开火，并且进行射线检测
 /// </summary>
 /// <param name="bPressed"></param>
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -90,7 +90,11 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	bFireButtonPressed = bPressed;
 
 	if (bFireButtonPressed) {
-		ServerFire();
+		FHitResult HitResult;
+		//准星绘制及射线检测
+		TraceUnderCrosshairs(HitResult);
+
+		ServerFire(HitResult.ImpactPoint);
 	}
 	
 }
@@ -134,40 +138,28 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
 		{
 			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
-			HitTarget = End;
-		}
-		else //碰撞检测到了
-		{
-			//设置射线检测命中的目标位置
-			HitTarget = TraceHitResult.ImpactPoint;
-
-			DrawDebugSphere(//用于调试的 射线绘制查看
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.f, //碰撞点的球体半径
-				12, //碰撞点的球体的段数
-				FColor::Red //颜色
-			);
 		}
 	}
 }
 /// <summary>
 /// 开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
 /// </summary>
-void UCombatComponent::ServerFire_Implementation()
+/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	MulticastFire();
+	MulticastFire(TraceHitTarget);
 }
 /// <summary>
 /// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
 /// 多播RPC被执行时，会在服务器和所有客户端上执行函数
 /// </summary>
-void UCombatComponent::MulticastFire_Implementation()
+/// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
 	if (Character) {
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(HitTarget);
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
 
@@ -175,11 +167,6 @@ void UCombatComponent::MulticastFire_Implementation()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-
-	FHitResult HitResult;
-	//准星绘制及射线检测
-	TraceUnderCrosshairs(HitResult);
 }
 /// <summary>
 /// 装备(捡起)武器
