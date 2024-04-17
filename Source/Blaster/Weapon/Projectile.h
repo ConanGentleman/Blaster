@@ -26,16 +26,16 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	
-	UFUNCTION()
 	/// <summary>
 	/// 子弹碰撞函数
 	/// </summary>
+	/// https://dev.epicgames.com/documentation/zh-cn/unreal-engine/events-in-unreal-engine
 	/// <param name="HitComp">进行碰撞的组件（这里就是CollisionBox）</param>
-	/// <param name="OtherActor">触发事件的主体</param>
+	/// <param name="OtherActor">参与碰撞的其他 Actor</param>
 	/// <param name="OtherComp">被击中的另一个组件</param>
-	/// <param name="NormalImpulse">垂直于被击中表面的方向上生成的<矢量（估计就是法线吧）/param>
+	/// <param name="NormalImpulse">Actor 碰撞的力/param>
 	/// <param name="Hit">击中结果</param>
+	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 private:
 	//子弹碰撞体
