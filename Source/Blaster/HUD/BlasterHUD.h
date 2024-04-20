@@ -1,0 +1,64 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/HUD.h"
+#include "BlasterHUD.generated.h"
+
+USTRUCT(BlueprintType)
+/// <summary>
+/// 准星贴图结构体
+/// </summary>
+struct FHUDPackage
+{
+	GENERATED_BODY()
+public:
+	class UTexture2D* CrosshairsCenter;
+	UTexture2D* CrosshairsLeft;
+	UTexture2D* CrosshairsRight;
+	UTexture2D* CrosshairsTop;
+	UTexture2D* CrosshairsBottom;
+	///准星扩散
+	float CrosshairSpread;
+};
+
+/**
+ * 
+ */
+UCLASS()
+class BLASTER_API ABlasterHUD : public AHUD
+{
+	GENERATED_BODY()
+public:
+	/// <summary>
+	/// 在这里绘制准星
+	/// </summary>
+	virtual void DrawHUD() override;
+private:
+	/// <summary>
+	/// 准星贴图
+	/// </summary>
+	FHUDPackage HUDPackage;
+
+	/// <summary>
+	/// 绘制准星的函数
+	/// </summary>
+	/// <param name="Texture"></param>
+	/// <param name="ViewportCenter"></param>
+	/// <param name="Spread"></param>
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+
+	/// <summary>
+	/// 准星扩散最大值（实际上是用于调整准星扩散的
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float CrosshairSpreadMax = 16.f;
+public:
+	/// <summary>
+	/// 设置准星贴图
+	/// </summary>
+	/// <param name="Package"></param>
+	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+};
+

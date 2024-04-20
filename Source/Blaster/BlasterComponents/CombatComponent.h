@@ -75,11 +75,25 @@ protected:
 	/// </summary>
 	/// <param name="TraceHitResult">命中信息</param>
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
+	/// <summary>
+	/// 设置准星的贴图并用于BlasterHUD绘制
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void SetHUDCrosshairs(float DeltaTime);
 private:
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 
 	/// </summary>
 	class ABlasterCharacter* Character;
+	/// <summary>
+	/// 当前对应的玩家控制器。用于获取HUD
+	/// </summary>
+	class ABlasterPlayerController* Controller;
+	/// <summary>
+	/// 当前对应的HUD。从ABlasterPlayerController中获取
+	/// </summary>
+	class ABlasterHUD* HUD;
 	/// <summary>
 	/// 当前装备的武器(设置为复制变量是因为，在此之前装备的武器在所有客户端上都将为空，
 	/// 因为我们只在服务器上设置它，即BlasterCharacter中的EquipButtonPressed调用EquipWeapon
@@ -113,4 +127,17 @@ private:
 	/// 武器是否开火
 	/// </summary>
 	bool bFireButtonPressed;
+
+
+	/**
+	* 用于控制准星扩散位置的变量
+	*/
+	/// <summary>
+	/// 速度影响因素（大小）
+	/// </summary>
+	float CrosshairVelocityFactor;
+	/// <summary>
+	/// 在空中（跳跃）的影响因素（大小）
+	/// </summary>
+	float CrosshairInAirFactor; 
 };

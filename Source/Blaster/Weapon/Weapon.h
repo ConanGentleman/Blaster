@@ -53,6 +53,20 @@ public:
 	/// </summary>
 	/// <param name="HitTarget">已通过射线检测（或其他方法）得到的命中目标的位置</param>
 	virtual void Fire(const FVector& HitTarget);
+
+	/**
+	* 武器十字准星的贴图
+	*/
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	class UTexture2D* CrosshairsCenter;//准星中心
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsLeft;//准星左
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsRight;//准星右
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsTop;//准星上
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsBottom;//准星下
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -117,6 +131,7 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
+
 public:	
 	///设置武器状态 
 	void SetWeaponState(EWeaponState State);

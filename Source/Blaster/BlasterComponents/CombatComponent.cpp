@@ -10,6 +10,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/HUD/BlasterHUD.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -41,6 +43,82 @@ void UCombatComponent::BeginPlay()
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	}
 }
+
+// Called every frame
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//设置准星的贴图并用于BlasterHUD绘制
+	SetHUDCrosshairs(DeltaTime);
+}
+
+/// <summary>
+/// 设置准星的贴图并用于BlasterHUD绘制
+/// </summary>
+/// <param name="DeltaTime"></param>
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (Character == nullptr || Character->Controller == nullptr) return;
+	//获取玩家控制器
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		//获取控制器对应的HUD
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+		if (HUD)
+		{
+			//设置准星贴图结构体变量
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon)
+			{
+				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
+				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
+				HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
+				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
+			}
+			else
+			{
+				HUDPackage.CrosshairsCenter = nullptr;
+				HUDPackage.CrosshairsLeft = nullptr;
+				HUDPackage.CrosshairsRight = nullptr;
+				HUDPackage.CrosshairsBottom = nullptr;
+				HUDPackage.CrosshairsTop = nullptr;
+			}
+			///计算准星分布
+
+			//角色速度范围
+			FVector2D WalkSpeedRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
+			//速度映射范围
+			FVector2D VelocityMultiplierRange(0.f, 1.f);
+			//获取当前角色速度
+			FVector Velocity = Character->GetVelocity();
+			//不关心z轴方向速度
+			Velocity.Z = 0.f;
+
+			//将速度映射为0到1之间的数。
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+			
+			if (Character->GetCharacterMovement()->IsFalling())//判断是否在空中。
+			{
+				//FInterpTo参数：当前值，目标值，每帧时间，插值速度
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
+			}
+			else//没在空中则需要还原到0
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+			}
+			//将速度和空中两个影响的扩散进行叠加得出最终的影响结果
+			HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+
+
+			//设置准星贴图
+			HUD->SetHUDPackage(HUDPackage);
+		}
+	}
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
@@ -163,11 +241,6 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	}
 }
 
-// Called every frame
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
 /// <summary>
 /// 装备(捡起)武器
 /// </summary>
