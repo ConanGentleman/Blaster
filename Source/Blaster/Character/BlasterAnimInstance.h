@@ -109,4 +109,13 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	ETurningInPlace TurningInPlace;
+
+	/// <summary>
+	/// 角色将右手骨骼朝向调整到与命中目标朝向的旋转差值
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	FRotator RightHandRotation;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bLocallyControlled;
 };

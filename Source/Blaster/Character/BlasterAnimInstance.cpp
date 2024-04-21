@@ -88,5 +88,26 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		//得到最终左手插槽的骨骼空间的位置
 		LeftHandTransform.SetLocation(OutPosition);
 		LeftHandTransform.SetRotation(FQuat(OutRotation));
+		
+		////获取枪口世界位置
+		//FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World);
+		////获取枪口尖端变换的x轴方向
+		//FVector  MuzzleX(FRotationMatrix(MuzzleTipTransform.GetRotation().Rotator()).GetUnitAxis(EAxis::X));
+		////绘制调试射线 并于看清枪口朝向
+		//DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), MuzzleTipTransform.GetLocation()+MuzzleX*1000.f,FColor::Red);
+		////绘制射线检测结果，用于看清屏幕中心与碰撞物体间的射线，便于与上面的枪口射线比较，以便我们进一步调整
+		//DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), BlasterCharacter->GetHitTarget(),FColor::Orange);
+		
+		//只是用于本地角色视角方面更为好看，不需要复制到各个客户端，因此只在本地调整即可
+		if (BlasterCharacter->IsLocallyControlled()) 
+		{
+			bLocallyControlled = true;
+			//通过调整右手插槽位置来改变枪口朝向，所以获取右手插槽
+			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
+			//右手骨骼朝向调整到与命中目标朝向的旋转差值。参数：起始向量，目标向量。返回与旋转差值
+			//RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget() 右手位置减去命中位置得到向量，该向量为从命中目标到右手位置的向量，如果再加上RightHandTransform.GetLocation()，则会得到从右手位置开始沿着命中目标的相反方向的反向运动。
+			//上一行主要说明的就是为了解决调整时，枪管被调整为了朝正确方向的反方向的情况
+			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+		}
 	}
 }

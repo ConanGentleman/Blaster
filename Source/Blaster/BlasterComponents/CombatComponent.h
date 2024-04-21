@@ -140,4 +140,9 @@ private:
 	/// 在空中（跳跃）的影响因素（大小）
 	/// </summary>
 	float CrosshairInAirFactor; 
+
+	/// <summary>
+	/// 射线检测到的目标位置（进队本地有效，用于调试而声明的变量，后续应该会删除）
+	/// </summary>
+	FVector HitTarget;
 };

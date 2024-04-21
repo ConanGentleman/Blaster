@@ -51,6 +51,15 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	//设置准星的贴图并用于BlasterHUD绘制
 	SetHUDCrosshairs(DeltaTime);
+
+	if (Character && Character->IsLocallyControlled())
+	{
+		//每帧绘制一下枪的线便于观察枪口情况
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		
+		HitTarget = HitResult.ImpactPoint;
+	}
 }
 
 /// <summary>
