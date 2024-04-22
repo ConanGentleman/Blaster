@@ -80,6 +80,23 @@ public:
 	//缩放插值速度
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed = 20.f;
+
+	/** 
+	* 自动开火（就是长按按键就一直射击
+	*/
+
+	/// <summary>
+	/// 开火延迟时间。函数执行的时间间隔(也就是武器射速
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float FireDelay = .15f;
+
+	/// <summary>
+	/// 武器是否自动开火（长按连续开火
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	bool bAutomatic = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

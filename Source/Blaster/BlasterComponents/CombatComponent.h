@@ -52,10 +52,15 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 	/// <summary>
-	/// 用于武器开火
+	/// 按下开火键，调用开火，并且进行射线检测
 	/// </summary>
 	/// <param name="bPressed"></param>
 	void FireButtonPressed(bool bPressed);
+
+	/// <summary>
+	/// 开火
+	/// </summary>
+	void Fire();
 
 	/// <summary>
 	/// 开火RPC。用于客户端调用，服务器执行的武器开火函数。在定义时需在函数名后补充_Implementation
@@ -191,5 +196,24 @@ private:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	void InterpFOV(float DeltaTime);
+
+	/**
+	* 自动开火（就是长按按键就一直射击
+	*/
+
+	/// <summary>
+	/// 开火计时器
+	/// </summary>
+	FTimerHandle FireTimer;
+	bool bCanFire = true;
+
+	/// <summary>
+	/// 启动开火计时
+	/// </summary>
+	void StartFireTimer();
+	/// <summary>
+	/// 计时器完成时回调的函数
+	/// </summary>
+	void FireTimerFinished();
 
 };

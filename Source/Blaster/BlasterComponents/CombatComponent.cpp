@@ -11,8 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
-//#include "Blaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -70,6 +70,198 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 		//插值改变相机视野
 		InterpFOV(DeltaTime);
+	}
+}
+
+/// <summary>
+/// 按下开火键，调用开火，并且进行射线检测
+/// </summary>
+/// <param name="bPressed"></param>
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+
+	if (bFireButtonPressed) {
+		//FHitResult HitResult;
+		////准星绘制及射线检测
+		//TraceUnderCrosshairs(HitResult);
+		Fire();
+	}
+
+}
+
+/// <summary>
+/// 武器开火
+/// </summary>
+void UCombatComponent::Fire()
+{
+	if (bCanFire && EquippedWeapon)
+	{
+		//在下次开火计时完成之前 无法再次开火，所以设置为false
+		bCanFire = false;
+		ServerFire(HitTarget);
+		if (EquippedWeapon)//如果开火并且装备了武器，则让准星收到射击因素的影响为.75f
+		{
+			CrosshairShootingFactor = .75f;//射击因素直接赋值
+		}
+		StartFireTimer();
+	}
+}
+
+/// <summary>
+/// 启动开火计时器
+/// </summary>
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	//设置一个定时器，用于开火定时。
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer, //定时句柄
+		this,    //调用执行（回调）函数的对象
+		&UCombatComponent::FireTimerFinished, //执行（回调）函数
+		EquippedWeapon->FireDelay //函数执行的时间间隔(也就是武器射速
+	);
+}
+
+/// <summary>
+/// 开火计时器完成函数回调
+/// </summary>
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
+}
+
+/// <summary>
+/// 开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
+/// </summary>
+/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	MulticastFire(TraceHitTarget);
+}
+/// <summary>
+/// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
+/// 多播RPC被执行时，会在服务器和所有客户端上执行函数
+/// </summary>
+/// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	if (EquippedWeapon == nullptr) return;
+	if (Character) {
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+/// <summary>
+/// 装备(捡起)武器
+/// </summary>
+/// <param name="WeaponToEquip"></param>
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (Character == nullptr || WeaponToEquip == nullptr) return;
+
+	EquippedWeapon = WeaponToEquip;
+	//设置武器状态
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+	//先获取人物网格的武器插槽
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+	if (HandSocket) {
+		//将武器放在人物网格插槽处
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	}
+	//设置武器的所有者
+	EquippedWeapon->SetOwner(Character);
+	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+	Character->bUseControllerRotationYaw = true;
+}
+
+/// <summary>
+/// 用于装备武器的变量复制前的调用
+/// </summary>
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && Character) {
+		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+		Character->bUseControllerRotationYaw = true;
+	}
+}
+
+/// <summary>
+/// 从屏幕中心发射射线，进行用于射击的射线检测
+/// </summary>
+/// <param name="TraceHitResult">命中信息</param>
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	//为了从屏幕中心进行追踪，需要视口大小
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)//检查游戏视口是否有效
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	//准星中心屏幕坐标位置 
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	//将准星的屏幕坐标转换为世界坐标位置。 返回值：转换是否成功
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),//当前控制的玩家。参数：世界；第几个控制器
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+	//进行射线检测
+	if (bScreenToWorld)
+	{
+		//射线起始点 
+		FVector Start = CrosshairWorldPosition;
+
+
+		if (Character)
+		{
+			//由于射线检测的起始点为相机，所以当敌方角色出现在相机和控制的角色之间时，也会被检测到使得准心变色。
+			//因此将射线检测的起始点加上相机与角色的距离，以使得射线检测以人物为起始点进行发射
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			//这里+100.f是为了不让你射线检测角色自己
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+			////调试绘制查看起始点的位置
+			//DrawDebugSphere(GetWorld(), Start, 16.f, 12, FColor::Red, false);
+		}
+
+		//射线终点
+		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+		//调用射线检测。参数：检测结果，开始位置，结束位置，碰撞通道
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
+		{
+			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
+		}
+		//判断是否射线检测击中了玩家角色，并且角色是否实现了UInteractWithCrosshairsInterface接口
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			//将准星变为红色
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
+		}
 	}
 }
 
@@ -211,152 +403,4 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	}
 }
 
-/// <summary>
-/// 用于装备武器的变量复制前的调用
-/// </summary>
-void UCombatComponent::OnRep_EquippedWeapon()
-{
-	if (EquippedWeapon && Character) {
-		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
-		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-		//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
-		Character->bUseControllerRotationYaw = true;
-	}
-}
-/// <summary>
-/// 按下开火键，调用开火，并且进行射线检测
-/// </summary>
-/// <param name="bPressed"></param>
-void UCombatComponent::FireButtonPressed(bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-
-	if (bFireButtonPressed) {
-		FHitResult HitResult;
-		//准星绘制及射线检测
-		TraceUnderCrosshairs(HitResult);
-
-		ServerFire(HitResult.ImpactPoint);
-
-		if (EquippedWeapon)//如果开火并且装备了武器，则让准星收到射击因素的影响为.75f
-		{
-			CrosshairShootingFactor = .75f;//射击因素直接赋值
-		}
-	}
-	
-}
-/// <summary>
-/// 从屏幕中心发射射线，进行用于射击的射线检测
-/// </summary>
-/// <param name="TraceHitResult">命中信息</param>
-void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
-{
-	//为了从屏幕中心进行追踪，需要视口大小
-	FVector2D ViewportSize;
-	if (GEngine && GEngine->GameViewport)//检查游戏视口是否有效
-	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
-	}
-	//准星中心屏幕坐标位置 
-	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-	FVector CrosshairWorldPosition;
-	FVector CrosshairWorldDirection;
-	//将准星的屏幕坐标转换为世界坐标位置。 返回值：转换是否成功
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
-		UGameplayStatics::GetPlayerController(this, 0),//当前控制的玩家。参数：世界；第几个控制器
-		CrosshairLocation,
-		CrosshairWorldPosition,
-		CrosshairWorldDirection
-	);
-	//进行射线检测
-	if (bScreenToWorld)
-	{
-		//射线起始点 
-		FVector Start = CrosshairWorldPosition;
-
-
-		if (Character)
-		{
-			//由于射线检测的起始点为相机，所以当敌方角色出现在相机和控制的角色之间时，也会被检测到使得准心变色。
-			//因此将射线检测的起始点加上相机与角色的距离，以使得射线检测以人物为起始点进行发射
-			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
-			//这里+100.f是为了不让你射线检测角色自己
-			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
-			////调试绘制查看起始点的位置
-			//DrawDebugSphere(GetWorld(), Start, 16.f, 12, FColor::Red, false);
-		}
-
-		//射线终点
-		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
-		//调用射线检测。参数：检测结果，开始位置，结束位置，碰撞通道
-		GetWorld()->LineTraceSingleByChannel(
-			TraceHitResult,
-			Start,
-			End,
-			ECollisionChannel::ECC_Visibility
-		);
-		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
-		{
-			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
-		}
-		//判断是否射线检测击中了玩家角色，并且角色是否实现了UInteractWithCrosshairsInterface接口
-		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
-		{
-			//将准星变为红色
-			HUDPackage.CrosshairsColor = FLinearColor::Red;
-		}
-		else
-		{
-			HUDPackage.CrosshairsColor = FLinearColor::White;
-		}
-	}
-}
-/// <summary>
-/// 开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
-/// </summary>
-/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	MulticastFire(TraceHitTarget);
-}
-/// <summary>
-/// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
-/// 多播RPC被执行时，会在服务器和所有客户端上执行函数
-/// </summary>
-/// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	if (EquippedWeapon == nullptr) return;
-	if (Character) {
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-	}
-}
-
-/// <summary>
-/// 装备(捡起)武器
-/// </summary>
-/// <param name="WeaponToEquip"></param>
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (Character == nullptr || WeaponToEquip == nullptr) return;
-
-	EquippedWeapon = WeaponToEquip;
-	//设置武器状态
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	
-	//先获取人物网格的武器插槽
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-	
-	if (HandSocket) {
-		//将武器放在人物网格插槽处
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
-	//设置武器的所有者
-	EquippedWeapon->SetOwner(Character);
-	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
-	Character->bUseControllerRotationYaw = true;
-}
 
