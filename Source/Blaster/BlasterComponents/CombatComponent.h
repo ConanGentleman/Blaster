@@ -145,4 +145,38 @@ private:
 	/// 射线检测到的目标位置（进队本地有效，用于调试而声明的变量，后续应该会删除）
 	/// </summary>
 	FVector HitTarget;
+
+	
+	/** 
+	* 瞄准和视野
+	*/
+
+	/// <summary>
+	/// 不瞄准时的视野;在开始游戏中设置相机的基础视野
+	/// </summary>
+	float DefaultFOV;
+
+	/// <summary>
+	/// 缩放视野
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float ZoomedFOV = 30.f;
+
+	/// <summary>
+	/// 当前视野
+	/// </summary>
+	float CurrentFOV;
+
+	/// <summary>
+	/// 缩放插值速度
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float ZoomInterpSpeed = 20.f;
+
+	/// <summary>
+	/// 插值改变视野
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void InterpFOV(float DeltaTime);
+
 };

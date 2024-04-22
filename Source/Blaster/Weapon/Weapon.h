@@ -67,6 +67,19 @@ public:
 	UTexture2D* CrosshairsTop;//准星上
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	UTexture2D* CrosshairsBottom;//准星下
+
+	
+	/** 
+	* 当瞄准时缩放视野
+	*/
+
+	//缩放视野范围
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV = 30.f;
+
+	//缩放插值速度
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed = 20.f;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -138,4 +151,6 @@ public:
 	//FORCEINLINE表示内联函数
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 };

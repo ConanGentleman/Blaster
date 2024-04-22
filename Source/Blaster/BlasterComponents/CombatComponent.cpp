@@ -12,6 +12,7 @@
 #include "DrawDebugHelpers.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/HUD/BlasterHUD.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -41,6 +42,13 @@ void UCombatComponent::BeginPlay()
 	
 	if (Character) {//设置行走速度
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+		//如果角色跟随相机存在
+		if (Character->GetFollowCamera())
+		{
+			//则获取相机的默认视野
+			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
+			CurrentFOV = DefaultFOV;
+		}
 	}
 }
 
@@ -49,8 +57,6 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//设置准星的贴图并用于BlasterHUD绘制
-	SetHUDCrosshairs(DeltaTime);
 
 	if (Character && Character->IsLocallyControlled())
 	{
@@ -59,6 +65,11 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		TraceUnderCrosshairs(HitResult);
 		
 		HitTarget = HitResult.ImpactPoint;
+
+		//设置准星的贴图并用于BlasterHUD绘制
+		SetHUDCrosshairs(DeltaTime);
+		//插值改变相机视野
+		InterpFOV(DeltaTime);
 	}
 }
 
@@ -127,6 +138,32 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		}
 	}
 }
+
+/// <summary>
+/// 插值改变视野
+/// </summary>
+/// <param name="DeltaTime"></param>
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (EquippedWeapon == nullptr) return;
+	
+	if (bAiming)
+	{
+		//装备并瞄准时，插值改变视野
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+	}
+	else
+	{
+		//插值还原为视野
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	if (Character && Character->GetFollowCamera())
+	{
+		//设置相机视野
+		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+	}
+}
+
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
