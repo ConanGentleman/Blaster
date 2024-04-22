@@ -31,6 +31,13 @@ public:
 	/// 播放开火蒙太奇动画
 	/// </summary>
 	void PlayFireMontage(bool bAiming);
+
+	/// <summary>
+	/// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	/// Unreliable不可靠的，因为这种受击动画可有可无，是一种装饰物
+	/// </summary>
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -52,6 +59,8 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
+	//播放受击动画
+	void PlayHitReactMontage();
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -135,6 +144,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	/// <summary>
+	/// 手机动画蒙太奇
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* HitReactMontage;
 
 	/// <summary>
 	/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色

@@ -12,6 +12,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
+#include "Blaster/Blaster.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -53,6 +54,10 @@ ABlasterCharacter::ABlasterCharacter()
 	///下面两行防止两个角色相交时，胶囊体碰撞导致相机视角改变
 	//解决胶囊与相机碰撞的问题
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//设置碰撞类型为自定义类型。 由于在子弹类中，设置了只与地面、可见性和自定义类型ECC_SkeletalMesh会发生碰撞。
+	//因此将角色网格体（3d模型）的object对象类型设为ECC_SkeletalMesh，使得子弹与角色模型而不是角色的胶囊体进行碰撞。
+	//这样就可以进一步区分碰撞的位置（如爆头、身子、脚）来做差异化处理
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	//解决角色网格与相机的碰撞问题
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	//让这样设置的目的是为了让射线检测能够检测到角色网格，以便准星变色
@@ -148,8 +153,27 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		AnimInstance->Montage_Play(FireWeaponMontage);
 		//用来选择播放蒙太奇动画里面瞄准的开火还是不瞄准的开火动画
 		FName SectionName;
+		//选择蒙太奇中对应的动画标签
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		//转换到对应蒙太奇动画的蒙太奇片段上
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+/// <summary>
+/// 用于播放角色受击动画.
+/// </summary>
+void ABlasterCharacter::PlayHitReactMontage()
+{
+	//由于受击动画资源是拿着装备的，因此需要判断是否装备了装备
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		//选择蒙太奇中对应的动画标签
+		FName SectionName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
@@ -355,6 +379,15 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 		}
 	}
 }
+
+/// <summary>
+/// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+/// </summary>
+void ABlasterCharacter::MulticastHit_Implementation()
+{
+	PlayHitReactMontage();
+}
+
 /// <summary>
 /// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色
 /// </summary>

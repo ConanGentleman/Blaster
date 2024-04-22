@@ -8,6 +8,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/Blaster.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -29,6 +31,11 @@ AProjectile::AProjectile()
 	//设置任何可见性和世界静止物体（如墙、地板）为可碰撞通道
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	//自定义object通道提出的主要原因: 角色进行碰撞的是胶囊体组件（规则胶囊体），而非网格组件（人物三维模型）。
+	//希望子弹能够选择性的选择它现在能击中的物体，因此自定义了一个新的object通道（在项目设置中设置）
+	//对于墙壁和可见性的东西确实需要进行碰撞的，所以上面并没有进行删除。
+	//使用自定义的object通道，并设置能进行碰撞。
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
 	//创建组件
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	//让子弹保持其旋转与速度一致 （每帧更新其旋转 以匹配速度的方向）
@@ -70,6 +77,13 @@ void AProjectile::BeginPlay()
 /// <param name="Hit">击中结果</param>
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	//子弹碰撞后，如果otheractor类型转换为ABlasterCharacter成功，即BlasterCharacter不为空，则子弹碰撞到的是角色。
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	if (BlasterCharacter)
+	{
+		//让角色播放受伤动画。调用多播RPC
+		BlasterCharacter->MulticastHit();
+	}
 	//撞击后销毁子弹
 	Destroy();
 }
