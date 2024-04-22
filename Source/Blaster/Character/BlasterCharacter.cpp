@@ -95,6 +95,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
+	HideCameraIfCharacterClose();
 	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
 	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
 	//if (OverlappingWeapon) {
@@ -354,6 +355,35 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 		}
 	}
 }
+/// <summary>
+/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色
+/// </summary>
+void ABlasterCharacter::HideCameraIfCharacterClose()
+{
+	//只对本地角色有效
+	if (!IsLocallyControlled()) return;
+	//计算相机到角色的距离，如果小于某个阈值，则进行角色隐藏
+	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		//隐藏角色网格
+		GetMesh()->SetVisibility(false);
+		//隐藏武器网格
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
+	}
+	else
+	{
+		//还原
+		GetMesh()->SetVisibility(true);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+	}
+}
+
 /// <summary>
 /// 客户端和服务器都会调用
 /// 用于在武器类中设置复制变量OverlappingWeapon

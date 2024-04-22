@@ -135,6 +135,14 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	/// <summary>
+	/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色
+	/// </summary>
+	void HideCameraIfCharacterClose();
+
+	UPROPERTY(EditAnywhere)
+	float CameraThreshold = 200.f;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

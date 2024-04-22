@@ -273,6 +273,19 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	{
 		//射线起始点 
 		FVector Start = CrosshairWorldPosition;
+
+
+		if (Character)
+		{
+			//由于射线检测的起始点为相机，所以当敌方角色出现在相机和控制的角色之间时，也会被检测到使得准心变色。
+			//因此将射线检测的起始点加上相机与角色的距离，以使得射线检测以人物为起始点进行发射
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			//这里+100.f是为了不让你射线检测角色自己
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+			////调试绘制查看起始点的位置
+			//DrawDebugSphere(GetWorld(), Start, 16.f, 12, FColor::Red, false);
+		}
+
 		//射线终点
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
 		//调用射线检测。参数：检测结果，开始位置，结束位置，碰撞通道
