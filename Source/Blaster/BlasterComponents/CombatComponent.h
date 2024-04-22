@@ -140,6 +140,14 @@ private:
 	/// 在空中（跳跃）的影响因素（大小）
 	/// </summary>
 	float CrosshairInAirFactor; 
+	/// <summary>
+	/// 瞄准的因素（瞄准时缩小准星
+	/// </summary>
+	float CrosshairAimFactor;
+	/// <summary>
+	/// 射击的因素（射击时扩大准星
+	/// </summary>
+	float CrosshairShootingFactor;
 
 	/// <summary>
 	/// 射线检测到的目标位置（进队本地有效，用于调试而声明的变量，后续应该会删除）

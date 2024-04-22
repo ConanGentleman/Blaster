@@ -129,8 +129,27 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			{
 				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
 			}
-			//将速度和空中两个影响的扩散进行叠加得出最终的影响结果
-			HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+			////将速度和空中两个影响的扩散进行叠加得出最终的影响结果（由于新增了瞄准和射击的因素 因此被弃用
+			//HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+			if (bAiming)
+			{
+				//如果正在瞄准，则插值瞄准因素
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.58f, DeltaTime, 30.f);
+			}
+			else
+			{
+				//没在瞄准，则插值还原为0
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.f, DeltaTime, 30.f);
+			}
+			//插值射击变为0
+			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
+			//将速度、跳跃、瞄准、射击四个对准星缩放的影响进行总和
+			HUDPackage.CrosshairSpread =
+				0.5f + //0.5是因为瞄准的因素会使准星缩放过于小了，因此添加一个基准值避免这种情况发生
+				CrosshairVelocityFactor +
+				CrosshairInAirFactor - //准星是缩小，所以用-
+				CrosshairAimFactor +
+				CrosshairShootingFactor;
 
 
 			//设置准星贴图
@@ -219,6 +238,11 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 		TraceUnderCrosshairs(HitResult);
 
 		ServerFire(HitResult.ImpactPoint);
+
+		if (EquippedWeapon)//如果开火并且装备了武器，则让准星收到射击因素的影响为.75f
+		{
+			CrosshairShootingFactor = .75f;//射击因素直接赋值
+		}
 	}
 	
 }
