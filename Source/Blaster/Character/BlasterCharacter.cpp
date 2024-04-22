@@ -89,6 +89,13 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon,COND_OwnerOnly);
 }
 
+void ABlasterCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+	SimProxiesTurn();
+	TimeSinceLastMovementReplication = 0.f;
+}
+
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
 {
@@ -99,7 +106,22 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	AimOffset(DeltaTime);
+	//如果控制权大于模拟代理（由于是枚举比较的就是数字大小，实际上指的就是如果role为ROLE_AutonomousProxy、ROLE_Authority、ROLE_Max）并且是本地控制的则直接进行瞄准偏移
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else//否则就对上次运动复制进行计时，计时超过时间则直接调用运动复制通知
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)//时间如果超过饿0.25说明还没有复制运动，此时直接调用复制运动
+		{
+			OnRep_ReplicatedMovement();
+		}
+		//计算每一帧的pitch
+		CalculateAO_Pitch();
+	}
+
 	HideCameraIfCharacterClose();
 	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
 	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
@@ -285,6 +307,18 @@ void ABlasterCharacter::AimButtonReleased()
 	}
 }
 /// <summary>
+/// 计算角色速度
+/// </summary>
+/// <returns></returns>
+float ABlasterCharacter::CalculateSpeed()
+{
+	FVector Velocity = GetVelocity();
+	//不关心z值
+	Velocity.Z = 0.f;
+	return Velocity.Size();
+}
+
+/// <summary>
 /// 动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
 /// 视频规定：只会在角色静止（没有在跑或者跳跃）且装备武器时影响角色动画。（但个人不合理，后续有时间进行修改）
 /// </summary>
@@ -293,16 +327,15 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 {
 	if (Combat && Combat->EquippedWeapon == nullptr) return;
 	//获取速度
-	FVector Velocity = GetVelocity();
-	//不关心z值
-	Velocity.Z = 0.f;
-	float Speed = Velocity.Size();
+	float Speed = CalculateSpeed();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
 	if (Speed == 0.f && !bIsInAir) {//速度为0，并且没有在跳跃
+		//静止不懂和跳跃是需要旋转根骨骼的
+		bRotateRootBone = true;
 		///！！！！！经过多次确认发现GetBaseAimRotation().Yaw无法进行服务器到客户端的同步，但是GetBaseAimRotation().Pitch是同步的，估计视频后续会有解决方案？
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		
+
 		//与静止前的旋转角的差
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
@@ -314,15 +347,25 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		TurnInPlace(DeltaTime);
 	}
 	if (Speed > 0.f || bIsInAir) { //在保持角色静止前
+		//在运动时则不需要旋转根骨骼
+		bRotateRootBone = false;
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //静止前的旋转情况
 		AO_Yaw = 0.f; //一旦移动或者跳跃就设置为0
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
-	
+
+	CalculateAO_Pitch();
+
+
+}
+/// <summary>
+/// 计算角色上下朝向角度
+/// </summary>
+void ABlasterCharacter::CalculateAO_Pitch()
+{
 	//当前的任何状态不影响上下朝向
 	AO_Pitch = GetBaseAimRotation().Pitch;
-
 	//虚幻通过网络发送Yaw和Pitch时进行了压缩，转变为了无符号整型类型。因此，我们需要对超过90的情况进行处理，不然两端会产生不一致的动作
 	if (AO_Pitch > 90.f && !IsLocallyControlled()) {
 		//映射[270,360) 到 [-90,0) 的 pitch
@@ -338,6 +381,52 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	//	UE_LOG(LogTemp, Warning, TEXT("AO_Pitch: %f"), AO_Pitch);
 	//}
 }
+/// <summary>
+/// 用于处理模拟代理（服务器上）的转向。用来解决角色转向同步时，由于（服务器上的）模拟代理角色旋转根骨骼并同步到其他客户端角色上导致转向抖动的问题
+/// 因为动画蓝图同步并不一定是每帧都在执行的。解决方式就是对于（服务器上的）模拟代理角色不采用旋转根骨骼，并且重写OnRep_ReplicatedMovement函数，在Tick计时，如果超过一定时间，则自行进行运动同步通知函数调用
+/// </summary>
+void ABlasterCharacter::SimProxiesTurn()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	//如果是模拟代理，则不旋转根骨骼
+	bRotateRootBone = false;
+	float Speed = CalculateSpeed();
+	//速度大于0则设置为不转向状态
+	if (Speed > 0.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	ProxyRotationLastFrame = ProxyRotation;
+	ProxyRotation = GetActorRotation();
+	//计算代理转向的偏移量
+	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
+
+	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
+
+	//根据增量与阈值比较，更新角色当前转向状态
+	if (FMath::Abs(ProxyYaw) > TurnThreshold)
+	{
+		if (ProxyYaw > TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Right;
+		}
+		else if (ProxyYaw < -TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Left;
+		}
+		else
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		}
+		return;
+	}
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+}
+
+
 void ABlasterCharacter::Jump()
 {
 	if (bIsCrouched) { //如果在蹲下的时候跳跃

@@ -39,7 +39,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bAiming = BlasterCharacter->IsAiming();
 	//角色转向
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
-
+	//是否旋转根骨骼（平滑控制人物持枪旋转的
+	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 
 
 	//设置拿着装备的混合动画值

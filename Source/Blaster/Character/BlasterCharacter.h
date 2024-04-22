@@ -38,6 +38,10 @@ public:
 	/// </summary>
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastHit();
+	/// <summary>
+	/// 复制运动的函数通知（同步各个客户端和服务器的角色移动的函数），每次运动发生改变时会被调用。跟tick频率不同，因此设计移动方面的同步需要用到该函数
+	/// </summary>
+	virtual void OnRep_ReplicatedMovement() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -56,6 +60,12 @@ protected:
 	void AimButtonReleased();
 	//动画偏移（动画叠加），这里用于获取角色枪口方向的值AO_Yaw和AO_Pitch来复制到BlasterAnimInstance中。 DeltaTime用于插值过渡动画
 	void AimOffset(float DeltaTime);
+	/// <summary>
+	/// 计算角色上下朝向角度
+	/// </summary>
+	void CalculateAO_Pitch();
+	//用于处理模拟代理（服务器上）的转向。用来解决角色转向同步时，转向抖动的问题
+	void SimProxiesTurn();
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
@@ -158,6 +168,23 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float CameraThreshold = 200.f;
+	//是否旋转根骨骼
+	bool bRotateRootBone;
+	//播放原地转向动画的阈值
+	float TurnThreshold = 0.5f;
+	//上一帧代理的旋转值
+	FRotator ProxyRotationLastFrame;
+	//当前代理的旋转值
+	FRotator ProxyRotation;
+	/// <summary>
+	/// 代理转向的偏移量
+	/// </summary>
+	float ProxyYaw;
+	/// <summary>
+	/// 上次运动改变（复制）以来的时间间隔
+	/// </summary>
+	float TimeSinceLastMovementReplication;
+	float CalculateSpeed();
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
@@ -189,4 +216,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 };
