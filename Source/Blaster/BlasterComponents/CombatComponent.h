@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Blaster/HUD/BlasterHUD.h"
 #include "CombatComponent.generated.h"
 //射线检测的距离长度
 #define TRACE_LENGTH 80000.f
@@ -154,7 +155,11 @@ private:
 	/// </summary>
 	FVector HitTarget;
 
-	
+	/// <summary>
+	/// 准星结构体
+	/// </summary>
+	FHUDPackage HUDPackage;
+
 	/** 
 	* 瞄准和视野
 	*/

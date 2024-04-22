@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
-#include "Blaster/HUD/BlasterHUD.h"
+//#include "Blaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
@@ -89,7 +89,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		if (HUD)
 		{
 			//设置准星贴图结构体变量
-			FHUDPackage HUDPackage;
 			if (EquippedWeapon)
 			{
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
@@ -286,6 +285,16 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit) //如果没有碰撞到
 		{
 			TraceHitResult.ImpactPoint = End; //设置撞击点就是End
+		}
+		//判断是否射线检测击中了玩家角色，并且角色是否实现了UInteractWithCrosshairsInterface接口
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			//将准星变为红色
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
 		}
 	}
 }

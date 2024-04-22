@@ -107,7 +107,11 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			//右手骨骼朝向调整到与命中目标朝向的旋转差值。参数：起始向量，目标向量。返回与旋转差值
 			//RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget() 右手位置减去命中位置得到向量，该向量为从命中目标到右手位置的向量，如果再加上RightHandTransform.GetLocation()，则会得到从右手位置开始沿着命中目标的相反方向的反向运动。
 			//上一行主要说明的就是为了解决调整时，枪管被调整为了朝正确方向的反方向的情况
-			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+			//(被弃用)RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+			
+			//让武器插值改变角度，避免突兀
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.f);
 		}
 	}
 }

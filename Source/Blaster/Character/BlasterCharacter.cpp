@@ -53,8 +53,10 @@ ABlasterCharacter::ABlasterCharacter()
 	///下面两行防止两个角色相交时，胶囊体碰撞导致相机视角改变
 	//解决胶囊与相机碰撞的问题
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	//解决网格与相机的碰撞问题
+	//解决角色网格与相机的碰撞问题
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//让这样设置的目的是为了让射线检测能够检测到角色网格，以便准星变色
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	//设置角色的旋转速度
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
 	//初始化转向为不转

@@ -21,27 +21,27 @@ void ABlasterHUD::DrawHUD() {
 		if (HUDPackage.CrosshairsCenter)
 		{
 			FVector2D Spread(0.f, 0.f);//中心不需要偏移
-			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewportCenter, Spread);
+			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
 		if (HUDPackage.CrosshairsLeft)
 		{
 			FVector2D Spread(-SpreadScaled, 0.f);//向左偏移
-			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewportCenter, Spread);
+			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
 		if (HUDPackage.CrosshairsRight)
 		{
 			FVector2D Spread(SpreadScaled, 0.f);//向右偏移
-			DrawCrosshair(HUDPackage.CrosshairsRight, ViewportCenter, Spread);
+			DrawCrosshair(HUDPackage.CrosshairsRight, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
 		if (HUDPackage.CrosshairsTop)
 		{
 			FVector2D Spread(0.f, -SpreadScaled);
-			DrawCrosshair(HUDPackage.CrosshairsTop, ViewportCenter, Spread);
+			DrawCrosshair(HUDPackage.CrosshairsTop, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
 		if (HUDPackage.CrosshairsBottom)
 		{
 			FVector2D Spread(0.f, SpreadScaled);
-			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);  
+			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread, HUDPackage.CrosshairsColor);
 		}
 	}
 }
@@ -51,8 +51,8 @@ void ABlasterHUD::DrawHUD() {
 /// <param name="Texture">贴图</param>
 /// <param name="ViewportCenter">屏幕中心位置</param>
 /// <param name="Spread">准星扩散</param>
-void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
-{
+/// <param name="CrosshairColor">准星颜色</param>
+void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor) {
 	//获取纹理的长宽
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
@@ -72,6 +72,6 @@ void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, F
 		0.f,//纹理的V坐标
 		1.f, //纹理的高度
 		1.f, //纹理的宽度
-		FLinearColor::White
+		CrosshairColor
 	);
 }

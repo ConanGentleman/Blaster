@@ -21,6 +21,10 @@ public:
 	UTexture2D* CrosshairsBottom;
 	///准星扩散
 	float CrosshairSpread;
+	/// <summary>
+	/// 准星颜色
+	/// </summary>
+	FLinearColor CrosshairsColor;
 };
 
 /**
@@ -47,7 +51,8 @@ private:
 	/// <param name="Texture"></param>
 	/// <param name="ViewportCenter"></param>
 	/// <param name="Spread"></param>
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+	/// <param name="CrosshairColor">准星颜色</param>
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
 
 	/// <summary>
 	/// 准星扩散最大值（实际上是用于调整准星扩散的
