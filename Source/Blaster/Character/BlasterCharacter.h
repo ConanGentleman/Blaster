@@ -48,11 +48,14 @@ public:
 	/// </summary>
 	virtual void OnRep_ReplicatedMovement() override;
 
+	void Elim();
+
 	/// <summary>
 	/// 淘汰（角色死亡） 。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 	/// </summary>
 	UFUNCTION(NetMulticast, Reliable)
-	void Elim();
+	void MulticastElim();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -247,6 +250,22 @@ private:
 	/// 角色是否被淘汰
 	/// </summary>
 	bool bElimmed = false;
+
+	/// <summary>
+	/// 角色淘汰计时器（用于角色重生）
+	/// </summary>
+	FTimerHandle ElimTimer;
+
+	/// <summary>
+	/// 淘汰的间隔时间（重生的时间）
+	/// EditDefaultsOnly表示此成员变量只会在蓝图编辑器中被暴露出来。
+	/// </summary>
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+	/// <summary>
+	/// 淘汰计时器完成后调用的函数
+	/// </summary>
+	void ElimTimerFinished();
 
 public:	
 	/// <summary>

@@ -15,13 +15,15 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
+#include "TimerManager.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	////这样设置是保证在重生点发生碰撞重合时，仍然生成角色。 视频这里添加后上除了，而在角色蓝图中进行的设置
+	//SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	//创建默认对象并命名为CameraBoom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	//将弹簧臂连接到网格组件（通常是跟组件，但是人物有蹲下操作，会改变胶囊体的大小，这样tan'huan
@@ -101,12 +103,40 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 }
 
 /// <summary>
+/// 角色淘汰或死亡的处理函数。（仅用于服务器上调用）。
+/// 可以在这里处理一些游戏模式相关的东西（例如重生）。因为游戏模式仅存于服务器上。
+/// </summary>
+void ABlasterCharacter::Elim()
+{
+	MulticastElim();
+	//设置一个计时器，用于玩家淘汰后一段时间内重生
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+/// <summary>
 /// 角色淘汰（死亡）。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 /// </summary>
-void ABlasterCharacter::Elim_Implementation()
+void ABlasterCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
+}
+/// <summary>
+/// 角色淘汰计时器完成后调用的函数。（这里用于复活角色
+/// </summary>
+void ABlasterCharacter::ElimTimerFinished()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	if (BlasterGameMode)
+	{
+		//调用游戏模式的角色重生
+		BlasterGameMode->RequestRespawn(this, Controller);
+	}
 }
 
 // Called when the game starts or when spawned
