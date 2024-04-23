@@ -32,12 +32,13 @@ public:
 	/// </summary>
 	void PlayFireMontage(bool bAiming);
 
-	/// <summary>
-	/// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
-	/// Unreliable不可靠的，因为这种受击动画可有可无，是一种装饰物
-	/// </summary>
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
+	///// <summary>
+	///// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	///// Unreliable不可靠的，因为这种受击动画可有可无，是一种装饰物
+	///// </summary>
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void MulticastHit();
+
 	/// <summary>
 	/// 复制运动的函数通知（同步各个客户端和服务器的角色移动的函数），每次运动发生改变时会被调用。跟tick频率不同，因此设计移动方面的同步需要用到该函数
 	/// </summary>
@@ -71,6 +72,22 @@ protected:
 	void FireButtonReleased();
 	//播放受击动画
 	void PlayHitReactMontage();
+
+	/// <summary>
+	/// 用于接收来自子弹类（如ProjectileBullet）中的ApplyDamage委托的回调函数。
+	/// 必须添加UFUNCTION()
+	/// </summary>
+	/// <param name="DamagedActor"></param>
+	/// <param name="Damage"></param>
+	/// <param name="DamageType"></param>
+	/// <param name="InstigatorController"></param>
+	/// <param name="DamageCauser"></param>
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	/// <summary>
+	/// 更新角色HUD的血量信息
+	/// </summary>
+	void UpdateHUDHealth();
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)

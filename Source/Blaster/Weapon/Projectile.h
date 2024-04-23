@@ -37,6 +37,12 @@ protected:
 	/// <param name="Hit">击中结果</param>
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	/// <summary>
+	/// 子弹伤害
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 private:
 	//子弹碰撞体
 	UPROPERTY(EditAnywhere)

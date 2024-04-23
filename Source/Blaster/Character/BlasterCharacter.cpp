@@ -103,12 +103,14 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//获取角色控制器
-	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	if (BlasterPlayerController)
+
+	UpdateHUDHealth();
+
+	//只在服务器上进行伤害计算，因此只在服务器上注册函数回调
+	if (HasAuthority())
 	{
-		//更新HUD血量信息
-		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+		//当演员以任何方式损坏时调用回调函数
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
 }
 // Called every frame
@@ -209,6 +211,26 @@ void ABlasterCharacter::PlayHitReactMontage()
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
+
+/// <summary>
+/// 用于接收来自子弹类（如ProjectileBullet）中的ApplyDamage委托的回调函数。
+/// </summary>
+/// <param name="DamagedActor"></param>
+/// <param name="Damage"></param>
+/// <param name="DamageType"></param>
+/// <param name="InstigatorController">煽动者</param>
+/// <param name="DamageCauser"></param>
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	//受伤修改血量。由于Health是复制变量，修改后会同步到各个客户端
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	//更新HUD上的血量信息（仅在服务器上更新，客户端的更新则通过OnRep_Health进行更新）
+	UpdateHUDHealth();
+	//播放角色受击动画（仅在服务器上播放，客户端的播放则通过OnRep_Health播放）
+	PlayHitReactMontage();
+
+}
+
 
 void ABlasterCharacter::MoveForward(float Value)
 {
@@ -479,13 +501,15 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-/// <summary>
-/// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
-/// </summary>
-void ABlasterCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
+/* 现在通过受伤的委托来进行角色的受击动画播放了，因此不再使用该方法进行受击播放了
+///// <summary>
+///// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+///// </summary>
+//void ABlasterCharacter::MulticastHit_Implementation()
+//{
+//	PlayHitReactMontage();
+//}
+*/
 
 /// <summary>
 /// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色
@@ -521,7 +545,22 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 /// </summary>
 void ABlasterCharacter::OnRep_Health()
 {
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
 
+/// <summary>
+/// 更新角色HUD的血量信息
+/// </summary>
+void ABlasterCharacter::UpdateHUDHealth()
+{
+	//获取角色控制器
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		//更新角色HUD的血量信息
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
 
 /// <summary>

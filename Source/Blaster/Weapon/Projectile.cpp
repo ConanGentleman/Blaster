@@ -77,13 +77,13 @@ void AProjectile::BeginPlay()
 /// <param name="Hit">击中结果</param>
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//子弹碰撞后，如果otheractor类型转换为ABlasterCharacter成功，即BlasterCharacter不为空，则子弹碰撞到的是角色。
-	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-	if (BlasterCharacter)
-	{
-		//让角色播放受伤动画。调用多播RPC
-		BlasterCharacter->MulticastHit();
-	}
+	////子弹碰撞后，如果otheractor类型转换为ABlasterCharacter成功，即BlasterCharacter不为空，则子弹碰撞到的是角色。
+	//ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	//if (BlasterCharacter)
+	//{
+	//	//让角色播放受伤动画。调用多播RPC
+	//	BlasterCharacter->MulticastHit();
+	//}
 	//撞击后销毁子弹
 	Destroy();
 }
