@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -266,6 +267,46 @@ private:
 	/// 淘汰计时器完成后调用的函数
 	/// </summary>
 	void ElimTimerFinished();
+
+	/**
+	* 溶解效果
+	*/
+
+	/// <summary>
+	/// 时间轴组件（绘制一个时间曲线用的）
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+	/// <summary>
+	/// 时间线中使用的轨道
+	/// </summary>
+	FOnTimelineFloat DissolveTrack;
+
+	/// <summary>
+	/// 时间轴上的曲线。时间轴上至少有一个曲线才能开始运行
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	/// <summary>
+	/// 材质溶解时间轴的回调函数
+	/// </summary>
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	/// <summary>
+	/// 启动材质溶解时间轴
+	/// </summary>
+	void StartDissolve();
+
+	// Dynamic instance that we can change at runtime
+	//我们可以在运行时更改的动态(材质)实例。方便RPC通知同步
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// Material instance set on the Blueprint, used with the dynamic material instance
+	//在蓝图上设置材质实例，与动态材质实例一起使用。相当于初始材质了。
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DissolveMaterialInstance;
 
 public:	
 	/// <summary>

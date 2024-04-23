@@ -74,6 +74,9 @@ ABlasterCharacter::ABlasterCharacter()
 	NetUpdateFrequency = 66.f; //默认是100；
 	//设置最小网络更新频率（用于决定在复制属性很少发生变化时的节流率
 	MinNetUpdateFrequency = 33.f;//默认是2
+
+	//创建溶解时间轴组件
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
@@ -125,6 +128,19 @@ void ABlasterCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
+
+	if (DissolveMaterialInstance)
+	{
+		//创建动态材质实例
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		//设置动态材质到网格的上索引为0的位置
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+		//设置动态材质的起始两个参数。一个负责溶解，一个负责发光。
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+	//启用溶解
+	StartDissolve();
 }
 /// <summary>
 /// 角色淘汰计时器完成后调用的函数。（这里用于复活角色
@@ -136,6 +152,33 @@ void ABlasterCharacter::ElimTimerFinished()
 	{
 		//调用游戏模式的角色重生
 		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+/// <summary>
+/// 材质溶解时间轴的回调函数（随着时间轴的播放，将在每一帧调用这个函数
+/// </summary>
+void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		//设置溶解参数
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+	}
+}
+/// <summary>
+/// 启动材质溶解时间轴
+/// </summary>
+void ABlasterCharacter::StartDissolve()
+{
+	//绑定溶解完成的回调
+	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeline)
+	{
+		//将曲线加入到时间轴中。 参数：曲线、轨道
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		//启用时间线
+		DissolveTimeline->Play();
 	}
 }
 
