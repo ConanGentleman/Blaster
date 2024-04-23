@@ -26,4 +26,12 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* HealthText;
+
+	/// <summary>
+	/// 分数文字
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ScoreAmount;
+
+
 };

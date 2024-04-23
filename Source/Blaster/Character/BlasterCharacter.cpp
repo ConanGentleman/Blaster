@@ -19,6 +19,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
+
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -254,6 +256,9 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	//	//设置武器的提示文字的显隐
 	//	OverlappingWeapon->ShowPickupWidget(true);
 	//}
+	
+	//每帧去看玩家状态是否有效（也就是角色是否重生完成）
+	PollInit();
 }
 
 // Called to bind functionality to input
@@ -701,6 +706,22 @@ void ABlasterCharacter::UpdateHUDHealth()
 	{
 		//更新角色HUD的血量信息
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+/// <summary>
+/// 轮询任何相关类并初始化我们的HUD。也就是当角色死亡重生后，需要将其玩家状态类的信息用以初始化HUD上的信息。
+/// </summary>
+void ABlasterCharacter::PollInit()
+{
+	if (BlasterPlayerState == nullptr)
+	{
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+		if (BlasterPlayerState)
+		{
+			//传递的参数是增加的得分，因为是重生所以没得分，分数只能+0
+			BlasterPlayerState->AddToScore(0.f);
+		}
 	}
 }
 

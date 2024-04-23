@@ -6,6 +6,7 @@
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 
 //GameMode仅存于服务器上！！！！
 
@@ -17,6 +18,19 @@
 /// <param name="AttackerController">攻击者控制器</param>
 void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
+	if (AttackerController == nullptr || AttackerController->PlayerState == nullptr) return;
+	if (VictimController == nullptr || VictimController->PlayerState == nullptr) return;
+	//获取攻击者和淘汰者的玩家状态
+	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
+	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
+
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	{
+		//玩家死亡，则给予攻击者1分
+		AttackerPlayerState->AddToScore(1.f);
+	}
+
+
 	if (ElimmedCharacter)
 	{
 		ElimmedCharacter->Elim();

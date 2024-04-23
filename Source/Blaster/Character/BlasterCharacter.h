@@ -107,6 +107,9 @@ protected:
 	/// 更新角色HUD的血量信息
 	/// </summary>
 	void UpdateHUDHealth();
+
+	// 轮询任何相关类并初始化我们的HUD。也就是当角色死亡重生后，需要将其玩家状态类的信息用以初始化HUD上的信息。
+	void PollInit();
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -334,6 +337,11 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ElimBotSound;
+
+	/// <summary>
+	/// 当前玩家状态
+	/// </summary>
+	class ABlasterPlayerState* BlasterPlayerState;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
