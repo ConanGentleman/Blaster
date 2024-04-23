@@ -14,6 +14,7 @@
 #include "BlasterAnimInstance.h"
 #include "Blaster/Blaster.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -97,6 +98,14 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
+}
+
+/// <summary>
+/// 角色淘汰（死亡）
+/// </summary>
+void ABlasterCharacter::Elim()
+{
+
 }
 
 // Called when the game starts or when spawned
@@ -218,7 +227,7 @@ void ABlasterCharacter::PlayHitReactMontage()
 /// <param name="DamagedActor"></param>
 /// <param name="Damage"></param>
 /// <param name="DamageType"></param>
-/// <param name="InstigatorController">煽动者</param>
+/// <param name="InstigatorController">煽动者（施加伤害的控制器）</param>
 /// <param name="DamageCauser"></param>
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
@@ -228,6 +237,21 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	UpdateHUDHealth();
 	//播放角色受击动画（仅在服务器上播放，客户端的播放则通过OnRep_Health播放）
 	PlayHitReactMontage();
+
+	//血量为0，则调用游戏模式中的淘汰函数
+	if (Health == 0.f)
+	{
+		//获取游戏模式
+		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if (BlasterGameMode)
+		{
+			//获取当前角色（受害者）控制
+			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			//获取煽动者的控制器
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 
 }
 

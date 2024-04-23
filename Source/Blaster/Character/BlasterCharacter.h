@@ -43,6 +43,11 @@ public:
 	/// 复制运动的函数通知（同步各个客户端和服务器的角色移动的函数），每次运动发生改变时会被调用。跟tick频率不同，因此设计移动方面的同步需要用到该函数
 	/// </summary>
 	virtual void OnRep_ReplicatedMovement() override;
+
+	/// <summary>
+	/// 淘汰（角色死亡）
+	/// </summary>
+	void Elim();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
