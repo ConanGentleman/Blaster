@@ -576,7 +576,7 @@ void ABlasterCharacter::SimProxiesTurn()
 	//计算代理转向的偏移量
 	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
 
-	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
+	//UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
 
 	//根据增量与阈值比较，更新角色当前转向状态
 	if (FMath::Abs(ProxyYaw) > TurnThreshold)
