@@ -56,6 +56,11 @@ public:
 	/// </summary>
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastElim();
+
+	/// <summary>
+	/// 角色生命周期函数，在角色销毁时调用,在服务器上销毁一个复制的actor的行为会传播到所有客户端。用以销毁淘汰机器人粒子组件
+	/// </summary>
+	virtual void Destroyed() override;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -308,6 +313,27 @@ private:
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
 
+	/**
+	* 淘汰机器人
+	*/
+
+	/// <summary>
+	/// 粒子特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ElimBotEffect;
+
+	/// <summary>
+	/// 淘汰机器人例子组件
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* ElimBotComponent;
+
+	/// <summary>
+	/// 淘汰机器人音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ElimBotSound;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

@@ -16,6 +16,9 @@
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -158,6 +161,29 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	// 溶解时使碰撞体无效，禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用网格碰撞
+
+	// 生成 淘汰机器人
+	if (ElimBotEffect)
+	{
+		//淘汰机器人生成的位置。在角色正上方200处
+		FVector ElimBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
+		//在某个位置产生特效，并将返回值存储
+		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ElimBotEffect,
+			ElimBotSpawnPoint,
+			GetActorRotation()//使机器人与角色有相同的旋转
+		);
+	}
+	if (ElimBotSound)
+	{
+		//在某个位置生成音效
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			ElimBotSound,
+			GetActorLocation()
+		);
+	}
 }
 /// <summary>
 /// 角色淘汰计时器完成后调用的函数。（这里用于复活角色
@@ -173,31 +199,18 @@ void ABlasterCharacter::ElimTimerFinished()
 }
 
 /// <summary>
-/// 材质溶解时间轴的回调函数（随着时间轴的播放，将在每一帧调用这个函数
+/// 角色生命周期函数，在角色销毁时调用,在服务器上销毁一个复制的actor的行为会传播到所有客户端。用以销毁淘汰机器人粒子组件
 /// </summary>
-void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+void ABlasterCharacter::Destroyed()
 {
-	if (DynamicDissolveMaterialInstance)
+	Super::Destroyed();
+
+	if (ElimBotComponent)
 	{
-		//设置溶解参数
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+		ElimBotComponent->DestroyComponent();
 	}
 }
-/// <summary>
-/// 启动材质溶解时间轴
-/// </summary>
-void ABlasterCharacter::StartDissolve()
-{
-	//绑定溶解完成的回调
-	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
-	if (DissolveCurve && DissolveTimeline)
-	{
-		//将曲线加入到时间轴中。 参数：曲线、轨道
-		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
-		//启用时间线
-		DissolveTimeline->Play();
-	}
-}
+
 
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
@@ -688,6 +701,33 @@ void ABlasterCharacter::UpdateHUDHealth()
 	{
 		//更新角色HUD的血量信息
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+/// <summary>
+/// 材质溶解时间轴的回调函数（随着时间轴的播放，将在每一帧调用这个函数
+/// </summary>
+void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		//设置溶解参数
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+	}
+}
+/// <summary>
+/// 启动材质溶解时间轴
+/// </summary>
+void ABlasterCharacter::StartDissolve()
+{
+	//绑定溶解完成的回调
+	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeline)
+	{
+		//将曲线加入到时间轴中。 参数：曲线、轨道
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		//启用时间线
+		DissolveTimeline->Play();
 	}
 }
 
