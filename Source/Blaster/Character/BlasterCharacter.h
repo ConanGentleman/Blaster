@@ -208,6 +208,9 @@ private:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_Health();
+
+	class ABlasterPlayerController* BlasterPlayerController;
+
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

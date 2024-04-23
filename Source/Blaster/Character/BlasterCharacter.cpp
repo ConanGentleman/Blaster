@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
 #include "Blaster/Blaster.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -102,6 +103,13 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	//获取角色控制器
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	if (BlasterPlayerController)
+	{
+		//更新HUD血量信息
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)

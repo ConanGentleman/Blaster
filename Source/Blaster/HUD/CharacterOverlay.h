@@ -7,7 +7,7 @@
 #include "CharacterOverlay.generated.h"
 
 /**
- * 
+ * 该类作为BlasterHUD中的一部分
  */
 UCLASS()
 class BLASTER_API UCharacterOverlay : public UUserWidget
