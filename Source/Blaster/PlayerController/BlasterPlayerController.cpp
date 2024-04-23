@@ -13,7 +13,7 @@ void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+	BlasterHUD = Cast<ABlasterHUD>(GetHUD()); 
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
