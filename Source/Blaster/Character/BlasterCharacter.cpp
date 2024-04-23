@@ -21,7 +21,7 @@
 ABlasterCharacter::ABlasterCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true; 
 	////这样设置是保证在重生点发生碰撞重合时，仍然生成角色。 视频这里添加后上除了，而在角色蓝图中进行的设置
 	//SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	//创建默认对象并命名为CameraBoom
