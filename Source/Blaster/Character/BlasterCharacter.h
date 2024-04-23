@@ -31,6 +31,10 @@ public:
 	/// 播放开火蒙太奇动画
 	/// </summary>
 	void PlayFireMontage(bool bAiming);
+	/// <summary>
+	/// 播放淘汰（死亡）蒙太奇动画
+	/// </summary>
+	void PlayElimMontage();
 
 	///// <summary>
 	///// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
@@ -45,8 +49,9 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 	/// <summary>
-	/// 淘汰（角色死亡）
+	/// 淘汰（角色死亡） 。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
 	void Elim();
 protected:
 	// Called when the game starts or when spawned
@@ -178,10 +183,16 @@ private:
 	class UAnimMontage* FireWeaponMontage;
 
 	/// <summary>
-	/// 手机动画蒙太奇
+	/// 受击动画蒙太奇
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
+
+	/// <summary>
+	/// 淘汰（死亡）动画蒙太奇
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
 
 	/// <summary>
 	/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色
@@ -232,6 +243,10 @@ private:
 	void OnRep_Health();
 
 	class ABlasterPlayerController* BlasterPlayerController;
+	/// <summary>
+	/// 角色是否被淘汰
+	/// </summary>
+	bool bElimmed = false;
 
 public:	
 	/// <summary>
@@ -266,4 +281,5 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };

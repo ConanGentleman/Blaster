@@ -41,7 +41,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	//是否旋转根骨骼（平滑控制人物持枪旋转的
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
-
+	//是否被淘汰（或死亡）
+	bElimmed = BlasterCharacter->IsElimmed();
 
 	//设置拿着装备的混合动画值
 	//自带的获取基础目标旋转的函数

@@ -101,11 +101,12 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 }
 
 /// <summary>
-/// 角色淘汰（死亡）
+/// 角色淘汰（死亡）。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 /// </summary>
-void ABlasterCharacter::Elim()
+void ABlasterCharacter::Elim_Implementation()
 {
-
+	bElimmed = true;
+	PlayElimMontage();
 }
 
 // Called when the game starts or when spawned
@@ -200,6 +201,19 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		//转换到对应蒙太奇动画的蒙太奇片段上
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+/// <summary>
+/// 播放角色淘汰（死亡）动画
+/// </summary>
+void ABlasterCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		//只有一个部分，因此不需要跳转到某个蒙太奇片段上
+		AnimInstance->Montage_Play(ElimMontage);
 	}
 }
 
