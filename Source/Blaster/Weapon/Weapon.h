@@ -54,6 +54,11 @@ public:
 	/// <param name="HitTarget">已通过射线检测（或其他方法）得到的命中目标的位置</param>
 	virtual void Fire(const FVector& HitTarget);
 
+	/// <summary>
+	/// 丢弃武器
+	/// </summary>
+	void Dropped();
+
 	/**
 	* 武器十字准星的贴图
 	*/

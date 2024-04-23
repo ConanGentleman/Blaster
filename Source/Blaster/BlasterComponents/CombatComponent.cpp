@@ -191,6 +191,16 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character) {
+		//武器状态和装备武器都属于复制变量，这里我们无法确保到底哪个复制会到达各个客户端，由于武器状态的修改会导致武器本身物理现象的改变（在Weapon中的SetWeaponState可知，装备时是没有物理的，没装备时是有物理的）就有可能与当前情况不匹配，导致装备武器的交互出现差错。
+		//因此为了避免伤处情况。选择在OnRep_EquippedWeapon将武器附加到客户端上。因为武器状态处理碰撞属性，如果视图捡起已经掉落的武器，他会进行物理模拟和启用物理功能，则无法将装备武器的附加到角色上。
+		//所以先在客户端设置装备状态
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
+
 		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致

@@ -111,6 +111,11 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 /// </summary>
 void ABlasterCharacter::Elim()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		//淘汰则武器掉落
+		Combat->EquippedWeapon->Dropped();
+	}
 	MulticastElim();
 	//设置一个计时器，用于玩家淘汰后一段时间内重生
 	GetWorldTimerManager().SetTimer(
@@ -128,7 +133,7 @@ void ABlasterCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
-
+	//启用角色材质溶解
 	if (DissolveMaterialInstance)
 	{
 		//创建动态材质实例
@@ -141,6 +146,18 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	}
 	//启用溶解
 	StartDissolve();
+
+	// 溶解时禁用角色移动
+	GetCharacterMovement()->DisableMovement();//禁止移动（但还可以旋转角色
+	GetCharacterMovement()->StopMovementImmediately();//立刻停止移动（主要用来禁止角色旋转
+	if (BlasterPlayerController)
+	{
+		//禁止输入（避免开火、跳跃、蹲下等
+		DisableInput(BlasterPlayerController);
+	}
+	// 溶解时使碰撞体无效，禁用碰撞
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用网格碰撞
 }
 /// <summary>
 /// 角色淘汰计时器完成后调用的函数。（这里用于复活角色

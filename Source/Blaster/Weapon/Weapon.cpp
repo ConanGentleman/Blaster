@@ -135,6 +135,28 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 		ShowPickupWidget(false);
 		//装备武器后，禁用球体碰撞器（避免装备上的武器仍然能够检测重叠）
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//关闭武器物理模拟
+		WeaponMesh->SetSimulatePhysics(false);
+		//关闭武器受重力影响
+		WeaponMesh->SetEnableGravity(false);
+		//设置武器网格无法碰撞
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	case EWeaponState::EWS_Dropped:
+		/*
+		现在set weapon state在服务器端被调用，但我们不知道是否会在客户端调用set weapons state。
+		所以我们需要确保，如果我们为区域球体启用碰撞，我们只在服务器上执行，这样我们就可以确保我们首先在服务器上执行。
+		*/
+		if (HasAuthority()) //武器被丢掉后，在服务器上启动球碰撞器
+		{
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		//开启武器物理模拟
+		WeaponMesh->SetSimulatePhysics(true);
+		//开启受重力影响
+		WeaponMesh->SetEnableGravity(true);
+		//开启武器网格碰撞
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
 }
@@ -151,7 +173,14 @@ void AWeapon::OnRep_WeaponState()
 		//隐藏文字提示
 		ShowPickupWidget(false);
 		//不用像CombatComponent再设置Owener。因为本身Owener也用ReplicatedUsing标记了，所以在服务器上设置时，客户端也同步了
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
+	case EWeaponState::EWS_Dropped:
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 }
 
@@ -193,4 +222,17 @@ void AWeapon::Fire(const FVector& HitTarget)
 		}
 	}
 }
-
+/// <summary>
+/// 丢弃武器（例如角色死亡时掉落
+/// </summary>
+void AWeapon::Dropped()
+{
+	//设置武器状态。
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	//组件分离规则。EDetachmentRule::KeepWorld表示武器会保持其世界变换
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	//从组件分离，传入分离规则
+	WeaponMesh->DetachFromComponent(DetachRules);
+	//设置所有者为空
+	SetOwner(nullptr);
+}
