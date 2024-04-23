@@ -185,6 +185,29 @@ private:
 	/// </summary>
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
+
+	
+	/**
+	* 玩家血量
+	*/
+
+	/// <summary>
+	/// 最大血量
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	/// <summary>
+	/// 当前血量（可复制，复制通知为OnRep_Health）
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.f;
+
+	/// <summary>
+	/// （在服务器上）血量变化时，通知各客户端调用的回调函数。
+	/// </summary>
+	UFUNCTION()
+	void OnRep_Health();
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

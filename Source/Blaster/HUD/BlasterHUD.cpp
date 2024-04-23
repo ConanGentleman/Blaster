@@ -2,6 +2,34 @@
 
 
 #include "BlasterHUD.h"
+#include "GameFramework/PlayerController.h"
+#include "CharacterOverlay.h"
+
+void ABlasterHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+/// <summary>
+/// （用于在游戏开始时）添加血量界面到屏幕
+/// </summary>
+void ABlasterHUD::AddCharacterOverlay()
+{
+	//为了调用CreateWidget，需要获取一个玩家控制器
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && CharacterOverlayClass)
+	{
+		/// <summary>
+		/// 创捷用户界面
+		/// </summary>
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		/// <summary>
+		/// 将用户界面添加到屏幕
+		/// </summary>
+		CharacterOverlay->AddToViewport();
+	}
+}
 
 /// <summary>
 /// 在这里绘制射击的十字准星

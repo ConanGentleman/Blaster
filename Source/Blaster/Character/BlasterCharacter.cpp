@@ -87,6 +87,8 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	//DOREPLIFETIME_CONDITION参数：指定角色类（具有复制变量的类），复制变量，条件（这里COND_OwnerOnly，如果你在机器上控制Pawn，那么就是Pawn的Owner
 	//当条件设为COND_OwnerOnly，意味着重叠武器将仅复制到当前控制的BlasterCharacter所对应的客户端
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon,COND_OwnerOnly);
+
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 void ABlasterCharacter::OnRep_ReplicatedMovement()
@@ -504,6 +506,14 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
+}
+
+/// <summary>
+/// （在服务器上）血量变化时，通知各客户端调用的回调函数。
+/// </summary>
+void ABlasterCharacter::OnRep_Health()
+{
+
 }
 
 /// <summary>

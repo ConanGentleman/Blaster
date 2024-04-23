@@ -39,6 +39,23 @@ public:
 	/// 在这里绘制准星
 	/// </summary>
 	virtual void DrawHUD() override;
+
+	/// <summary>
+	/// 血量显示的用户界面
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+
+	/// <summary>
+	/// 血量显示的信息
+	/// </summary>
+	class UCharacterOverlay* CharacterOverlay;
+protected:
+	virtual void BeginPlay() override;
+	/// <summary>
+	/// （用于在游戏开始时）添加血量界面到屏幕
+	/// </summary>
+	void AddCharacterOverlay();
 private:
 	/// <summary>
 	/// 准星贴图
