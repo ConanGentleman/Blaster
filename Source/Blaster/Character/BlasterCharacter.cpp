@@ -859,6 +859,12 @@ FVector ABlasterCharacter::GetHitTarget() const
 	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;
 }
-
-
-
+/// <summary>
+/// 获取战斗状态
+/// </summary>
+/// <returns></returns>
+ECombatState ABlasterCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
+}

@@ -7,6 +7,7 @@
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
+#include "Blaster/BlasterTypes/CombatState.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -153,7 +154,7 @@ private:
 	/// <summary>
 	/// 战斗组件，用于处理角色所有雨战斗相关的功能（也是一个可以被复制的变量
 	/// </summary>
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
 
 	//远程过程调用（RPC）具有在一台机器上调用并在另一台机器上执行的功能。例如可以从客户端上调用，并在服务器上执行对应函数
@@ -399,4 +400,9 @@ public:
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	/// <summary>
+	/// 获取战斗状态
+	/// </summary>
+	/// <returns></returns>
+	ECombatState GetCombatState() const;
 };

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/Weapon/WeaponTypes.h"
+#include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 //射线检测的距离长度
 #define TRACE_LENGTH 80000.f
@@ -36,6 +37,12 @@ public:
 	/// 换弹
 	/// </summary>
 	void Reload();
+
+	/// <summary>
+	/// 完成换弹，可供蓝图使用。在换弹动画播放完后通过动画通知在蓝图中调用该函数。（动画通知似乎会进行复制？
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -99,6 +106,11 @@ protected:
 	/// </summary>
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
+
+	/// <summary>
+	/// 处理发生在所有机器上的事情。（如播放换弹蒙太奇动画
+	/// </summary>
+	void HandleReload();
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 
@@ -263,6 +275,18 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 30;
 
+	///初始化携带的子弹数量
 	void InitializeCarriedAmmo();
 
+	/// <summary>
+	/// 战斗状态 复制变量
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	/// <summary>
+	/// 战斗状态变量复制时调用
+	/// </summary>
+	UFUNCTION()
+	void OnRep_CombatState();
 };

@@ -130,4 +130,10 @@ private:
 	/// </summary>
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bElimmed;
+
+	/// <summary>
+	/// 是否使用IK
+	/// </summary>
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bUseFABRIK;
 };

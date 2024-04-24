@@ -37,6 +37,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	//DOREPLIFETIME_CONDITION参数：指定角色类（具有复制变量的类），复制变量，条件（这里COND_OwnerOnly，如果你在机器上控制Pawn，那么就是Pawn的Owner
 	//当条件设为COND_OwnerOnly，意味着携带的子弹数量将仅复制到当前控制的BlasterCharacter所对应的客户端
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
+	DOREPLIFETIME(UCombatComponent, CombatState);
 }
 
 // Called when the game starts
@@ -219,8 +220,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 /// </summary>
 void UCombatComponent::Reload()
 {
-	//
-	if (CarriedAmmo > 0)
+	//携带子弹大于0且不处于换弹状态 才调用RPC。不然可能存在一直按R 的情况
+	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
 	{
 		ServerReload();
 	}
@@ -232,9 +233,45 @@ void UCombatComponent::ServerReload_Implementation()
 {
 	if (Character == nullptr) return;
 
-	Character->PlayReloadMontage();
+	CombatState = ECombatState::ECS_Reloading;
+	HandleReload();
 }
 
+/// <summary>
+/// 完成换弹调用
+/// </summary>
+void UCombatComponent::FinishReloading()
+{
+	if (Character == nullptr) return;
+	//由权限才能变换状态
+	if (Character->HasAuthority())
+	{
+		//换弹完成变换状态
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+}
+
+/// <summary>
+/// 战斗状态变量复制时调用
+/// </summary>
+void UCombatComponent::OnRep_CombatState()
+{
+	//根据状态类型做不同行为
+	switch (CombatState)
+	{
+	case ECombatState::ECS_Reloading:
+		HandleReload();
+		break;
+	}
+}
+
+/// <summary>
+/// 处理发生在所有机器上的事情。（如播放换弹蒙太奇动画
+/// </summary>
+void UCombatComponent::HandleReload()
+{
+	Character->PlayReloadMontage();
+}
 
 /// <summary>
 /// 用于装备武器的变量复制前的调用
