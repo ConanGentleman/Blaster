@@ -146,6 +146,11 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+	//如果子弹打空了，则自动换弹
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 }
 
 /// <summary>
@@ -219,7 +224,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 			Character->GetActorLocation()
 		);
 	}
-
+	//如果子弹打空了，则自动换弹
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
