@@ -88,17 +88,22 @@ protected:
 	/// <param name="DeltaTime"></param>
 	void SetHUDCrosshairs(float DeltaTime);
 private:
+	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
+
 	/// <summary>
 	/// 当前对应的角色。这样就可以访问角色来调用其上的函数并执行附加武器之类的操作 
 	/// </summary>
+	UPROPERTY()
 	class ABlasterCharacter* Character;
 	/// <summary>
 	/// 当前对应的玩家控制器。用于获取HUD
 	/// </summary>
+	UPROPERTY()
 	class ABlasterPlayerController* Controller;
 	/// <summary>
 	/// 当前对应的HUD。从ABlasterPlayerController中获取
 	/// </summary>
+	UPROPERTY()
 	class ABlasterHUD* HUD;
 	/// <summary>
 	/// 当前装备的武器(设置为复制变量是因为，在此之前装备的武器在所有客户端上都将为空，

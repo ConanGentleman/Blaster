@@ -254,6 +254,8 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	//加上UPROPERTY()的原因是让BlasterPlayerController初始化为nullptr，即与class ABlasterPlayerController* BlasterPlayerController=nullptr相同
+	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
 	/// <summary>
 	/// 角色是否被淘汰
@@ -341,6 +343,8 @@ private:
 	/// <summary>
 	/// 当前玩家状态
 	/// </summary>
+	//加上UPROPERTY()的原因是让BlasterPlayerState初始化为nullptr，即与class ABlasterPlayerState* BlasterPlayerState=nullptr相同
+	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
 public:	
 	/// <summary>

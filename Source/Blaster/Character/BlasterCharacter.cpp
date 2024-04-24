@@ -721,6 +721,8 @@ void ABlasterCharacter::PollInit()
 		{
 			//传递的参数是增加的得分，因为是重生所以没得分，分数只能+0
 			BlasterPlayerState->AddToScore(0.f);
+			//死亡同理
+			BlasterPlayerState->AddToDefeats(0);
 		}
 	}
 }

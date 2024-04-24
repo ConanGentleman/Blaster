@@ -29,7 +29,11 @@ void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacte
 		//玩家死亡，则给予攻击者1分
 		AttackerPlayerState->AddToScore(1.f);
 	}
-
+	//死亡的玩家死亡次数+1
+	if (VictimPlayerState)
+	{
+		VictimPlayerState->AddToDefeats(1);
+	}
 
 	if (ElimmedCharacter)
 	{

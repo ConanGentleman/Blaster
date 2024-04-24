@@ -61,7 +61,9 @@ private:
 
 	/// <summary>
 	/// 用以存储基于Tracer生成后的粒子附加器
+	/// 加上UPROPERTY()使其初始化为nullptr
 	/// </summary>
+	UPROPERTY()
 	class UParticleSystemComponent* TracerComponent;
 
 	/// <summary>

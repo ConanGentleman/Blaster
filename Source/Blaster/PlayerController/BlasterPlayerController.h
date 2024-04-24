@@ -25,6 +25,11 @@ public:
 	/// <param name="Score"></param>
 	void SetHUDScore(float Score);
 	/// <summary>
+	/// 设置HUD中的死亡信息
+	/// </summary>
+	/// <param name="Defeats"></param>
+	void SetHUDDefeats(int32 Defeats);
+	/// <summary>
 	/// 当一个角色被控制器拥有时，即玩家开始控制该角色时，OnPossess函数就会被调用。（可以用在角色淘汰被重生时使用，因为其发生了控制器对角色控制的分离和新角色的控制
 	/// 测试了一下好像刚开始获取的时候并不会调用
 	/// </summary>
@@ -35,6 +40,8 @@ protected:
 
 private:
 	//角色HUD
+	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
+	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
 	
 };
