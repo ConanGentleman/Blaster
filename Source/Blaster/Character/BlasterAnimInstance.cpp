@@ -124,3 +124,4 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	//在换弹，取消右手变换
 	bTransformRightHand = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }
+ 
