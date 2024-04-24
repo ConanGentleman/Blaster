@@ -38,4 +38,10 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DefeatsAmount;
+
+	/// <summary>
+	/// 子弹文字
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* WeaponAmmoAmount;
 };

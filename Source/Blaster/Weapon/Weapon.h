@@ -47,6 +47,15 @@ public:
 	/// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	/// <summary>
+	/// 当武器所有者改变时调用的函数（AActor已内置的owner复制变量）
+	/// </summary>
+	virtual void OnRep_Owner() override;
+	/// <summary>
+	/// 设置HUD上的子弹信息
+	/// </summary>
+	void SetHUDAmmo();
+
 	void ShowPickupWidget(bool bShowWidget);
 	/// <summary>
 	/// 开火
@@ -166,6 +175,34 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
+
+	/// <summary>
+	/// 子弹数量（复制变量）
+	/// </summary>
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	int32 Ammo;
+
+	/// <summary>
+	/// 子弹数量复制时调用的函数
+	/// </summary>
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	/// <summary>
+	/// 花费子弹（由于设定的子弹都是一个一个的，所以在这里面就直接--。同时更新HUD上的子弹信息
+	/// </summary>
+	void SpendRound();
+
+	/// <summary>
+	/// 子弹容量
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 MagCapacity;
+
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
 
 public:	
 	///设置武器状态 

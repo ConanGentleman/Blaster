@@ -159,12 +159,16 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 }
 
 /// <summary>
-/// 装备(捡起)武器
+/// 装备(捡起或替换)武器
 /// </summary>
 /// <param name="WeaponToEquip"></param>
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
+	if (EquippedWeapon)//替换武器
+	{
+		EquippedWeapon->Dropped();
+	}
 
 	EquippedWeapon = WeaponToEquip;
 	//设置武器状态
@@ -179,6 +183,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	//设置武器的所有者
 	EquippedWeapon->SetOwner(Character);
+	//装备武器更新子弹信息显示
+	EquippedWeapon->SetHUDAmmo();
 	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致

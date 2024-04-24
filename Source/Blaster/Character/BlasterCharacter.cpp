@@ -136,6 +136,11 @@ void ABlasterCharacter::Elim()
 /// </summary>
 void ABlasterCharacter::MulticastElim_Implementation()
 {
+	if (BlasterPlayerController)
+	{
+		//设置子弹数量
+		BlasterPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bElimmed = true;
 	PlayElimMontage();
 	//启用角色材质溶解

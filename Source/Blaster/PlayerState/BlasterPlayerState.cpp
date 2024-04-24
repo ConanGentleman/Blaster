@@ -24,7 +24,8 @@ void ABlasterPlayerState::AddToScore(float ScoreAmount)
 	SetScore(GetScore() + ScoreAmount);//复制变量修改会触发OnRep_Score调用
 	//获取当前控制的玩家角色
 	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
-	if (Character && Character->Controller)
+	//if (Character && Character->Controller)将原有的判断条件修改为了下一行，保证Controller的正常获取，以修复上一次出现的defeat不正确的问题
+	if (Character)
 	{
 		//获取当前控制器
 		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
@@ -46,7 +47,8 @@ void ABlasterPlayerState::OnRep_Score()
 
 	//获取当前控制的玩家角色
 	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
-	if (Character && Character->Controller)
+	//if (Character && Character->Controller)将原有的判断条件修改为了下一行，保证Controller的正常获取，以修复上一次出现的defeat不正确的问题
+	if (Character)
 	{
 		//获取当前控制器
 		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
@@ -67,7 +69,8 @@ void ABlasterPlayerState::AddToDefeats(int32 DefeatsAmount)
 {
 	Defeats += DefeatsAmount;//复制变量修改会触发OnRep_Defeats调用
 	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
-	if (Character && Character->Controller)
+	//if (Character && Character->Controller)将原有的判断条件修改为了下一行，保证Controller的正常获取，以修复上一次出现的defeat不正确的问题
+	if (Character)
 	{
 		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 		if (Controller)
@@ -85,7 +88,8 @@ void ABlasterPlayerState::AddToDefeats(int32 DefeatsAmount)
 void ABlasterPlayerState::OnRep_Defeats()
 {
 	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
-	if (Character && Character->Controller)
+	//if (Character && Character->Controller)将原有的判断条件修改为了下一行，保证Controller的正常获取，以修复上一次出现的defeat不正确的问题
+	if (Character)
 	{
 		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 		if (Controller)

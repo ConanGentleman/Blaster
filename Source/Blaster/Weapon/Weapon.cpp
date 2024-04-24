@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -83,6 +84,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//将武器状态注册为复制变量
 	DOREPLIFETIME(AWeapon, WeaponState);
+	//将子弹数量注册为复制变量
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 /// <summary>
@@ -122,6 +125,54 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		BlasterCharacter->SetOverlappingWeapon(nullptr);//设置OverlappingWeapon，因为离开了 所以为空
 	}
 }
+
+/// <summary>
+/// 设置更新HUD的子弹信息
+/// </summary>
+void AWeapon::SetHUDAmmo()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if (BlasterOwnerController)
+		{
+			BlasterOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+/// <summary>
+/// 花费子弹（由于设定的子弹都是一个一个的，所以在这里面就直接--。同时更新HUD上的子弹信息
+/// </summary>
+void AWeapon::SpendRound()
+{
+	--Ammo;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	//如果武器所有者为空，则没有所有角色了
+	if (Owner == nullptr)
+	{
+		BlasterOwnerCharacter = nullptr;
+		BlasterOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
+}
+
+
 /// <summary>
 /// 客户端、服务器都会调用
 /// 设置武器状态
@@ -221,6 +272,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+	//开火则会消耗子弹
+	SpendRound();
 }
 /// <summary>
 /// 丢弃武器（例如角色死亡时掉落
@@ -235,4 +288,7 @@ void AWeapon::Dropped()
 	WeaponMesh->DetachFromComponent(DetachRules);
 	//设置所有者为空
 	SetOwner(nullptr);
+	//武器被丢弃后就不应该由所有者了
+	BlasterOwnerCharacter = nullptr;
+	BlasterOwnerController = nullptr;
 }
