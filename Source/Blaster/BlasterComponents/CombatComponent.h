@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Blaster/HUD/BlasterHUD.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 //射线检测的距离长度
 #define TRACE_LENGTH 80000.f
@@ -226,5 +227,24 @@ private:
 	/// </summary>
 	/// <returns></returns>
 	bool CanFire();
+
+
+	/// <summary>
+	/// 所携带的对应当前装备武器类型的子弹。将该变量放在CombatComponent而没有放在PlayerState是因为PlayerState复制变量更慢
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
+	int32 CarriedAmmo;
+
+	/// <summary>
+	/// 携带子弹数量复制时调用的函数
+	/// </summary>
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	/// <summary>
+	/// 武器类型与对应的携带的子弹数量
+	/// </summary>
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
 
 };

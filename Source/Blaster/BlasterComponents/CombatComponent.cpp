@@ -33,6 +33,10 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	//可使用DOREPLIFETIME_CONDITION来指定向那些客户端复制变量
+	//DOREPLIFETIME_CONDITION参数：指定角色类（具有复制变量的类），复制变量，条件（这里COND_OwnerOnly，如果你在机器上控制Pawn，那么就是Pawn的Owner
+	//当条件设为COND_OwnerOnly，意味着携带的子弹数量将仅复制到当前控制的BlasterCharacter所对应的客户端
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
 
 // Called when the game starts
@@ -429,4 +433,9 @@ bool UCombatComponent::CanFire()
 	if (EquippedWeapon == nullptr) return false;
 	//判断武器子弹是否为空或者是否不能开火
 	return !EquippedWeapon->IsEmpty() || !bCanFire;
+}
+
+void UCombatComponent::OnRep_CarriedAmmo()
+{
+
 }

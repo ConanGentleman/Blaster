@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 
 USTRUCT(BlueprintType)
 /// <summary>
-/// ×¼ĞÇÌùÍ¼½á¹¹Ìå
+/// å‡†æ˜Ÿè´´å›¾ç»“æ„ä½“
 /// </summary>
 struct FHUDPackage
 {
@@ -19,10 +19,10 @@ public:
 	UTexture2D* CrosshairsRight;
 	UTexture2D* CrosshairsTop;
 	UTexture2D* CrosshairsBottom;
-	///×¼ĞÇÀ©É¢
+	///å‡†æ˜Ÿæ‰©æ•£
 	float CrosshairSpread;
 	/// <summary>
-	/// ×¼ĞÇÑÕÉ«
+	/// å‡†æ˜Ÿé¢œè‰²
 	/// </summary>
 	FLinearColor CrosshairsColor;
 };
@@ -36,49 +36,49 @@ class BLASTER_API ABlasterHUD : public AHUD
 	GENERATED_BODY()
 public:
 	/// <summary>
-	/// ÔÚÕâÀï»æÖÆ×¼ĞÇ
+	/// åœ¨è¿™é‡Œç»˜åˆ¶å‡†æ˜Ÿ
 	/// </summary>
 	virtual void DrawHUD() override;
 
 	/// <summary>
-	/// ÑªÁ¿ÏÔÊ¾µÄÓÃ»§½çÃæ
+	/// è¡€é‡æ˜¾ç¤ºçš„ç”¨æˆ·ç•Œé¢
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 
 	/// <summary>
-	/// ÑªÁ¿ÏÔÊ¾µÄĞÅÏ¢
+	/// è§’è‰²å„é¡¹ä¿¡æ¯çš„æ˜¾ç¤º
 	/// </summary>
 	class UCharacterOverlay* CharacterOverlay;
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>
-	/// £¨ÓÃÓÚÔÚÓÎÏ·¿ªÊ¼Ê±£©Ìí¼ÓÑªÁ¿½çÃæµ½ÆÁÄ»
+	/// ï¼ˆç”¨äºåœ¨æ¸¸æˆå¼€å§‹æ—¶ï¼‰æ·»åŠ è¡€é‡ç•Œé¢åˆ°å±å¹•
 	/// </summary>
 	void AddCharacterOverlay();
 private:
 	/// <summary>
-	/// ×¼ĞÇÌùÍ¼
+	/// å‡†æ˜Ÿè´´å›¾
 	/// </summary>
 	FHUDPackage HUDPackage;
 
 	/// <summary>
-	/// »æÖÆ×¼ĞÇµÄº¯Êı
+	/// ç»˜åˆ¶å‡†æ˜Ÿçš„å‡½æ•°
 	/// </summary>
 	/// <param name="Texture"></param>
 	/// <param name="ViewportCenter"></param>
 	/// <param name="Spread"></param>
-	/// <param name="CrosshairColor">×¼ĞÇÑÕÉ«</param>
+	/// <param name="CrosshairColor">å‡†æ˜Ÿé¢œè‰²</param>
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
 
 	/// <summary>
-	/// ×¼ĞÇÀ©É¢×î´óÖµ£¨Êµ¼ÊÉÏÊÇÓÃÓÚµ÷Õû×¼ĞÇÀ©É¢µÄ
+	/// å‡†æ˜Ÿæ‰©æ•£æœ€å¤§å€¼ï¼ˆå®é™…ä¸Šæ˜¯ç”¨äºè°ƒæ•´å‡†æ˜Ÿæ‰©æ•£çš„
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.f;
 public:
 	/// <summary>
-	/// ÉèÖÃ×¼ĞÇÌùÍ¼
+	/// è®¾ç½®å‡†æ˜Ÿè´´å›¾
 	/// </summary>
 	/// <param name="Package"></param>
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

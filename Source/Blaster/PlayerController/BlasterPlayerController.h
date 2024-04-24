@@ -35,6 +35,11 @@ public:
 	/// <param name="Ammo"></param>
 	void SetHUDWeaponAmmo(int32 Ammo);
 	/// <summary>
+	/// 设置HUD中所携带的子弹数量
+	/// </summary>
+	/// <param name="Ammo"></param>
+	void SetHUDCarriedAmmo(int32 Ammo);
+	/// <summary>
 	/// 当一个角色被控制器拥有时，即玩家开始控制该角色时，OnPossess函数就会被调用。（可以用在角色淘汰被重生时使用，因为其发生了控制器对角色控制的分离和新角色的控制
 	/// 测试了一下好像刚开始获取的时候并不会调用
 	/// </summary>

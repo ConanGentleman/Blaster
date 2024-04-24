@@ -44,4 +44,10 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* WeaponAmmoAmount;
+
+	/// <summary>
+	/// 所携带的子弹数量（角色自己的弹匣）
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CarriedAmmoAmount;
 };
