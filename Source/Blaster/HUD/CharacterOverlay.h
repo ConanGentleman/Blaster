@@ -50,4 +50,10 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CarriedAmmoAmount;
+
+	/// <summary>
+	/// 匹配倒计时文字
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MatchCountdownText;
 };
