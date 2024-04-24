@@ -31,6 +31,11 @@ public:
 
 	///装备武器
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+
+	/// <summary>
+	/// 换弹
+	/// </summary>
+	void Reload();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -88,6 +93,12 @@ protected:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	void SetHUDCrosshairs(float DeltaTime);
+
+	/// <summary>
+	/// 换弹,RPC，客户端或服务器调用，仅在服务器执行。
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 
@@ -246,5 +257,12 @@ private:
 	/// </summary>
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
+	/// <summary>
+	/// 初始携带的子弹数
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
+
+	void InitializeCarriedAmmo();
 
 };

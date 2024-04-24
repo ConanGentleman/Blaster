@@ -33,6 +33,10 @@ public:
 	/// </summary>
 	void PlayFireMontage(bool bAiming);
 	/// <summary>
+	/// 播放换弹动画
+	/// </summary>
+	void PlayReloadMontage();
+	/// <summary>
 	/// 播放淘汰（死亡）蒙太奇动画
 	/// </summary>
 	void PlayElimMontage();
@@ -74,6 +78,8 @@ protected:
 	void EquipButtonPressed();
 	//蹲下
 	void CrouchButtonPressed();
+	//换弹
+	void ReloadButtonPressed();
 	//瞄准
 	void AimButtonPressed();
 	//取消瞄准
@@ -188,11 +194,22 @@ private:
 	/// <param name="DeltaTime"></param>
 	void TurnInPlace(float DeltaTime);
 
+	/**
+	* 动画蒙太奇
+	*/
+
 	/// <summary>
 	/// 开火动画的蒙太奇动画
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	/// <summary>
+	/// 换弹动画蒙太奇
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ReloadMontage;
+
 
 	/// <summary>
 	/// 受击动画蒙太奇

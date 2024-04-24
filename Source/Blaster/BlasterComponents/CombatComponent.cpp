@@ -53,6 +53,12 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
+		//只能由服务器来设置
+		if (Character->HasAuthority())
+		{
+			//初始化角色携带的子弹数量
+			InitializeCarriedAmmo();
+		}
 	}
 }
 
@@ -189,11 +195,46 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetOwner(Character);
 	//装备武器更新子弹信息显示
 	EquippedWeapon->SetHUDAmmo();
+	//判断是否存在武器类型，存在则获取携带的子弹数量
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	//获取控制器
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		//设置HUD上的携带子弹数
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
 	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
 	Character->bUseControllerRotationYaw = true;
 }
+
+/// <summary>
+/// 换弹（服务器或客户端都可调用）
+/// </summary>
+void UCombatComponent::Reload()
+{
+	//
+	if (CarriedAmmo > 0)
+	{
+		ServerReload();
+	}
+}
+/// <summary>
+/// 换弹RPC。仅在服务器执行
+/// </summary>
+void UCombatComponent::ServerReload_Implementation()
+{
+	if (Character == nullptr) return;
+
+	Character->PlayReloadMontage();
+}
+
 
 /// <summary>
 /// 用于装备武器的变量复制前的调用
@@ -434,8 +475,23 @@ bool UCombatComponent::CanFire()
 	//判断武器子弹是否为空或者是否不能开火
 	return !EquippedWeapon->IsEmpty() || !bCanFire;
 }
-
+/// <summary>
+/// 携带子弹数量复制时调用
+/// </summary>
 void UCombatComponent::OnRep_CarriedAmmo()
 {
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+}
 
+/// <summary>
+/// 初始化携带的子弹数量
+/// </summary>
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	//想map中添加武器类型及携带的子弹数量
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
 }
