@@ -294,6 +294,18 @@ void AWeapon::Dropped()
 }
 
 /// <summary>
+/// 添加子弹
+/// </summary>
+/// <param name="AmmoToAdd"></param>
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
+	//更新HUD子弹信息
+	SetHUDAmmo();
+}
+
+
+/// <summary>
 /// 判断武器子弹是否为空
 /// </summary>
 /// <returns></returns>

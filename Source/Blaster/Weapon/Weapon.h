@@ -69,6 +69,12 @@ public:
 	/// </summary>
 	void Dropped();
 
+	/// <summary>
+	/// 添加子弹
+	/// </summary>
+	/// <param name="AmmoToAdd"></param>
+	void AddAmmo(int32 AmmoToAdd);
+
 	/**
 	* 武器十字准星的贴图
 	*/
@@ -221,4 +227,6 @@ public:
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	bool IsEmpty();
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 };

@@ -111,6 +111,8 @@ protected:
 	/// 处理发生在所有机器上的事情。（如播放换弹蒙太奇动画
 	/// </summary>
 	void HandleReload();
+
+	int32 AmountToReload();
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 
@@ -289,4 +291,6 @@ private:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void UpdateAmmoValues();
 };

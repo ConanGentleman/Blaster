@@ -163,7 +163,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
-	if (Character) {
+	if (Character && CombatState == ECombatState::ECS_Unoccupied) {//保证是空闲状态才能开火
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
 	}
@@ -231,7 +231,7 @@ void UCombatComponent::Reload()
 /// </summary>
 void UCombatComponent::ServerReload_Implementation()
 {
-	if (Character == nullptr) return;
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
 
 	CombatState = ECombatState::ECS_Reloading;
 	HandleReload();
@@ -248,7 +248,39 @@ void UCombatComponent::FinishReloading()
 	{
 		//换弹完成变换状态
 		CombatState = ECombatState::ECS_Unoccupied;
+		//换弹动作完成才修改武器子弹和携带子弹量
+		UpdateAmmoValues();
 	}
+	//换弹完成后尝试开一下火，有点像预输入
+	if (bFireButtonPressed)
+	{
+		Fire();
+	}
+}
+
+/// <summary>
+/// 换弹更新子弹和携带子弹的值
+/// </summary>
+void UCombatComponent::UpdateAmmoValues()
+{
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
+	//获取计算能够换弹多杀
+	int32 ReloadAmount = AmountToReload();
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		//携带子弹减少
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= ReloadAmount;
+		//获取减少后携带的子弹量
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		//更新携带子弹量
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+	//更新武器子弹量
+	EquippedWeapon->AddAmmo(-ReloadAmount);
 }
 
 /// <summary>
@@ -262,6 +294,13 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading:
 		HandleReload();
 		break;
+	case ECombatState::ECS_Unoccupied:
+		//如果换弹完成并且按着左键，则开火
+		if (bFireButtonPressed)
+		{
+			Fire();
+		}
+		break;
 	}
 }
 
@@ -271,6 +310,28 @@ void UCombatComponent::OnRep_CombatState()
 void UCombatComponent::HandleReload()
 {
 	Character->PlayReloadMontage();
+}
+
+/// <summary>
+/// 计算武器换弹能换多少子弹量
+/// </summary>
+/// <returns></returns>
+int32 UCombatComponent::AmountToReload()
+{
+	if (EquippedWeapon == nullptr) return 0;
+	//容量-当前子弹量=可装填的子弹量
+	int32 RoomInMag = EquippedWeapon->GetMagCapacity() - EquippedWeapon->GetAmmo();
+	//携带有同类型的子弹
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		//获取所携带的子弹量
+		int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		//比较携带的和所需的那个小
+		int32 Least = FMath::Min(RoomInMag, AmountCarried);
+		//获得最终可换弹的子弹数量
+		return FMath::Clamp(RoomInMag, 0, Least);
+	}
+	return 0;
 }
 
 /// <summary>
@@ -509,8 +570,8 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
-	//判断武器子弹是否为空或者是否不能开火
-	return !EquippedWeapon->IsEmpty() || !bCanFire;
+	//判断武器子弹是否不为空 且 能开火 且处于空闲状态（即不运行在装弹时开火）
+	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 /// <summary>
 /// 携带子弹数量复制时调用
