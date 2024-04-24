@@ -95,7 +95,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 /// </summary>
 void UCombatComponent::Fire()
 {
-	if (bCanFire && EquippedWeapon)
+	if (CanFire())
 	{
 		//在下次开火计时完成之前 无法再次开火，所以设置为false
 		bCanFire = false;
@@ -420,3 +420,13 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 }
 
 
+/// <summary>
+/// 判断是否能够开火
+/// </summary>
+/// <returns></returns>
+bool UCombatComponent::CanFire()
+{
+	if (EquippedWeapon == nullptr) return false;
+	//判断武器子弹是否为空或者是否不能开火
+	return !EquippedWeapon->IsEmpty() || !bCanFire;
+}

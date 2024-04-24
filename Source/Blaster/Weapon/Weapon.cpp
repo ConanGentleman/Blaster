@@ -147,7 +147,7 @@ void AWeapon::SetHUDAmmo()
 /// </summary>
 void AWeapon::SpendRound()
 {
-	--Ammo;
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
 }
 
@@ -291,4 +291,13 @@ void AWeapon::Dropped()
 	//武器被丢弃后就不应该由所有者了
 	BlasterOwnerCharacter = nullptr;
 	BlasterOwnerController = nullptr;
+}
+
+/// <summary>
+/// 判断武器子弹是否为空
+/// </summary>
+/// <returns></returns>
+bool AWeapon::IsEmpty()
+{
+	return Ammo <= 0;
 }

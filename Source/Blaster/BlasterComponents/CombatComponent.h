@@ -221,4 +221,10 @@ private:
 	/// </summary>
 	void FireTimerFinished();
 
+	/// <summary>
+	/// 是否能够开火
+	/// </summary>
+	/// <returns></returns>
+	bool CanFire();
+
 };
