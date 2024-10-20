@@ -55,6 +55,12 @@ public:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	virtual void Tick(float DeltaTime) override;
+	/// <summary>
+	/// 获取服务器时间（与服务器时间同步）
+	/// </summary>
+	/// <returns></returns>
+	virtual float GetServerTime(); 
+	virtual void ReceivedPlayer() override; // 尽快同步服务器时间
 protected:
 	virtual void BeginPlay() override;
 
@@ -62,6 +68,38 @@ protected:
 	/// 倒计时
 	/// </summary>
 	void SetHUDTime();
+
+	/**
+	* 同步客户端和服务器之间的时间（用于比赛时间显示）
+	* 客户端的时间 = 服务器的时间 + （客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
+	*/
+
+	// 请求当前服务器时间,并传入发送请求时客户端的时间（传入时间在服务器中只用来后续返回给客户端以计算往返时间）
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	//  服务器响应erverRequestServerTime，将服务器时间发送给客户端
+	//  服务器把客户端请求时的时间以及服务器的当前时间发送回客户端
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
+	float ClientServerDelta = 0.f; // 客户端当前与服务器的时间差
+
+	/// <summary>
+	/// 每隔一段时间，同步一下服务器和客户端的时间及时间增量
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Time)
+	float TimeSyncFrequency = 5.f;
+	/// <summary>
+	/// 距离上一次时间同步的时间计时
+	/// </summary>
+	float TimeSyncRunningTime = 0.f;
+	/// <summary>
+	/// 检查是否到同步间隔时间了
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void CheckTimeSync(float DeltaTime);
+
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
