@@ -49,6 +49,7 @@ public:
 	/// <summary>
 	/// 角色各项信息的显示
 	/// </summary>
+	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 protected:
 	virtual void BeginPlay() override;

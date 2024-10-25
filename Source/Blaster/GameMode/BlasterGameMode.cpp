@@ -10,6 +10,35 @@
 
 //GameMode仅存于服务器上！！！！
 
+//构造函数
+ABlasterGameMode::ABlasterGameMode()
+{
+	bDelayedStart = true;//是否延迟开始游戏（即让游戏状态停留在等待开始状态）
+}
+
+void ABlasterGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	//设置进入游戏关卡时的时刻
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void ABlasterGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		//实际上就是 WarmupTime - (GetWorld()->GetTimeSeconds() - LevelStartingTime)
+		//看预热时间是否为0
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();//开始游戏，将游戏状态变为InProgress 进行中
+		}
+	}
+}
+
 /// <summary>
 /// 玩家被淘汰（死亡）时调用的函数 （比如处理增加玩家得分之类的事情
 /// </summary>
