@@ -44,7 +44,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	/// <summary>
+	/// 游戏状态设置的回调
+	/// </summary>
+	virtual void OnMatchStateSet() override;
 private:
 	/// <summary>
 	/// 预热时间倒计时

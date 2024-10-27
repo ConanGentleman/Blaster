@@ -8,8 +8,6 @@
 void ABlasterHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AddCharacterOverlay();
 }
 /// <summary>
 /// （用于在游戏开始时）添加血量界面到屏幕

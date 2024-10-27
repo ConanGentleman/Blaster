@@ -47,16 +47,16 @@ public:
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 
 	/// <summary>
+	/// （用于在游戏开始时）添加血量界面到屏幕
+	/// </summary>
+	void AddCharacterOverlay();
+	/// <summary>
 	/// 角色各项信息的显示
 	/// </summary>
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 protected:
 	virtual void BeginPlay() override;
-	/// <summary>
-	/// （用于在游戏开始时）添加血量界面到屏幕
-	/// </summary>
-	void AddCharacterOverlay();
 private:
 	/// <summary>
 	/// 准星贴图

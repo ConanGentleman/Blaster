@@ -55,12 +55,18 @@ public:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	/// <summary>
 	/// 获取服务器时间（与服务器时间同步）
 	/// </summary>
 	/// <returns></returns>
 	virtual float GetServerTime(); 
 	virtual void ReceivedPlayer() override; // 尽快同步服务器时间
+	/// <summary>
+	/// 用于BlasterGameMode类将游戏模式状态设置过来（但只会发生在服务器上，因为只有服务器才有游戏模式）
+	/// </summary>
+	/// <param name="State"></param>
+	void OnMatchStateSet(FName State);
 protected:
 	virtual void BeginPlay() override;
 
@@ -68,7 +74,10 @@ protected:
 	/// 倒计时
 	/// </summary>
 	void SetHUDTime();
-
+	/// <summary>
+	/// 初始化HUD信息
+	/// </summary>
+	void PollInit();
 	/**
 	* 同步客户端和服务器之间的时间（用于比赛时间显示）
 	* 客户端的时间 = 服务器的时间 + （客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
@@ -114,5 +123,27 @@ private:
 	/// 倒计时（游戏剩余时间）
 	/// </summary>
 	uint32 CountdownInt = 0;
-	
+
+	/// <summary>
+	/// 保存当前游戏模式状态，用于BlasterGameMode类将游戏模式状态设置过来（但只会发生在服务器上，因为只有服务器才有游戏模式，所以这里要设置为复制变量）
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	/// <summary>
+	/// 作为BlasterHUD中的一部分，用于HUD显示的数据类
+	/// </summary>
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+	bool bInitializeCharacterOverlay = false;
+	/// <summary>
+	/// 下面是用于在HUD还没有效的情况下的缓存数据存储
+	/// </summary>
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
 };

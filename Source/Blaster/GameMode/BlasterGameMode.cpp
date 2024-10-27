@@ -40,6 +40,25 @@ void ABlasterGameMode::Tick(float DeltaTime)
 }
 
 /// <summary>
+/// 游戏状态设置的回调
+/// </summary>
+void ABlasterGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+	//获取所有的玩家控制器，并设置他们的游戏模式状态变量
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if (BlasterPlayer)
+		{
+			//每次状态改变都告诉玩家控制器，一旦转换到 进行中 状态玩家控制器就显示响应的HUD
+			BlasterPlayer->OnMatchStateSet(MatchState);
+		}
+	}
+}
+
+
+/// <summary>
 /// 玩家被淘汰（死亡）时调用的函数 （比如处理增加玩家得分之类的事情
 /// </summary>
 /// <param name="ElimmedCharacter">被淘汰的角色</param>

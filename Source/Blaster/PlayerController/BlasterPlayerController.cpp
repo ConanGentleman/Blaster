@@ -8,6 +8,8 @@
 #include "Components/TextBlock.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -16,12 +18,29 @@ void ABlasterPlayerController::BeginPlay()
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD()); 
 }
 
+/// <summary>
+/// 重写生命周期复制变量函数，以便于注册复制变量（这里的复制变量是游戏模式状态）
+/// </summary>
+/// <param name="OutLifetimeProps"></param>
+void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABlasterPlayerController, MatchState);
+}
+
+
 void ABlasterPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//倒计时
 	SetHUDTime();
 	CheckTimeSync(DeltaTime);
+	/// <summary>
+	/// 由于倒计时期间没有HUD，但此时已经调用了OnPossess，因此OnPossess里面的并没有正常设置HUDHealth相关的内容
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	PollInit();
 }
 /// <summary>
 /// 检查是否该同步时间了
@@ -71,6 +90,12 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		//设置血量文字
 		BlasterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
+	else //没有满足就现缓存下来，等HUD被生成后设置
+	{
+		bInitializeCharacterOverlay = true;
+		HUDHealth = Health;
+		HUDMaxHealth = MaxHealth;
+	}
 }
 
 void ABlasterPlayerController::SetHUDScore(float Score)
@@ -79,11 +104,17 @@ void ABlasterPlayerController::SetHUDScore(float Score)
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->ScoreAmount;
+
 	if (bHUDValid)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		//设置分数
 		BlasterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDScore = Score;
 	}
 }
 
@@ -98,6 +129,11 @@ void ABlasterPlayerController::SetHUDDefeats(int32 Defeats)
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
 		//设置死亡数
 		BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+	else //没有HUD就现缓存下来，等HUD被生成后设置
+	{
+		bInitializeCharacterOverlay = true;
+		HUDDefeats = Defeats;
 	}
 }
 
@@ -166,6 +202,24 @@ void ABlasterPlayerController::SetHUDTime()
 	CountdownInt = SecondsLeft;
 }
 
+void ABlasterPlayerController::PollInit()
+{
+	if (CharacterOverlay == nullptr)
+	{
+		if (BlasterHUD && BlasterHUD->CharacterOverlay)
+		{
+			CharacterOverlay = BlasterHUD->CharacterOverlay;
+			if (CharacterOverlay)
+			{
+				SetHUDHealth(HUDHealth, HUDMaxHealth);
+				SetHUDScore(HUDScore);
+				SetHUDDefeats(HUDDefeats);
+			}
+		}
+	}
+}
+
+
 /// <summary>
 /// 请求当前服务器时间,并传入发送请求时客户端的时间
 /// </summary>
@@ -207,5 +261,36 @@ void ABlasterPlayerController::ReceivedPlayer()
 	if (IsLocalController()) //是否是本地玩家控制
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds()); //将请求发送到服务器，以便计算增量
+	}
+}
+
+
+void ABlasterPlayerController::OnMatchStateSet(FName State)
+{
+	MatchState = State;
+
+	if (MatchState == MatchState::InProgress)
+	{
+		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if (BlasterHUD)
+		{
+			BlasterHUD->AddCharacterOverlay();
+		}
+	}
+}
+
+/// <summary>
+/// 游戏模式状态复制变量被设置后的回调
+/// </summary>
+void ABlasterPlayerController::OnRep_MatchState()
+{
+	if (MatchState == MatchState::InProgress)
+	{
+		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if (BlasterHUD)
+		{
+			//当游戏模式状态为进行中时，才显示玩家的HUD界面
+			BlasterHUD->AddCharacterOverlay();
+		}
 	}
 }
