@@ -55,6 +55,21 @@ public:
 	/// </summary>
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
+
+	/// <summary>
+	/// 游戏开始倒计时前的用户界面
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Announcements")
+	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	/// <summary>
+	/// 游戏开始倒计时前各项信息的显示
+	/// </summary>
+	UPROPERTY()
+	class UAnnouncement* Announcement;
+
+	void AddAnnouncement();
+
 protected:
 	virtual void BeginPlay() override;
 private:

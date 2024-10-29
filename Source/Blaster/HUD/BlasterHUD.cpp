@@ -4,6 +4,7 @@
 #include "BlasterHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
+#include "Announcement.h"
 
 void ABlasterHUD::BeginPlay()
 {
@@ -28,6 +29,26 @@ void ABlasterHUD::AddCharacterOverlay()
 		CharacterOverlay->AddToViewport();
 	}
 }
+
+/// <summary>
+/// 添加游戏开始前倒计时的显示
+/// </summary>
+void ABlasterHUD::AddAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && AnnouncementClass)
+	{
+		/// <summary>
+		/// 创建倒计时界面
+		/// </summary>
+		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
+		/// <summary>
+		/// 将倒计时界面添加到屏幕
+		/// </summary>
+		Announcement->AddToViewport();
+	}
+}
+
 
 /// <summary>
 /// 在这里绘制射击的十字准星

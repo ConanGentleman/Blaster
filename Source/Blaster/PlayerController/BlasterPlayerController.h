@@ -67,6 +67,10 @@ public:
 	/// </summary>
 	/// <param name="State"></param>
 	void OnMatchStateSet(FName State);
+	/// <summary>
+	/// 统一处理当倒计时结束（即游戏开始时）的逻辑
+	/// </summary>
+	void HandleMatchHasStarted();
 protected:
 	virtual void BeginPlay() override;
 
