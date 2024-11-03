@@ -45,6 +45,11 @@ public:
 	/// <param name="CountdownTime"></param>
 	void SetHUDMatchCountdown(float CountdownTime);
 	/// <summary>
+	/// 设置游戏预热时间
+	/// </summary>
+	/// <param name="CountdownTime"></param>
+	void SetHUDAnnouncementCountdown(float CountdownTime);
+	/// <summary>
 	/// 当一个角色被控制器拥有时，即玩家开始控制该角色时，OnPossess函数就会被调用。（可以用在角色淘汰被重生时使用，因为其发生了控制器对角色控制的分离和新角色的控制
 	/// 测试了一下好像刚开始获取的时候并不会调用
 	/// </summary>
@@ -113,6 +118,18 @@ protected:
 	/// <param name="DeltaTime"></param>
 	void CheckTimeSync(float DeltaTime);
 
+	/// <summary>
+	/// RPC函数，获取游戏模式中的各种信息，存储到本类中
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState();
+
+	/// <summary>
+	/// RPC函数一旦客户端进入游戏，先调用服务器完成匹配状态检查（ServerCheckMatchState），然后客户端进入游戏，并保存游戏新的相关信息
+	/// </summary>
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
@@ -120,9 +137,17 @@ private:
 	class ABlasterHUD* BlasterHUD;
 
 	/// <summary>
+	/// 进入关卡的时间（但游戏还未开始
+	/// </summary>
+	float LevelStartingTime = 0.f;
+	/// <summary>
 	/// 游戏时间
 	/// </summary>
 	float MatchTime = 120.f;
+	/// <summary>
+	/// 游戏开始倒计时时间
+	/// </summary>
+	float WarmupTime = 0.f;
 	/// <summary>
 	/// 倒计时（游戏剩余时间）
 	/// </summary>

@@ -38,6 +38,12 @@ public:
 	float WarmupTime = 10.f;
 
 	/// <summary>
+	/// 比赛时间
+	/// </summary>
+	UPROPERTY(EditDefaultsOnly)
+	float MatchTime = 120.f;
+
+	/// <summary>
 	/// 进入关卡的时间（但游戏还未开始
 	/// </summary>
 	float LevelStartingTime = 0.f;
