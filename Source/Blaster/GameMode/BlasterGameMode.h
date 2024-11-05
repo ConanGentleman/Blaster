@@ -6,6 +6,15 @@
 #include "GameFramework/GameMode.h"
 #include "BlasterGameMode.generated.h"
 
+//向AGameMode类中的命名空间为MatchState的游戏状态添加一个冷却游戏状态
+//这里的BLASTER_API与AGameMode类中的MatchState的游戏状态的_API作用相同，但是只能使用BLASTER_API，ENGINE_AP是引擎使用的。其作用的使变量能够通过dll动态导入（实际上不加好像也可以？
+//加上extern 方便在.cpp中访问使用
+namespace MatchState
+{
+	extern BLASTER_API const FName Cooldown; //定义冷却游戏模式状态。比赛结束，显示获胜者并开始执行冷却计时器的状态
+}
+
+
 /**
  * 
  */
@@ -42,6 +51,13 @@ public:
 	/// </summary>
 	UPROPERTY(EditDefaultsOnly)
 	float MatchTime = 120.f;
+
+	/// <summary>
+	/// 比赛结束冷却时间
+	/// </summary>
+	UPROPERTY(EditDefaultsOnly)
+	float CooldownTime = 10.f;
+
 
 	/// <summary>
 	/// 进入关卡的时间（但游戏还未开始

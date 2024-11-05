@@ -76,6 +76,10 @@ public:
 	/// 统一处理当倒计时结束（即游戏开始时）的逻辑
 	/// </summary>
 	void HandleMatchHasStarted();
+	/// <summary>
+	/// 统一处理当游戏结束时的逻辑
+	/// </summary>
+	void HandleCooldown();
 protected:
 	virtual void BeginPlay() override;
 

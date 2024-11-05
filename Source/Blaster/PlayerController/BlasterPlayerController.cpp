@@ -346,9 +346,13 @@ void ABlasterPlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
-	if (MatchState == MatchState::InProgress)
+	if (MatchState == MatchState::InProgress) //如果是游戏模式是进行中状态
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown) ///如果是游戏模式是游戏冷却状态
+	{
+		HandleCooldown();
 	}
 }
 
@@ -357,9 +361,13 @@ void ABlasterPlayerController::OnMatchStateSet(FName State)
 /// </summary>
 void ABlasterPlayerController::OnRep_MatchState()
 {
-	if (MatchState == MatchState::InProgress)
+	if (MatchState == MatchState::InProgress) //如果是游戏模式是进行中状态
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown) ///如果是游戏模式是游戏冷却状态
+	{
+		HandleCooldown();
 	}
 }
 
@@ -377,6 +385,24 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 		{
 			//当游戏模式状态为进行中时，设置倒计时显示为隐藏状态
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+/// <summary>
+/// 统一处理当游戏结束时的逻辑
+/// </summary>
+void ABlasterPlayerController::HandleCooldown()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
+	{
+		//删除玩家游戏信息界面
+		BlasterHUD->CharacterOverlay->RemoveFromParent();
+		if (BlasterHUD->Announcement)
+		{
+			//开启冷却倒计时界面（与游戏预热倒计时共用一个界面）
+			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
 }

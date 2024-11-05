@@ -10,6 +10,12 @@
 
 //GameMode仅存于服务器上！！！！
 
+//向AGameMode类中的命名空间为MatchState的游戏状态添加一个冷却游戏状态（.h中也要添加）
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");	// 定义冷却游戏模式状态。
+}
+
 //构造函数
 ABlasterGameMode::ABlasterGameMode()
 {
@@ -35,6 +41,15 @@ void ABlasterGameMode::Tick(float DeltaTime)
 		if (CountdownTime <= 0.f)
 		{
 			StartMatch();//开始游戏，将游戏状态变为InProgress 进行中
+		}
+		else if (MatchState == MatchState::InProgress)
+		{
+			CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+			if (CountdownTime <= 0.f)
+			{
+				//如果游戏结束，则转换为游戏冷却状态
+				SetMatchState(MatchState::Cooldown);
+			}
 		}
 	}
 }
