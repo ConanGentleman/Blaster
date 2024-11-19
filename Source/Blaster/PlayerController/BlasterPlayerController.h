@@ -132,13 +132,16 @@ protected:
 	/// RPC函数一旦客户端进入游戏，先调用服务器完成匹配状态检查（ServerCheckMatchState），然后客户端进入游戏，并保存游戏新的相关信息
 	/// </summary>
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+		void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
+	//存储BlasterGameMode类。以便于当角色为服务器上的角色时，直接获取BlasterGameMode中的数据
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
 
 	/// <summary>
 	/// 进入关卡的时间（但游戏还未开始
@@ -152,6 +155,10 @@ private:
 	/// 游戏开始倒计时时间
 	/// </summary>
 	float WarmupTime = 0.f;
+	/// <summary>
+	/// 游戏中场冷却时间
+	/// </summary>
+	float CooldownTime = 0.f;
 	/// <summary>
 	/// 倒计时（游戏剩余时间）
 	/// </summary>

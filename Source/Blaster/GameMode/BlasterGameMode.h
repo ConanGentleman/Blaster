@@ -75,4 +75,6 @@ private:
 	/// 预热时间倒计时
 	/// </summary>
 	float CountdownTime = 0.f;
+public:
+	FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 };

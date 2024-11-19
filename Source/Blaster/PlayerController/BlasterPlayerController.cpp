@@ -72,21 +72,23 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 		//将游戏模式的相关状态，更新到玩家控制器上
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
+		CooldownTime = GameMode->CooldownTime;
 		LevelStartingTime = GameMode->LevelStartingTime;
 		//此时由于设置MatchState，使得在客户端的变量接收到服务器的改变时，在客户端上调用的OnRep_MatchState函数
 		//但是准备阶段相关的数据没有在OnRep_MatchState中赋值，所以相关的数据还是得走ServerCheckMatchState_Implementation()
 		MatchState = GameMode->GetMatchState(); 
-		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
+		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, CooldownTime, LevelStartingTime);
 	}
 }
 
 /// <summary>
 /// RPC函数一旦客户端进入游戏，先调用服务器完成匹配状态检查（ServerCheckMatchState），然后客户端进入游戏，并保存游戏新的相关信息
 /// </summary>
-void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime)
+void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime)
 {
 	WarmupTime = Warmup;
 	MatchTime = Match;
+	CooldownTime = Cooldown;
 	LevelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);
@@ -224,6 +226,12 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 		BlasterHUD->CharacterOverlay->MatchCountdownText;
 	if (bHUDValid)
 	{
+		if (CountdownTime < 0.f) //出现负数时先不显示，设置为空文本
+		{
+			BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+			return;
+		}
+
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;
 
@@ -244,6 +252,11 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 		BlasterHUD->Announcement->WarmupTime;
 	if (bHUDValid)
 	{
+		if (CountdownTime < 0.f) //出现负数时先不显示，设置为空文本
+		{
+			BlasterHUD->Announcement->WarmupTime->SetText(FText());
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;
 
@@ -261,12 +274,28 @@ void ABlasterPlayerController::SetHUDTime()
 	//预热倒计时和游戏时间倒计时分开计算
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
 	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
+	else if (MatchState == MatchState::Cooldown) TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	// GetWorld()->GetTimeSeconds()获取自比赛以来所经过的时间
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	////如果自身是服务器则直接获取倒计时
+	//if (HasAuthority())
+	//{
+	//	if (BlasterGameMode == nullptr)
+	//	{
+	//		BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	//		//LevelStartingTime = BlasterGameMode->LevelStartingTime;
+	//	}
+	//	BlasterGameMode = BlasterGameMode == nullptr ? Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)) : BlasterGameMode;
+	//	if (BlasterGameMode)
+	//	{
+	//		SecondsLeft = FMath::CeilToInt(BlasterGameMode->GetCountdownTime() + LevelStartingTime);
+	//	}
+	//}
 	
 	if (CountdownInt != SecondsLeft)
 	{
-		if (MatchState == MatchState::WaitingToStart)
+		if (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
 		{
 			SetHUDAnnouncementCountdown(TimeLeft);
 		}
@@ -399,10 +428,17 @@ void ABlasterPlayerController::HandleCooldown()
 	{
 		//删除玩家游戏信息界面
 		BlasterHUD->CharacterOverlay->RemoveFromParent();
-		if (BlasterHUD->Announcement)
+		bool bHUDValid = BlasterHUD->Announcement &&
+			BlasterHUD->Announcement->AnnouncementText &&
+			BlasterHUD->Announcement->InfoText;
+		if (bHUDValid)
 		{
 			//开启冷却倒计时界面（与游戏预热倒计时共用一个界面）
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+			//调整文字显示
+			FString AnnouncementText("New Match Starts In:");
+			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+			BlasterHUD->Announcement->InfoText->SetText(FText());
 		}
 	}
 }
