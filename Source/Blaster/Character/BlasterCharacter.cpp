@@ -160,6 +160,10 @@ void ABlasterCharacter::MulticastElim_Implementation()
 
 	// 死亡溶解时禁用角色移动等输入操作
 	bDisableGameplay = true; 
+	if (Combat)
+	{
+		Combat->FireButtonPressed(false);//死亡时，取消开火，避免一直处于开火状态
+	}
 	// 溶解时使碰撞体无效，禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用网格碰撞
@@ -211,7 +215,11 @@ void ABlasterCharacter::Destroyed()
 	{
 		ElimBotComponent->DestroyComponent();
 	}
-	if (Combat && Combat->EquippedWeapon) 
+	//获取游戏状态（最高得分等信息）
+	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	//获取游戏匹配状态（如果不是正在游戏则销毁武器
+	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
+	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
 	{
 		Combat->EquippedWeapon->Destroy();//销毁武器
 	}

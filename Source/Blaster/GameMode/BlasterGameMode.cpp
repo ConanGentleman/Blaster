@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Blaster/GameState/BlasterGameState.h"
 
 //GameMode仅存于服务器上！！！！
 
@@ -96,10 +97,14 @@ void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacte
 	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 
-	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	//获取游戏状态（包含最高得分等信息）
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && BlasterGameState)
 	{
 		//玩家死亡，则给予攻击者1分
 		AttackerPlayerState->AddToScore(1.f);
+		//得分则更新一下最高得分
+		BlasterGameState->UpdateTopScore(AttackerPlayerState);
 	}
 	//死亡的玩家死亡次数+1
 	if (VictimPlayerState)
