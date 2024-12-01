@@ -101,6 +101,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon,COND_OwnerOnly);
 
 	DOREPLIFETIME(ABlasterCharacter, Health);
+	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
 }
 
 void ABlasterCharacter::OnRep_ReplicatedMovement()
@@ -157,14 +158,8 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	//启用溶解
 	StartDissolve();
 
-	// 溶解时禁用角色移动
-	GetCharacterMovement()->DisableMovement();//禁止移动（但还可以旋转角色
-	GetCharacterMovement()->StopMovementImmediately();//立刻停止移动（主要用来禁止角色旋转
-	if (BlasterPlayerController)
-	{
-		//禁止输入（避免开火、跳跃、蹲下等
-		DisableInput(BlasterPlayerController);
-	}
+	// 死亡溶解时禁用角色移动等输入操作
+	bDisableGameplay = true; 
 	// 溶解时使碰撞体无效，禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用网格碰撞
@@ -216,6 +211,10 @@ void ABlasterCharacter::Destroyed()
 	{
 		ElimBotComponent->DestroyComponent();
 	}
+	if (Combat && Combat->EquippedWeapon) 
+	{
+		Combat->EquippedWeapon->Destroy();//销毁武器
+	}
 }
 
 
@@ -238,6 +237,27 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	RotateInPlace(DeltaTime);//玩家就地旋转
+	HideCameraIfCharacterClose();
+	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
+	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
+	//if (OverlappingWeapon) {
+	//	//设置武器的提示文字的显隐
+	//	OverlappingWeapon->ShowPickupWidget(true);
+	//}
+	
+	//每帧去看玩家状态是否有效（也就是角色是否重生完成）
+	PollInit();
+}
+
+void ABlasterCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)//游戏冷却状态时，禁止对角色本身进行原地旋转
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	//如果控制权大于模拟代理（由于是枚举比较的就是数字大小，实际上指的就是如果role为ROLE_AutonomousProxy、ROLE_Authority、ROLE_Max）并且是本地控制的则直接进行瞄准偏移
 	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
 	{
@@ -253,17 +273,6 @@ void ABlasterCharacter::Tick(float DeltaTime)
 		//计算每一帧的pitch
 		CalculateAO_Pitch();
 	}
-
-	HideCameraIfCharacterClose();
-	////目前先使用该方法来做显隐。一旦服务器上设置了重叠武器，基于复制变量的效果，
-	////所有的客户端上也会进行重叠武器的复制，使得所有客户端上的武器均不为空，因此能够显示文字提示
-	//if (OverlappingWeapon) {
-	//	//设置武器的提示文字的显隐
-	//	OverlappingWeapon->ShowPickupWidget(true);
-	//}
-	
-	//每帧去看玩家状态是否有效（也就是角色是否重生完成）
-	PollInit();
 }
 
 // Called to bind functionality to input
@@ -408,6 +417,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 void ABlasterCharacter::MoveForward(float Value)
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止移动
 	if (Controller != nullptr && Value != 0.f) {
 		//找到控制器的旋转输入，拿到绕z轴旋转的方向也就是控制器的朝向方向
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -426,6 +436,7 @@ void ABlasterCharacter::MoveForward(float Value)
 
 void ABlasterCharacter::MoveRight(float Value)
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止
 	if (Controller != nullptr && Value != 0.f) {
 		//找到控制器的旋转输入，拿到绕z轴旋转的方向也就是控制器的朝向方向
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -456,6 +467,7 @@ void ABlasterCharacter::LookUp(float Value)
 /// </summary>
 void ABlasterCharacter::EquipButtonPressed()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止武器操作
 	if (Combat) {
 		if (HasAuthority()) {
 			Combat->EquipWeapon(OverlappingWeapon);
@@ -483,6 +495,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 /// </summary>
 void ABlasterCharacter::CrouchButtonPressed()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止蹲下
 	//Character自带有蹲下和蹲起的函数，蹲下成功会将变量bWantsToCrouch设置为true,并且自动调整胶囊体的大小，bWantsToCrouch是表示将要开始蹲下。
 	//此外，Character还存在有bIsCrouched变量，且为复制变量，且能通知OnRep_IsCrouched，因此每当服务器上设置bIsCrouched，该值就恢复知道客户端
 	//因此可以在动画蓝图中使用bIsCrouched
@@ -497,6 +510,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 
 void ABlasterCharacter::ReloadButtonPressed()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止装填弹药
 	if (Combat)
 	{
 		Combat->Reload();
@@ -508,6 +522,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 /// </summary>
 void ABlasterCharacter::AimButtonPressed()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止瞄准
 	if (Combat) {
 		Combat->SetAiming(true);
 	}
@@ -517,6 +532,7 @@ void ABlasterCharacter::AimButtonPressed()
 /// </summary>
 void ABlasterCharacter::AimButtonReleased()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止取消瞄准
 	if (Combat) {
 		Combat->SetAiming(false);
 	}
@@ -644,6 +660,7 @@ void ABlasterCharacter::SimProxiesTurn()
 
 void ABlasterCharacter::Jump()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止跳跃
 	if (bIsCrouched) { //如果在蹲下的时候跳跃
 		UnCrouch();
 	}
@@ -653,12 +670,14 @@ void ABlasterCharacter::Jump()
 }
 void ABlasterCharacter::FireButtonPressed() 
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
 	if (Combat) {
 		Combat->FireButtonPressed(true);
 	}
 }
 void ABlasterCharacter::FireButtonReleased()
 {
+	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
 	if (Combat) {
 		Combat->FireButtonPressed(false);
 	}

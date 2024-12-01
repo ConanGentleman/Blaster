@@ -42,14 +42,23 @@ void ABlasterGameMode::Tick(float DeltaTime)
 		{
 			StartMatch();//开始游戏，将游戏状态变为InProgress 进行中
 		}
-		else if (MatchState == MatchState::InProgress)
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
 		{
-			CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
-			if (CountdownTime <= 0.f)
-			{
-				//如果游戏结束，则转换为游戏冷却状态
-				SetMatchState(MatchState::Cooldown);
-			}
+			//如果游戏结束，则转换为游戏冷却状态
+			SetMatchState(MatchState::Cooldown);
+		}
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		CountdownTime = CooldownTime + WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			//游戏冷却状态结束，重开游戏
+			RestartGame();
 		}
 	}
 }

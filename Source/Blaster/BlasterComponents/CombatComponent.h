@@ -43,6 +43,12 @@ public:
 	/// </summary>
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+
+	/// <summary>
+	/// 按下开火键，调用开火，并且进行射线检测
+	/// </summary>
+	/// <param name="bPressed"></param>
+	void FireButtonPressed(bool bPressed);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -64,11 +70,7 @@ protected:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
-	/// <summary>
-	/// 按下开火键，调用开火，并且进行射线检测
-	/// </summary>
-	/// <param name="bPressed"></param>
-	void FireButtonPressed(bool bPressed);
+
 
 	/// <summary>
 	/// 开火

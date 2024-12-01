@@ -67,6 +67,11 @@ public:
 	/// </summary>
 	virtual void Destroyed() override;
 	
+	/// <summary>
+	/// 玩家是否处于冷却等待状态（是否关闭游戏输入指令）-复制变量
+	/// </summary>
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -117,6 +122,11 @@ protected:
 
 	// 轮询任何相关类并初始化我们的HUD。也就是当角色死亡重生后，需要将其玩家状态类的信息用以初始化HUD上的信息。
 	void PollInit();
+	/// <summary>
+	/// 玩家原地旋转
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void RotateInPlace(float DeltaTime);
 private:
 	//弹簧臂组件 (向前声明
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -405,4 +415,10 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	/// <summary>
+	/// 获取游戏当前是否处于禁止输入状态（游戏冷却状态）
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 };
