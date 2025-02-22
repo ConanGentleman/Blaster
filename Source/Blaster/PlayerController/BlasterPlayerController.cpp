@@ -412,7 +412,7 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 	if (BlasterHUD)
 	{
 		//当游戏模式状态为进行中时，才显示玩家的HUD界面
-		BlasterHUD->AddCharacterOverlay();
+		if (BlasterHUD->CharacterOverlay == nullptr) BlasterHUD->AddCharacterOverlay();
 		if (BlasterHUD->Announcement)
 		{
 			//当游戏模式状态为进行中时，设置倒计时显示为隐藏状态

@@ -10,6 +10,10 @@ enum class EWeaponType : uint8
 	/// 突击步枪
 	/// </summary>
 	EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),
+	/// <summary>
+	/// 火箭筒
+	/// </summary>
+	EWT_RocketLauncher UMETA(DisplayName = "Rocket Launcher"),
 
 	/// <summary>
 	/// 枚举数量

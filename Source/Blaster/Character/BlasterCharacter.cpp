@@ -160,6 +160,8 @@ void ABlasterCharacter::MulticastElim_Implementation()
 
 	// 死亡溶解时禁用角色移动等输入操作
 	bDisableGameplay = true; 
+	// 死亡时让其停止移动，不然会受重力影响
+	GetCharacterMovement()->DisableMovement();
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);//死亡时，取消开火，避免一直处于开火状态

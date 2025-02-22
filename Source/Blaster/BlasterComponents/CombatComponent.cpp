@@ -622,4 +622,6 @@ void UCombatComponent::InitializeCarriedAmmo()
 {
 	//想map中添加武器类型及携带的子弹数量
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
+
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 }
