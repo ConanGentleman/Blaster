@@ -43,10 +43,24 @@ protected:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
-private:
+
+
+	/// <summary>
+	/// 撞击特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ImpactParticles;
+
+	/// <summary>
+	/// 撞击音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
+
 	//子弹碰撞体
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
+private:
 	/// <summary>
 	/// 子弹运动组件(用来做抛物线或者子弹的组件)
 	/// </summary>
@@ -57,7 +71,7 @@ private:
 	/// 子弹轨迹粒子特效
 	/// </summary>
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* Tracer;
+	UParticleSystem* Tracer;
 
 	/// <summary>
 	/// 用以存储基于Tracer生成后的粒子附加器
@@ -66,17 +80,6 @@ private:
 	UPROPERTY()
 	class UParticleSystemComponent* TracerComponent;
 
-	/// <summary>
-	/// 撞击特效
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
-
-	/// <summary>
-	/// 撞击音效
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
 public:	
 	
 };
