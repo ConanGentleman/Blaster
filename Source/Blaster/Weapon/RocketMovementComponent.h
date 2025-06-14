@@ -7,7 +7,9 @@
 #include "RocketMovementComponent.generated.h"
 
 /**
- * 
+ * 	/// <summary>
+	/// 子弹运动组件(用来做抛物线或者子弹的组件)，不使用父类的ProjectileMovementComponent组件
+	/// </summary>
  */
 UCLASS()
 class BLASTER_API URocketMovementComponent : public UProjectileMovementComponent
