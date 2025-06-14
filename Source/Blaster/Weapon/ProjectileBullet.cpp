@@ -4,6 +4,18 @@
 #include "ProjectileBullet.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+
+AProjectileBullet::AProjectileBullet()
+{
+	//创建组件
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	//让子弹保持其旋转与速度一致 （每帧更新其旋转 以匹配速度的方向）
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+	//设置为复制
+	ProjectileMovementComponent->SetIsReplicated(true);
+}
+
 
 /// <summary>
 /// 重写子弹父类中的子弹碰撞函数。父类中的子弹碰撞函数已经完成了子弹销毁等功能。

@@ -3,7 +3,6 @@
 
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
@@ -36,10 +35,7 @@ AProjectile::AProjectile()
 	//对于墙壁和可见性的东西确实需要进行碰撞的，所以上面并没有进行删除。
 	//使用自定义的object通道，并设置能进行碰撞。
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
-	//创建组件
-	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-	//让子弹保持其旋转与速度一致 （每帧更新其旋转 以匹配速度的方向）
-	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+
 }
 
 void AProjectile::BeginPlay()
@@ -64,6 +60,8 @@ void AProjectile::BeginPlay()
 	{
 		//注册碰撞检测事件
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+		//忽略与玩家自身的碰撞，不然会炸到自己
+		CollisionBox->IgnoreActorWhenMoving(Owner, true);
 	}
 }
 /// <summary>

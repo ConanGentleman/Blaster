@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -13,10 +13,12 @@ UCLASS()
 class BLASTER_API AProjectileBullet : public AProjectile
 {
 	GENERATED_BODY()
+public:
+	AProjectileBullet();
 protected:
 	/// <summary>
-	/// ÖØĞ´×Óµ¯¸¸ÀàÖĞµÄ×Óµ¯Åö×²º¯Êı¡£¸¸ÀàÖĞµÄ×Óµ¯Åö×²º¯ÊıÒÑ¾­Íê³ÉÁË×Óµ¯Ïú»ÙµÈ¹¦ÄÜ¡£
-	/// ÕâÀïÖ÷Òªµ÷ÓÃÉËº¦º¯Êı¡£
+	/// é‡å†™å­å¼¹çˆ¶ç±»ä¸­çš„å­å¼¹ç¢°æ’å‡½æ•°ã€‚çˆ¶ç±»ä¸­çš„å­å¼¹ç¢°æ’å‡½æ•°å·²ç»å®Œæˆäº†å­å¼¹é”€æ¯ç­‰åŠŸèƒ½ã€‚
+	/// è¿™é‡Œä¸»è¦è°ƒç”¨ä¼¤å®³å‡½æ•°ã€‚
 	/// </summary>
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 };

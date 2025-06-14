@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
+#include "RocketMovementComponent.h"
 
 AProjectileRocket::AProjectileRocket()
 {
@@ -18,6 +19,13 @@ AProjectileRocket::AProjectileRocket()
 	RocketMesh->SetupAttachment(RootComponent);
 	//设置碰撞
 	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    //创建组件
+    RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
+    //让子弹保持其旋转与速度一致 （每帧更新其旋转 以匹配速度的方向）
+    RocketMovementComponent->bRotationFollowsVelocity = true;
+    //设置为复制
+    RocketMovementComponent->SetIsReplicated(true);
 }
 
 void AProjectileRocket::BeginPlay()
@@ -78,6 +86,11 @@ void AProjectileRocket::DestroyTimerFinished()
 /// <param name="Hit"></param>
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+    //如果玩家发射出去的子弹击中的是玩家自己，则忽略，销毁在
+    if (OtherActor == GetOwner())
+    {
+        return;
+    }
 	// 获取火箭筒的释放者（该释放者是在OrijectileWeapon的Fire函数中被设置的）
 	APawn* FiringPawn = GetInstigator(); 
     if (FiringPawn && HasAuthority()) // HasAuthority() 表示仅在服务器处理爆炸伤害

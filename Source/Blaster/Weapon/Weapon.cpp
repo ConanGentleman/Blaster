@@ -20,6 +20,8 @@ AWeapon::AWeapon()
 	//bReplicates 变量告知游戏此Actor应复制。Actor默认仅存在于生成它的机器上。
 	//当 bReplicates 设为 True，只要Actor的权威副本存在于服务器上，就会尝试将该Actor复制到所有已连接的客户端。
 	bReplicates = true;
+	//设置复制运动
+	SetReplicateMovement(true);
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	//设置自己为根组件

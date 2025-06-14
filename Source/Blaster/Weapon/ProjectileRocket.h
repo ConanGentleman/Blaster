@@ -61,6 +61,13 @@ protected:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	USoundAttenuation* LoopingSoundAttenuation;
+
+	/// <summary>
+	/// 子弹运动组件(用来做抛物线或者子弹的组件)，不使用父类的ProjectileMovementComponent组件
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	class URocketMovementComponent* RocketMovementComponent;
+
 private:
 	/// <summary>
 	/// 子弹网格体（子弹预制模型）

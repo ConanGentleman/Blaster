@@ -60,13 +60,14 @@ protected:
 	//子弹碰撞体
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-private:
+
 	/// <summary>
 	/// 子弹运动组件(用来做抛物线或者子弹的组件)
 	/// </summary>
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
+private:
 	/// <summary>
 	/// 子弹轨迹粒子特效
 	/// </summary>
