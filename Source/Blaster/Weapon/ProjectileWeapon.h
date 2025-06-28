@@ -7,7 +7,7 @@
 #include "ProjectileWeapon.generated.h"
 
 /**
- * 
+ * 火箭筒
  */
 UCLASS()
 class BLASTER_API AProjectileWeapon : public AWeapon
