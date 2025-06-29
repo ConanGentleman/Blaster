@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.Add commentMore actions
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.Add commentMore actions
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "HitScanWeapon.generated.h"
 
 /**
- * Ö±½ÓÔì³ÉÉËº¦µÄÎäÆ÷£¨ÈçÊÖÇ¹£©
+ * ç›´æ¥é€ æˆä¼¤å®³çš„æ­¦å™¨ï¼ˆå¦‚æ‰‹æªï¼‰
  */
 UCLASS()
 class BLASTER_API AHitScanWeapon : public AWeapon
@@ -20,6 +20,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
+	/// <summary>
+	/// å‡»ä¸­ç‰¹æ•ˆ
+	/// </summary>
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
+
+	/// <summary>
+	/// å­å¼¹è·¯å¾„ç‰¹æ•ˆï¼ˆå…‰æŸç‰¹æ•ˆï¼‰
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* BeamParticles;
 };
