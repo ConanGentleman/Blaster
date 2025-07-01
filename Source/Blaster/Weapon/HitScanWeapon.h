@@ -31,4 +31,22 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
+
+	/// <summary>
+	/// 枪口开火特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* MuzzleFlash;
+
+	/// <summary>
+	/// 开火音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	USoundCue* FireSound;
+
+	/// <summary>
+	/// 击中音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
 };

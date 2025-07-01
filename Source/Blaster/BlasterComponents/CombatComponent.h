@@ -286,12 +286,18 @@ private:
 	int32 StartingRocketAmmo = 0;
 
 	/// <summary>
-	/// 初始携带的子弹书（火箭筒）
+	/// 初始携带的子弹书（手枪）
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	int32 StartingPistolAmmo = 0;
 
-	///初始化携带的子弹数量(手枪)
+	/// <summary>
+	/// 初始携带的子弹书（冲锋枪）
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 StartingSMGAmmo = 0;
+
+	///初始化携带的子弹数量
 	void InitializeCarriedAmmo();
 
 	/// <summary>

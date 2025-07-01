@@ -18,6 +18,10 @@ enum class EWeaponType : uint8
 	/// 手枪
 	/// </summary>
 	EWT_Pistol UMETA(DisplayName = "Pistol"),
+	/// <summary>
+	/// 冲锋枪
+	/// </summary>
+	EWT_SubmachineGun UMETA(DisplayName = "Submachine Gun"),
 
 	/// <summary>
 	/// 枚举数量
