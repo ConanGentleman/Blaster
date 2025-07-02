@@ -194,6 +194,12 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 		WeaponMesh->SetEnableGravity(false);
 		//设置武器网格无法碰撞
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (WeaponType == EWeaponType::EWT_SubmachineGun) //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
+		{
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			WeaponMesh->SetEnableGravity(true);
+			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
+		}
 		break;
 	case EWeaponState::EWS_Dropped:
 		/*
@@ -210,6 +216,14 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 		WeaponMesh->SetEnableGravity(true);
 		//开启武器网格碰撞
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
+		//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		//但是碰撞忽略Pawn
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		//但是碰撞忽略相机
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 		break;
 	}
 }
@@ -229,11 +243,26 @@ void AWeapon::OnRep_WeaponState()
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (WeaponType == EWeaponType::EWT_SubmachineGun)  //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
+		{
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			WeaponMesh->SetEnableGravity(true);
+			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
+		}
 		break;
 	case EWeaponState::EWS_Dropped:
 		WeaponMesh->SetSimulatePhysics(true);
 		WeaponMesh->SetEnableGravity(true);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
+		//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		//但是碰撞忽略Pawn
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		//但是碰撞忽略相机
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		break;
 	}
 }
 
