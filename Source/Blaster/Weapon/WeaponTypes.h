@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+//射线检测的距离长度
+#define TRACE_LENGTH 80000.f
+
 /// <summary>
 /// 武器类型枚举
 /// </summary>
@@ -22,6 +25,10 @@ enum class EWeaponType : uint8
 	/// 冲锋枪
 	/// </summary>
 	EWT_SubmachineGun UMETA(DisplayName = "Submachine Gun"),
+	/// <summary>
+	/// 冲锋枪
+	/// </summary>
+	EWT_Shotgun UMETA(DisplayName = "Shotgun"),
 
 	/// <summary>
 	/// 枚举数量

@@ -8,8 +8,7 @@
 #include "Blaster/Weapon/WeaponTypes.h"
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
-//射线检测的距离长度
-#define TRACE_LENGTH 80000.f
+
 
 ///战斗组件
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -296,6 +295,13 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	int32 StartingSMGAmmo = 0;
+
+	/// <summary>
+	/// 初始携带的子弹书（冲锋枪）
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 StartingShotgunAmmo = 0;
+
 
 	///初始化携带的子弹数量
 	void InitializeCarriedAmmo();
