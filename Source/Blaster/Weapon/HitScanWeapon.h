@@ -24,16 +24,31 @@ protected:
 	/// <param name="HitTarget"></param>
 	/// <returns></returns>
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
-private:
 
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+	/// <summary>
+	/// 武器击中检测
+	/// </summary>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitTarget"></param>
+	/// <param name="OutHit"></param>
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
 	/// <summary>
 	/// 击中特效
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
+
+	/// <summary>
+	/// 击中音效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+private:
 
 	/// <summary>
 	/// 子弹路径特效（光束特效）
@@ -52,12 +67,6 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
-
-	/// <summary>
-	/// 击中音效
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	USoundCue* HitSound;
 
 
 	/**
@@ -78,7 +87,7 @@ private:
 	float SphereRadius = 75.f;
 
 	/// <summary>
-	/// 是否使用散射（如霰弹枪
+	/// 是否使用散射（如霰弹枪，或者每次射击都会随机射出方向
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	bool bUseScatter = false;
