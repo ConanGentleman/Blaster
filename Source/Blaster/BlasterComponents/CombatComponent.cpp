@@ -566,6 +566,7 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
 	bAiming = bIsAiming;
 	//UE_LOG(LogTemp, Warning, TEXT("bAiming : %d"), bAiming);
 	//如果没有服务器权限，则表示是客户端调用的，因此需要调用RPC函数。
@@ -576,6 +577,10 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	//当设置瞄准时修改人物移动速度
 	if (Character) {//设置行走速度 (应该是
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle) //如果角色受本地控制，且装备的是狙击枪
+	{
+		Character->ShowSniperScopeWidget(bIsAiming);
 	}
 }
 /// <summary>

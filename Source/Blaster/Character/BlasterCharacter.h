@@ -72,6 +72,12 @@ public:
 	/// </summary>
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
+
+	/// <summary>
+	/// 显示狙击枪开镜准星 BlueprintImplementableEvent表示可实现蓝图事件的函数，在角色蓝图中调用
+	/// </summary>
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowSniperScopeWidget(bool bShowScope);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

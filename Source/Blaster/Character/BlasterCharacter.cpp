@@ -192,6 +192,16 @@ void ABlasterCharacter::MulticastElim_Implementation()
 			GetActorLocation()
 		);
 	}
+	//玩家死亡时隐藏开镜效果
+	bool bHideSniperScope = IsLocallyControlled() && 
+		Combat &&
+		Combat->bAiming &&
+		Combat->EquippedWeapon &&
+		Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if (bHideSniperScope)
+	{
+		ShowSniperScopeWidget(false);
+	}
 }
 /// <summary>
 /// 角色淘汰计时器完成后调用的函数。（这里用于复活角色
