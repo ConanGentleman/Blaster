@@ -308,6 +308,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingSniperAmmo = 0;
 
+	/// <summary>
+	/// 初始携带的子弹书（榴弹发射器）
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 StartingGrenadeLauncherAmmo = 0;
+
 
 	///初始化携带的子弹数量
 	void InitializeCarriedAmmo();
