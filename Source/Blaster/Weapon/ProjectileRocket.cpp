@@ -3,7 +3,6 @@
 
 #include "ProjectileRocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Sound/SoundCue.h"
 #include "Components/BoxComponent.h"
@@ -13,12 +12,12 @@
 
 AProjectileRocket::AProjectileRocket()
 {
-	//创建对象
-	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
+	//创建网格对象
+    ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
 	//将该组件附加到另一个组件上
-	RocketMesh->SetupAttachment(RootComponent);
+    ProjectileMesh->SetupAttachment(RootComponent);
 	//设置碰撞
-	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     //创建组件
     RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
@@ -38,19 +37,21 @@ void AProjectileRocket::BeginPlay()
         CollisionBox->OnComponentHit.AddDynamic(this, &AProjectileRocket::OnHit);
     }
 
-    if (TrailSystem)
-    {
-        //给物体上附加Niagara组件
-        TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-            TrailSystem, //Niagara系统（特效源）
-            GetRootComponent(),//附加到哪个组件
-            FName(),//附加到的骨骼或者插槽名（这里传空名称，因为不需要附加到指定的位置）
-            GetActorLocation(), //位置
-            GetActorRotation(), //旋转
-            EAttachLocation::KeepWorldPosition, //位置模式，以便附加的组件保持相同的世界变换。
-            false//是否自动销毁（这里我们不通过接口自动销毁特效，而是通过倒计时控制
-        );
-    }
+    //if (TrailSystem)
+    //{
+    //    //给物体上附加Niagara组件
+    //    TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+    //        TrailSystem, //Niagara系统（特效源）
+    //        GetRootComponent(),//附加到哪个组件
+    //        FName(),//附加到的骨骼或者插槽名（这里传空名称，因为不需要附加到指定的位置）
+    //        GetActorLocation(), //位置
+    //        GetActorRotation(), //旋转
+    //        EAttachLocation::KeepWorldPosition, //位置模式，以便附加的组件保持相同的世界变换。
+    //        false//是否自动销毁（这里我们不通过接口自动销毁特效，而是通过倒计时控制
+    //    );
+    //}
+    SpawnTrailSystem();
+
     if (ProjectileLoop && LoopingSoundAttenuation)
     {
         //子弹飞行时的音效
@@ -71,11 +72,6 @@ void AProjectileRocket::BeginPlay()
     }
 }
 
-void AProjectileRocket::DestroyTimerFinished()
-{
-    Destroy();
-}
-
 /// <summary>
 /// 子弹击中函数
 /// </summary>
@@ -91,36 +87,12 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
     {
         return;
     }
-	// 获取火箭筒的释放者（该释放者是在OrijectileWeapon的Fire函数中被设置的）
-	APawn* FiringPawn = GetInstigator(); 
-    if (FiringPawn && HasAuthority()) // HasAuthority() 表示仅在服务器处理爆炸伤害
-	{
-		AController* FiringController = FiringPawn->GetController();
-		if (FiringController)
-		{
-			UGameplayStatics::ApplyRadialDamageWithFalloff( //造成圆形爆炸伤害
-				this, // World context object
-				Damage, // BaseDamage 基础伤害（父类的一个成员变量
-				10.f, // MinimumDamage 最小伤害
-				GetActorLocation(), // Origin 爆炸原点
-				200.f, // DamageInnerRadius 伤害内径
-				500.f, // DamageOuterRadius 伤害外径（在外径内收到最小伤害
-				1.f, // DamageFalloff 伤害衰减（线性
-				UDamageType::StaticClass(), // DamageTypeClass 上海类型
-				TArray<AActor*>(), // IgnoreActors 忽略伤害的玩家
-				this, // DamageCauser 造成伤害的原因
-				FiringController // InstigatorController 释放者控制器
-			);
-		}
-	}
-	/*Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit); //去掉父类调用，不然会导致Niagara自动销毁。但这样会导致不会触发父类AProjectile中的OnHit并触发Destroy函数，因此需要补充下面的代码 */ 
-    //命中后设置计时器用以延迟销毁特效
-    GetWorldTimerManager().SetTimer(
-        DestroyTimer,
-        this,
-        &AProjectileRocket::DestroyTimerFinished,
-        DestroyTime
-    );
+    //碰撞时造成爆炸伤害
+    ExplodeDamage();
+
+	///*Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit); //去掉父类调用，不然会导致Niagara自动销毁。但这样会导致不会触发父类AProjectile中的OnHit并触发Destroy函数，因此需要补充下面的代码 */ 
+
+    StartDestroyTimer();
 
     if (ImpactParticles)
     {
@@ -130,9 +102,9 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
     {
         UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
     }
-    if (RocketMesh)
+    if (ProjectileMesh)
     {
-        RocketMesh->SetVisibility(false); //碰撞后隐藏子弹网格体
+        ProjectileMesh->SetVisibility(false); //碰撞后隐藏子弹网格体
     }
     if (CollisionBox)
     {

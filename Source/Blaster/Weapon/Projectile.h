@@ -25,6 +25,14 @@ public:
 	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	/// <summary>
+	/// 销毁倒计时回调
+	/// </summary>
+	void DestroyTimerFinished();
+
+	void SpawnTrailSystem();
+	void ExplodeDamage();
 
 	/// <summary>
 	/// 子弹碰撞函数
@@ -62,10 +70,40 @@ protected:
 	class UBoxComponent* CollisionBox;
 
 	/// <summary>
+	/// 用于火箭弹拖尾的特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
+
+	/// <summary>
+	/// 用于火箭弹拖尾特效的组件
+	/// </summary>
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+
+	/// <summary>
 	/// 子弹运动组件(用来做抛物线或者子弹的组件)
 	/// </summary>
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
+
+	/// <summary>
+	/// 子弹网格体（子弹预制模型）
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+
+	/// <summary>
+	/// 爆炸伤害内径
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 200.f;
+
+	/// <summary>
+	/// 爆炸伤害外径
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
 
 private:
 	/// <summary>
@@ -80,6 +118,17 @@ private:
 	/// </summary>
 	UPROPERTY()
 	class UParticleSystemComponent* TracerComponent;
+
+	/// <summary>
+	/// 子弹销毁计时器
+	/// </summary>
+	FTimerHandle DestroyTimer;
+
+	/// <summary>
+	/// 子弹销毁倒计时时间
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
 
 public:	
 	

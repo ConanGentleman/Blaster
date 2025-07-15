@@ -27,22 +27,6 @@ protected:
 	/// <param name="Hit"></param>
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void BeginPlay() override;
-	/// <summary>
-	/// 销毁倒计时回调
-	/// </summary>
-	void DestroyTimerFinished();
-
-	/// <summary>
-	/// 用于火箭弹拖尾的特效
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* TrailSystem;
-
-	/// <summary>
-	/// 用于火箭弹拖尾特效的组件
-	/// </summary>
-	UPROPERTY()
-	class UNiagaraComponent* TrailSystemComponent;
 
 	/// <summary>
 	/// 子弹飞行时的声音源
@@ -69,20 +53,4 @@ protected:
 	class URocketMovementComponent* RocketMovementComponent;
 
 private:
-	/// <summary>
-	/// 子弹网格体（子弹预制模型）
-	/// </summary>
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* RocketMesh;
-
-	/// <summary>
-	/// 子弹销毁计时器
-	/// </summary>
-	FTimerHandle DestroyTimer;
-
-	/// <summary>
-	/// 子弹销毁倒计时时间
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	float DestroyTime = 3.f;
 };
