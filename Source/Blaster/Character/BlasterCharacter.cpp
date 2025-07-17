@@ -381,7 +381,7 @@ void ABlasterCharacter::PlayReloadMontage()
 			SectionName = FName("GrenadeLauncher");
 			break;
 		}
-
+		//跳转到蒙太奇指定点播放动画
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }

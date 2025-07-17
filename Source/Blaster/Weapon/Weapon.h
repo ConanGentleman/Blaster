@@ -232,6 +232,11 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	bool IsEmpty();
+	/// <summary>
+	/// 判断子弹是否已经装满（用于霰弹枪等一颗一颗装填的武器）
+	/// </summary>
+	/// <returns></returns>
+	bool IsFull();
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }

@@ -48,6 +48,17 @@ public:
 	/// </summary>
 	/// <param name="bPressed"></param>
 	void FireButtonPressed(bool bPressed);
+
+	/// <summary>
+	/// 霰弹枪子弹装填（蓝图中通过动画通知调用）
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	/// <summary>
+	/// 停止霰弹枪子弹装填
+	/// </summary>
+	void JumpToShotgunEnd();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -331,4 +342,8 @@ private:
 	void OnRep_CombatState();
 
 	void UpdateAmmoValues();
+	/// <summary>
+	/// 更新霰弹枪的子弹（需要一颗一颗装填
+	/// </summary>
+	void UpdateShotgunAmmoValues();
 };

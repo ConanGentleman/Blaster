@@ -427,4 +427,9 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
+	/// <summary>
+	/// 获取玩家当前是否处于装弹状态（霰弹枪一颗一颗装）
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 };

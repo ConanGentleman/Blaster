@@ -11,6 +11,7 @@
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -156,6 +157,11 @@ void AWeapon::SpendRound()
 void AWeapon::OnRep_Ammo()
 {
 	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
+	{
+		//如果子弹装满了，停止播放装填子弹动画（霰弹枪用）
+		BlasterOwnerCharacter->GetCombat()->JumpToShotgunEnd();
+	}
 	SetHUDAmmo();
 }
 
@@ -343,4 +349,13 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 bool AWeapon::IsEmpty()
 {
 	return Ammo <= 0;
+}
+
+/// <summary>
+/// 判断武器子弹是否上满了（霰弹枪一颗一颗装的时候用）
+/// </summary>
+/// <returns></returns>
+bool AWeapon::IsFull()
+{
+	return Ammo == MagCapacity;
 }
