@@ -41,6 +41,10 @@ public:
 	/// 播放淘汰（死亡）蒙太奇动画
 	/// </summary>
 	void PlayElimMontage();
+	/// <summary>
+	/// 投掷手榴弹蒙太奇动画
+	/// </summary>
+	void PlayThrowGrenadeMontage();
 
 	///// <summary>
 	///// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
@@ -109,6 +113,10 @@ protected:
 	void FireButtonReleased();
 	//播放受击动画
 	void PlayHitReactMontage();
+	/// <summary>
+	/// 投掷手榴弹
+	/// </summary>
+	void GrenadeButtonPressed();
 
 	/// <summary>
 	/// 用于接收来自子弹类（如ProjectileBullet）中的ApplyDamage委托的回调函数。
@@ -239,6 +247,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* ElimMontage;
+
+	/// <summary>
+	/// 投掷手榴弹动画蒙太奇
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ThrowGrenadeMontage;
 
 	/// <summary>
 	/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色

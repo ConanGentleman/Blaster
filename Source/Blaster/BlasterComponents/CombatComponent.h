@@ -59,6 +59,14 @@ public:
 	/// 停止霰弹枪子弹装填
 	/// </summary>
 	void JumpToShotgunEnd();
+
+	/// <summary>
+	/// 完成投掷手榴弹回调函数
+	/// 可在蓝图中调用
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void ThrowGrenadeFinished();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -125,6 +133,18 @@ protected:
 	void HandleReload();
 
 	int32 AmountToReload();
+
+	/// <summary>
+	/// 投掷手榴弹
+	/// </summary>
+	void ThrowGrenade();
+
+	/// <summary>
+	/// 投掷手榴弹RPC，客户端或服务器调用，仅在服务器执行。
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerThrowGrenade();
+
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 

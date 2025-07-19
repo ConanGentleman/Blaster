@@ -1,22 +1,27 @@
-#pragma once
+ï»¿#pragma once
 
 /// <summary>
-/// Õ½¶·×é¼ş×´Ì¬
+/// æˆ˜æ–—ç»„ä»¶çŠ¶æ€
 /// </summary>
 UENUM(BlueprintType)
 enum class ECombatState : uint8
 {
 	/// <summary>
-	/// ¿ÕÏĞ×´Ì¬£¨¿ÉÒÔ½øĞĞ¿ª»ğĞĞÎª£©
+	/// ç©ºé—²çŠ¶æ€ï¼ˆå¯ä»¥è¿›è¡Œå¼€ç«è¡Œä¸ºï¼‰
 	/// </summary>
 	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
 	/// <summary>
-	/// »»µ¯×´Ì¬
+	/// æ¢å¼¹çŠ¶æ€
 	/// </summary>
 	ECS_Reloading UMETA(DisplayName = "Reloading"),
+	/// <summary>
+	/// æŠ•æ·æ‰‹æ¦´å¼¹çŠ¶æ€
+	/// </summary>
+	ECS_ThrowingGrenade UMETA(DisplayName = "Throwing Grenade"),
+
 
 	/// <summary>
-	/// Ã¶¾ÙÊıÁ¿
+	/// æšä¸¾æ•°é‡
 	/// </summary>
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };

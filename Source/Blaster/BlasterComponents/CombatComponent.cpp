@@ -203,6 +203,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
 	if (EquippedWeapon)//替换武器
 	{
 		EquippedWeapon->Dropped();
@@ -261,8 +262,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 /// </summary>
 void UCombatComponent::Reload()
 {
-	//携带子弹大于0且不处于换弹状态 才调用RPC。不然可能存在一直按R 的情况
-	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
+	//携带子弹大于0且处于空闲状态 才调用RPC。不然可能存在一直按R 的情况
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		ServerReload();
 	}
@@ -370,6 +371,15 @@ void UCombatComponent::JumpToShotgunEnd()
 }
 
 /// <summary>
+/// 完成投掷手榴弹回调
+/// </summary>
+void UCombatComponent::ThrowGrenadeFinished()
+{
+	//完成手榴弹投掷后则将战斗状态改为空闲
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
+/// <summary>
 /// 战斗状态变量复制时调用
 /// </summary>
 void UCombatComponent::OnRep_CombatState()
@@ -385,6 +395,12 @@ void UCombatComponent::OnRep_CombatState()
 		if (bFireButtonPressed)
 		{
 			Fire();
+		}
+		break;
+	case ECombatState::ECS_ThrowingGrenade: 
+		if (Character && !Character->IsLocallyControlled())//如果是本地控制的角色肯定已经播放过玩家的投掷动画了，因此只处理不是本地控制的角色播放动画蒙太奇
+		{
+			Character->PlayThrowGrenadeMontage();
 		}
 		break;
 	}
@@ -419,6 +435,37 @@ int32 UCombatComponent::AmountToReload()
 	}
 	return 0;
 }
+
+/// <summary>
+/// 投掷手榴弹 
+/// </summary>
+void UCombatComponent::ThrowGrenade()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	//将当前战斗状态变成投掷状态
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage(); //播放蒙太奇动画
+	}
+	if (Character && !Character->HasAuthority())//如果是客户端则调用投掷手榴弹RPC，让服务器也执行一下
+	{
+		ServerThrowGrenade();
+	}
+}
+
+/// <summary>
+/// 投掷手榴弹RPC  用于客户端调用服务器执行的函数
+/// </summary>
+void UCombatComponent::ServerThrowGrenade_Implementation()
+{
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+}
+
 
 /// <summary>
 /// 用于装备武器的变量复制前的调用

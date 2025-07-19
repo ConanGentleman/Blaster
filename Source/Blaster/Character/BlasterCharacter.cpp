@@ -315,6 +315,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
 }
 /// <summary>
 /// 在创建对象并且其所有组件都已注册和初始化时调用
@@ -401,6 +402,18 @@ void ABlasterCharacter::PlayElimMontage()
 }
 
 /// <summary>
+/// 播放角色投掷手榴弹动画
+/// </summary>
+void ABlasterCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+	}
+}
+
+/// <summary>
 /// 用于播放角色受击动画.
 /// </summary>
 void ABlasterCharacter::PlayHitReactMontage()
@@ -415,6 +428,17 @@ void ABlasterCharacter::PlayHitReactMontage()
 		//选择蒙太奇中对应的动画标签
 		FName SectionName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+/// <summary>
+/// 按下投掷按钮牛触发 投掷手榴弹
+/// </summary>
+void ABlasterCharacter::GrenadeButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->ThrowGrenade();
 	}
 }
 
