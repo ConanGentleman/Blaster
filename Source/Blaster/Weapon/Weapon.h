@@ -124,6 +124,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EquipSound;
 
+	/**
+	* 开启or禁用启用自定义深度（启用后如果将武器的深度调整到合适的情况，那么由于BlasterMap地图场景中的PostProcessVolume设置了后处理材质，使得场景中的武器有了外轮廓（紫色的）
+	*/
+	void EnableCustomDepth(bool bEnable);
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

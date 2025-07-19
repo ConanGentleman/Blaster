@@ -3,6 +3,11 @@
 //射线检测的距离长度
 #define TRACE_LENGTH 80000.f
 
+//深度颜色，用于场地里未拾取的武器描边
+#define CUSTOM_DEPTH_PURPLE 250
+#define CUSTOM_DEPTH_BLUE 251
+#define CUSTOM_DEPTH_TAN 252
+
 /// <summary>
 /// 武器类型枚举
 /// </summary>

@@ -35,6 +35,14 @@ AWeapon::AWeapon()
 	//武器该开始生成时禁用碰撞，知道玩家捡起并捡起丢下，才使用碰撞。所有该开始肯定是禁用状态
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	//启用自定义深度
+	EnableCustomDepth(true);
+	//设置深度（颜色）
+	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
+	//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+	WeaponMesh->MarkRenderStateDirty();
+
 	//创建球形检测重叠
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
 	//绑定到根组件
@@ -50,6 +58,18 @@ AWeapon::AWeapon()
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	//绑定到根组件
 	PickupWidget->SetupAttachment(RootComponent);
+}
+
+/// <summary>
+/// 开启or禁用启用自定义深度（启用后如果将武器的深度调整到合适的情况，那么由于BlasterMap地图场景中的PostProcessVolume设置了后处理材质，使得场景中的武器有了外轮廓（紫色的）
+/// </summary>
+/// <param name="bEnable"></param>
+void AWeapon::EnableCustomDepth(bool bEnable)
+{
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetRenderCustomDepth(bEnable);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -206,6 +226,8 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
 		}
+		//装备武器禁用其深度颜色（轮廓）
+		EnableCustomDepth(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		/*
@@ -230,6 +252,14 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 		//但是碰撞忽略相机
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		
+		
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+		//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
+		//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+		WeaponMesh->MarkRenderStateDirty();
+		//丢弃武器时开启轮廓显示
+		EnableCustomDepth(true);
 		break;
 	}
 }
@@ -255,6 +285,8 @@ void AWeapon::OnRep_WeaponState()
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
 		}
+		//装备武器禁用其深度颜色
+		EnableCustomDepth(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		WeaponMesh->SetSimulatePhysics(true);
@@ -268,6 +300,13 @@ void AWeapon::OnRep_WeaponState()
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 		//但是碰撞忽略相机
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+		//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
+		//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+		WeaponMesh->MarkRenderStateDirty();
+		//丢弃武器时开启轮廓显示
+		EnableCustomDepth(true);
 		break;
 	}
 }
