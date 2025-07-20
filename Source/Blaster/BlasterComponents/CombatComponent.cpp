@@ -160,10 +160,7 @@ void UCombatComponent::FireTimerFinished()
 		Fire();
 	}
 	//如果子弹打空了，则自动换弹
-	if (EquippedWeapon->IsEmpty())
-	{
-		Reload();
-	}
+	ReloadEmptyWeapon();
 }
 
 /// <summary>
@@ -204,26 +201,74 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
-	if (EquippedWeapon)//替换武器
-	{
-		EquippedWeapon->Dropped();
-	}
 
+	//丢弃已经装备的武器
+	DropEquippedWeapon();
 	EquippedWeapon = WeaponToEquip;
 	//设置武器状态
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	//将武器网格添加到角色骨骼右手上
+	AttachActorToRightHand(EquippedWeapon);
 
+	//设置武器的所有者
+	EquippedWeapon->SetOwner(Character);
+	//装备武器更新子弹信息显示
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquipWeaponSound();
+	ReloadEmptyWeapon();
+
+	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::DropEquippedWeapon()
+{
+	if (EquippedWeapon)//如果装备了武器
+	{
+		EquippedWeapon->Dropped();
+	}
+}
+
+/// <summary>
+/// 将某个actor添加到角色骨骼的右手上（如将武器添加到右手
+/// </summary>
+/// <param name="ActorToAttach"></param>
+void UCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
 	//先获取人物网格的武器插槽
 	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 
 	if (HandSocket) {
 		//将武器放在人物网格插槽处
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
 	}
-	//设置武器的所有者
-	EquippedWeapon->SetOwner(Character);
-	//装备武器更新子弹信息显示
-	EquippedWeapon->SetHUDAmmo();
+}
+
+/// <summary>
+/// 将某个actor添加到角色骨骼的左手上
+/// </summary>
+/// <param name="ActorToAttach"></param>
+void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr || EquippedWeapon == nullptr) return;
+	bool bUsePistolSocket =
+		EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Pistol ||
+		EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun; //冲锋枪和手枪使用PistolSocket插槽
+	FName SocketName = bUsePistolSocket ? FName("PistolSocket") : FName("LeftHandSocket");
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(SocketName);
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::UpdateCarriedAmmo()
+{
+	if (EquippedWeapon == nullptr) return;
 	//判断是否存在武器类型，存在则获取携带的子弹数量
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
@@ -236,8 +281,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		//设置HUD上的携带子弹数
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
 	}
+}
 
-	if (EquippedWeapon->EquipSound)
+void UCombatComponent::PlayEquipWeaponSound()
+{
+	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
 	{
 		//播放装备音效
 		UGameplayStatics::PlaySoundAtLocation(
@@ -246,15 +294,18 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 			Character->GetActorLocation()
 		);
 	}
+}
+
+/// <summary>
+/// 如果子弹打空了，则自动换弹
+/// </summary>
+void UCombatComponent::ReloadEmptyWeapon()
+{
 	//如果子弹打空了，则自动换弹
-	if (EquippedWeapon->IsEmpty())
+	if (EquippedWeapon && EquippedWeapon->IsEmpty())
 	{
 		Reload();
 	}
-	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
-	Character->bUseControllerRotationYaw = true;
 }
 
 /// <summary>
@@ -377,6 +428,8 @@ void UCombatComponent::ThrowGrenadeFinished()
 {
 	//完成手榴弹投掷后则将战斗状态改为空闲
 	CombatState = ECombatState::ECS_Unoccupied;
+	//用于投掷手榴弹动作开启时会将武器绑定到左手，因此当投掷完成后绑定回右手
+	AttachActorToRightHand(EquippedWeapon);
 }
 
 /// <summary>
@@ -401,6 +454,8 @@ void UCombatComponent::OnRep_CombatState()
 		if (Character && !Character->IsLocallyControlled())//如果是本地控制的角色肯定已经播放过玩家的投掷动画了，因此只处理不是本地控制的角色播放动画蒙太奇
 		{
 			Character->PlayThrowGrenadeMontage();
+			//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
+			AttachActorToLeftHand(EquippedWeapon);
 		}
 		break;
 	}
@@ -447,6 +502,8 @@ void UCombatComponent::ThrowGrenade()
 	if (Character)
 	{
 		Character->PlayThrowGrenadeMontage(); //播放蒙太奇动画
+		//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
+		AttachActorToLeftHand(EquippedWeapon);
 	}
 	if (Character && !Character->HasAuthority())//如果是客户端则调用投掷手榴弹RPC，让服务器也执行一下
 	{
@@ -463,6 +520,8 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 	if (Character)
 	{
 		Character->PlayThrowGrenadeMontage();
+		//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
+		AttachActorToLeftHand(EquippedWeapon);
 	}
 }
 
@@ -477,11 +536,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		//因此为了避免伤处情况。选择在OnRep_EquippedWeapon将武器附加到客户端上。因为武器状态处理碰撞属性，如果视图捡起已经掉落的武器，他会进行物理模拟和启用物理功能，则无法将装备武器的附加到角色上。
 		//所以先在客户端设置装备状态
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-		if (HandSocket)
-		{
-			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-		}
+		AttachActorToRightHand(EquippedWeapon);
 
 		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -489,14 +544,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->bUseControllerRotationYaw = true;
 
 		//播放装备音效
-		if (EquippedWeapon->EquipSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				EquippedWeapon->EquipSound,
-				Character->GetActorLocation()
-			);
-		}
+		PlayEquipWeaponSound();
 	}
 }
 

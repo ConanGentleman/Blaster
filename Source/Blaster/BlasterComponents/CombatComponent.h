@@ -145,6 +145,34 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerThrowGrenade();
 
+	/// <summary>
+	/// 丢弃已经装备的武器
+	/// </summary>
+	void DropEquippedWeapon();
+
+	/// <summary>
+	/// 将某个actor添加到角色骨骼的右手上
+	/// </summary>
+	/// <param name="ActorToAttach"></param>
+	void AttachActorToRightHand(AActor* ActorToAttach);
+	/// <summary>
+	/// 将某个actor添加到角色骨骼的左手上
+	/// </summary>
+	/// <param name="ActorToAttach"></param>
+	void AttachActorToLeftHand(AActor* ActorToAttach);
+	/// <summary>
+	/// 更新子弹数量
+	/// </summary>
+	void UpdateCarriedAmmo();
+	/// <summary>
+	/// 播放装备武器音效
+	/// </summary>
+	void PlayEquipWeaponSound();
+	/// <summary>
+	/// 如果子弹打空了，则自动换弹
+	/// </summary>
+	void ReloadEmptyWeapon();
+
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 
