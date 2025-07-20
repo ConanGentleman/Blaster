@@ -394,6 +394,12 @@ private:
 	//加上UPROPERTY()的原因是让BlasterPlayerState初始化为nullptr，即与class ABlasterPlayerState* BlasterPlayerState=nullptr相同
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	/**
+	* 手榴弹网格组件（预制模型）
+	*/
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon

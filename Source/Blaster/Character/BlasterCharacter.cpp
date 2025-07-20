@@ -82,6 +82,12 @@ ABlasterCharacter::ABlasterCharacter()
 
 	//创建溶解时间轴组件
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
+
+	//创建手榴弹网格
+	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Attached Grenade"));
+	AttachedGrenade->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
+	// 设置手榴弹碰撞
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 /// <summary>
 /// 函数内部是注册要replicated（复制）的变量的地方。便于将服务器上的replicated变量同步到各个客户端

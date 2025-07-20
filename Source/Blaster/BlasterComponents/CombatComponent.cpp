@@ -313,8 +313,8 @@ void UCombatComponent::ReloadEmptyWeapon()
 /// </summary>
 void UCombatComponent::Reload()
 {
-	//携带子弹大于0且处于空闲状态 才调用RPC。不然可能存在一直按R 的情况
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied)
+	//携带子弹大于0且没有装满且处于空闲状态 才调用RPC。不然可能存在一直按R 的情况
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
 	{
 		ServerReload();
 	}
