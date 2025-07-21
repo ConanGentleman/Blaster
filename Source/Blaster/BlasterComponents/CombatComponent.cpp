@@ -433,6 +433,15 @@ void UCombatComponent::ThrowGrenadeFinished()
 }
 
 /// <summary>
+/// 发射手榴弹（由grenadetoss中的动画通知调用）
+/// </summary>
+void UCombatComponent::LaunchGrenade()
+{
+	//隐藏手上的手榴弹
+	ShowAttachedGrenade(false);
+}
+
+/// <summary>
 /// 战斗状态变量复制时调用
 /// </summary>
 void UCombatComponent::OnRep_CombatState()
@@ -456,6 +465,8 @@ void UCombatComponent::OnRep_CombatState()
 			Character->PlayThrowGrenadeMontage();
 			//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
 			AttachActorToLeftHand(EquippedWeapon);
+			//投掷手榴弹时显示手榴弹
+			ShowAttachedGrenade(true);
 		}
 		break;
 	}
@@ -504,6 +515,8 @@ void UCombatComponent::ThrowGrenade()
 		Character->PlayThrowGrenadeMontage(); //播放蒙太奇动画
 		//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
 		AttachActorToLeftHand(EquippedWeapon);
+		//投掷手榴弹时显示手榴弹
+		ShowAttachedGrenade(true);
 	}
 	if (Character && !Character->HasAuthority())//如果是客户端则调用投掷手榴弹RPC，让服务器也执行一下
 	{
@@ -522,6 +535,20 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 		Character->PlayThrowGrenadeMontage();
 		//投掷手榴弹会用右手投掷，但装备的武器也是绑定在右手，因此当投掷手榴弹时将武器绑定到左手去，并在投掷完成后通过ThrowGrenadeFinished将武器绑定回右手
 		AttachActorToLeftHand(EquippedWeapon);
+		//投掷手榴弹时显示手榴弹
+		ShowAttachedGrenade(true);
+	}
+}
+
+/// <summary>
+/// 设置手上手榴弹显示or隐藏（一般是扔手榴弹的时候显示，扔完就隐藏掉
+/// </summary>
+/// <param name="bShowGrenade"></param>
+void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
+{
+	if (Character && Character->GetAttachedGrenade())
+	{
+		Character->GetAttachedGrenade()->SetVisibility(bShowGrenade);
 	}
 }
 

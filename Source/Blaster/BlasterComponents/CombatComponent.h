@@ -67,6 +67,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
 
+	/// <summary>
+	/// 发射手榴弹（由grenadetoss中的动画通知调用）
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -172,6 +178,11 @@ protected:
 	/// 如果子弹打空了，则自动换弹
 	/// </summary>
 	void ReloadEmptyWeapon();
+	/// <summary>
+	/// 设置手上手榴弹显示or隐藏（一般是扔手榴弹的时候显示，扔完就隐藏掉
+	/// </summary>
+	/// <param name="bShowGrenade"></param>
+	void ShowAttachedGrenade(bool bShowGrenade);
 
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同

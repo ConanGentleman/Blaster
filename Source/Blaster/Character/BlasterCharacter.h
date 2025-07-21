@@ -452,4 +452,9 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
+	/// <summary>
+	/// 获取手榴弹预制是否显示
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 };

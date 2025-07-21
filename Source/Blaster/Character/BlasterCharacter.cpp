@@ -257,6 +257,11 @@ void ABlasterCharacter::BeginPlay()
 		//当演员以任何方式损坏时调用回调函数
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
+	if (AttachedGrenade)
+	{
+		//手上手榴弹可见性（隐藏）
+		AttachedGrenade->SetVisibility(false);
+	}
 }
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
