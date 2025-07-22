@@ -73,6 +73,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LaunchGrenade();
 
+	/// <summary>
+	/// 发射手榴弹RPC
+	/// RPC用于客户端调用服务器执行的函数，保证客户端同样能够获取到目标来生成并投出手榴弹
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

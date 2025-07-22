@@ -441,10 +441,23 @@ void UCombatComponent::LaunchGrenade()
 	//隐藏手上的手榴弹
 	ShowAttachedGrenade(false);
 	//在服务器上 且玩家是否有手榴弹
+	if (Character && Character->IsLocallyControlled())
+	{
+		ServerLaunchGrenade(HitTarget);
+	}
+}
+
+/// <summary>
+/// 发射手榴弹RPC
+/// RPC用于客户端调用服务器执行的函数，保证客户端同样能够获取到目标来生成并投出手榴弹
+/// </summary>
+/// <param name="Target">FVector_NetQuantize 类型用于网络同步，且精度没有FVector高但是网络带宽占用较小 UPROPERTY(Replicated) 或其他复制逻辑（如 RPC）使用</param>
+void UCombatComponent::ServerLaunchGrenade_Implementation(const FVector_NetQuantize & Target)
+{
 	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
 	{
 		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation(); //手榴弹开始的位置
-		FVector ToTarget = HitTarget - StartingLocation; //射线检测到的目标位置（准星瞄准方向
+		FVector ToTarget = Target - StartingLocation; //射线检测到的目标位置（准星瞄准方向
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Character; //拥有者
 		SpawnParams.Instigator = Character; //引发者（造成影响的人，造成伤害者
