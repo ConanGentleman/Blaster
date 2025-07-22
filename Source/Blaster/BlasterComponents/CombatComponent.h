@@ -418,4 +418,30 @@ private:
 	/// 更新霰弹枪的子弹（需要一颗一颗装填
 	/// </summary>
 	void UpdateShotgunAmmoValues();
+
+	/// <summary>
+	/// 剩余手榴弹数量
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
+	int32 Grenades = 4;
+
+	UFUNCTION()
+	void OnRep_Grenades();
+
+	/// <summary>
+	/// 最大手榴弹数量
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenades = 4;
+	/// <summary>
+	/// 更新手榴弹文本
+	/// </summary>
+	void UpdateHUDGrenades();
+
+public :
+	/// <summary>
+	/// 获取手榴弹数量
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 };

@@ -50,6 +50,11 @@ public:
 	/// <param name="CountdownTime"></param>
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	/// <summary>
+	/// 设置手榴弹数量文本
+	/// </summary>
+	/// <param name="Grenades"></param>
+	void SetHUDGrenades(int32 Grenades);
+	/// <summary>
 	/// 当一个角色被控制器拥有时，即玩家开始控制该角色时，OnPossess函数就会被调用。（可以用在角色淘汰被重生时使用，因为其发生了控制器对角色控制的分离和新角色的控制
 	/// 测试了一下好像刚开始获取的时候并不会调用
 	/// </summary>
@@ -132,7 +137,7 @@ protected:
 	/// RPC函数一旦客户端进入游戏，先调用服务器完成匹配状态检查（ServerCheckMatchState），然后客户端进入游戏，并保存游戏新的相关信息
 	/// </summary>
 	UFUNCTION(Client, Reliable)
-		void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
+	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 
 private:
 	//角色HUD
@@ -186,4 +191,8 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+	/// <summary>
+	/// 手榴弹数量
+	/// </summary>
+	int32 HUDGrenades;
 };

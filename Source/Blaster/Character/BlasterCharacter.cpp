@@ -463,6 +463,8 @@ void ABlasterCharacter::GrenadeButtonPressed()
 /// <param name="DamageCauser"></param>
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+	//如果玩家死亡了，则不继续作用伤害了
+	if (bElimmed) return;
 	//受伤修改血量。由于Health是复制变量，修改后会同步到各个客户端
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	//更新HUD上的血量信息（仅在服务器上更新，客户端的更新则通过OnRep_Health进行更新）

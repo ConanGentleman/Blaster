@@ -56,4 +56,10 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* MatchCountdownText;
+
+	/// <summary>
+	/// 手榴弹数量文本
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* GrenadesText;
 };

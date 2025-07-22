@@ -41,6 +41,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	//当条件设为COND_OwnerOnly，意味着携带的子弹数量将仅复制到当前控制的BlasterCharacter所对应的客户端
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
+	DOREPLIFETIME(UCombatComponent, Grenades);
 }
 
 /// <summary>
@@ -409,6 +410,14 @@ void UCombatComponent::UpdateShotgunAmmoValues()
 }
 
 /// <summary>
+/// 变量Grenades被赋值时触发(其他调用UpdateHUDGrenades函数的地方都只在服务器，所以这里用复制变量的方式通知客户端去调一下以刷新UI
+/// </summary>
+void UCombatComponent::OnRep_Grenades()
+{
+	UpdateHUDGrenades();
+}
+
+/// <summary>
 /// 停止装弹动画（因为霰弹枪的子弹上限是4，因此将4次一颗一颗装弹分成4次装弹动画，当不能再装弹时，则停止播放装弹动画
 /// </summary>
 void UCombatComponent::JumpToShotgunEnd()
@@ -440,7 +449,7 @@ void UCombatComponent::LaunchGrenade()
 {
 	//隐藏手上的手榴弹
 	ShowAttachedGrenade(false);
-	//在服务器上 且玩家是否有手榴弹
+	//准星目标是跟本地操控的玩家有关
 	if (Character && Character->IsLocallyControlled())
 	{
 		ServerLaunchGrenade(HitTarget);
@@ -540,6 +549,7 @@ int32 UCombatComponent::AmountToReload()
 /// </summary>
 void UCombatComponent::ThrowGrenade()
 {
+	if (Grenades == 0) return;
 	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
 	//将当前战斗状态变成投掷状态
 	CombatState = ECombatState::ECS_ThrowingGrenade;
@@ -555,6 +565,11 @@ void UCombatComponent::ThrowGrenade()
 	{
 		ServerThrowGrenade();
 	}
+	if (Character && Character->HasAuthority())
+	{
+		Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+		UpdateHUDGrenades();
+	}
 }
 
 /// <summary>
@@ -562,6 +577,7 @@ void UCombatComponent::ThrowGrenade()
 /// </summary>
 void UCombatComponent::ServerThrowGrenade_Implementation()
 {
+	if (Grenades == 0) return;
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	if (Character)
 	{
@@ -570,6 +586,17 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 		AttachActorToLeftHand(EquippedWeapon);
 		//投掷手榴弹时显示手榴弹
 		ShowAttachedGrenade(true);
+	}
+	Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+	UpdateHUDGrenades();
+}
+
+void UCombatComponent::UpdateHUDGrenades()
+{
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDGrenades(Grenades);
 	}
 }
 
