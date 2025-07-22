@@ -15,6 +15,7 @@
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterAnimInstance.h"
+#include "Blaster/Weapon/Projectile.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -439,6 +440,25 @@ void UCombatComponent::LaunchGrenade()
 {
 	//隐藏手上的手榴弹
 	ShowAttachedGrenade(false);
+	//在服务器上 且玩家是否有手榴弹
+	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
+	{
+		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation(); //手榴弹开始的位置
+		FVector ToTarget = HitTarget - StartingLocation; //射线检测到的目标位置（准星瞄准方向
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Character; //拥有者
+		SpawnParams.Instigator = Character; //引发者（造成影响的人，造成伤害者
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->SpawnActor<AProjectile>( //生成手榴弹
+				GrenadeClass,
+				StartingLocation,
+				ToTarget.Rotation(),
+				SpawnParams
+				);
+		}
+	}
 }
 
 /// <summary>
@@ -507,7 +527,7 @@ int32 UCombatComponent::AmountToReload()
 /// </summary>
 void UCombatComponent::ThrowGrenade()
 {
-	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
 	//将当前战斗状态变成投掷状态
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	if (Character)

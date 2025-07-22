@@ -152,6 +152,12 @@ protected:
 	void ServerThrowGrenade();
 
 	/// <summary>
+	/// 手榴弹类（扔出去的手榴弹-就是子弹的一种）
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> GrenadeClass;
+
+	/// <summary>
 	/// 丢弃已经装备的武器
 	/// </summary>
 	void DropEquippedWeapon();

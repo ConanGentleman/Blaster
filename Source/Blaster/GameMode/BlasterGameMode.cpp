@@ -136,6 +136,7 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 	}
 	if (ElimmedController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ElimmedController valid"))
 		TArray<AActor*> PlayerStarts;
 		//获取场景中所有玩家重生点
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
