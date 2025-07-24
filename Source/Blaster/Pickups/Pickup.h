@@ -31,6 +31,12 @@ protected:
 		const FHitResult& SweepResult
 	);
 
+	/// <summary>
+	/// 每秒旋转率
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float BaseTurnRate = 45.f;
+
 private:
 	/// <summary>
 	/// 球形碰撞体。重叠体积（碰撞体），用于角色靠近时，能够识别该能被捡起的物体

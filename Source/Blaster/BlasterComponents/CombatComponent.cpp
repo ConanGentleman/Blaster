@@ -56,6 +56,26 @@ void UCombatComponent::ShotgunShellReload()
 
 }
 
+/// <summary>
+/// 捡起子弹 通过AmmoPickup调用
+/// </summary>
+/// <param name="WeaponType">子弹类型</param>
+/// <param name="AmmoAmount">子弹数量</param>
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	//如果包含武器，则更新子弹数量
+	if (CarriedAmmoMap.Contains(WeaponType))
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + AmmoAmount, 0, MaxCarriedAmmo);
+		UpdateCarriedAmmo();
+	}
+	//如果正好对应类型的武器的弹夹是空的，装填一下子弹
+	if (EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		Reload();
+	}
+}
+
 // Called when the game starts
 void UCombatComponent::BeginPlay()
 {
@@ -271,7 +291,7 @@ void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 void UCombatComponent::UpdateCarriedAmmo()
 {
 	if (EquippedWeapon == nullptr) return;
-	//判断是否存在武器类型，存在则获取携带的子弹数量
+	//判断是否存在该武器类型，存在则获取携带的子弹数量
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
 		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];

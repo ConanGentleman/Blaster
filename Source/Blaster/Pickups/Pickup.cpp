@@ -5,7 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Components/SphereComponent.h"
-
+#include "Blaster/Weapon/WeaponTypes.h"
 
 APickup::APickup()
 {
@@ -28,12 +28,20 @@ APickup::APickup()
 	OverlapSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	//但是可与玩家进行碰撞检测
 	OverlapSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	//偏移一下位置（因为父节点是场景组件，会直接附着在地面，子弹的位置就需要调高一下）
+	OverlapSphere->AddLocalOffset(FVector(0.f, 0.f, 85.f));
 	//创建网格
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMesh"));
 	//附着在球型组件上
 	PickupMesh->SetupAttachment(OverlapSphere);
 	//关闭碰撞
 	PickupMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//设置一下网格（预制体）大小
+	PickupMesh->SetRelativeScale3D(FVector(5.f, 5.f, 5.f));
+	//启用自定义深度（启用后如果将可捡起的物体的深度调整到合适的情况，那么由于BlasterMap地图场景中的PostProcessVolume设置了后处理材质，使得场景中的可捡起物体有了外轮廓
+	PickupMesh->SetRenderCustomDepth(true);
+	//将外轮廓设置为紫色 
+	PickupMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
 }
 
 void APickup::BeginPlay()
@@ -59,6 +67,11 @@ void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (PickupMesh)
+	{
+		//每帧旋转
+		PickupMesh->AddWorldRotation(FRotator(0.f, BaseTurnRate * DeltaTime, 0.f));
+	}
 }
 
 void APickup::Destroyed()

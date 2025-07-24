@@ -80,6 +80,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
+	/// <summary>
+	/// 捡起子弹 通过AmmoPickup调用
+	/// </summary>
+	/// <param name="WeaponType">子弹类型</param>
+	/// <param name="AmmoAmount">子弹数量</param>
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -354,6 +361,12 @@ private:
 	/// 武器类型与对应的携带的子弹数量
 	/// </summary>
 	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	/// <summary>
+	/// 每类子弹能够携带的最大子弹数
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	int32 MaxCarriedAmmo = 500;
 
 	/// <summary>
 	/// 初始携带的子弹数(步枪）
