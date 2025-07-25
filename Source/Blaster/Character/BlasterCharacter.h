@@ -181,6 +181,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBuffComponent* Buff;
+
+
 	//远程过程调用（RPC）具有在一台机器上调用并在另一台机器上执行的功能。例如可以从客户端上调用，并在服务器上执行对应函数
 	//这里的函数打算在客户端调用并在服务器上执行
 	//需要选择是可靠Reliable还是不可靠的执行，不可靠可能存在丢弃的问题。当服务器收到 RBC 时，客户端将收到确认，如果它没有发送确认，RBC 将再次发送

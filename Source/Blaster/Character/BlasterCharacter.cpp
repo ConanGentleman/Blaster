@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Blaster/BlasterComponents/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
@@ -57,6 +58,11 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
 	Combat->SetIsReplicated(true);
+
+	//创建buff组件
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	//设置为复制
+	Buff->SetIsReplicated(true);
 
 	//将该变量设置为true才能正常蹲下，因为Crouch函数会依据这个
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -336,6 +342,10 @@ void ABlasterCharacter::PostInitializeComponents() {
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 }
 
