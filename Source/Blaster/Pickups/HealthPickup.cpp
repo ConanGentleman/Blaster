@@ -4,16 +4,11 @@
 #include "HealthPickup.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/BlasterComponents/BuffComponent.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 
 AHealthPickup::AHealthPickup()
 {
 	//设置为复制
 	bReplicates = true;
-	//创建特效Niagara组件
-	PickupEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PickupEffectComponent"));
-	PickupEffectComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -41,20 +36,4 @@ void AHealthPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	}
 
 	Destroy();
-}
-
-void AHealthPickup::Destroyed()
-{
-
-	if (PickupEffect)
-	{
-		// 被拾取后播放拾取动效
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			this,
-			PickupEffect,
-			GetActorLocation(),
-			GetActorRotation()
-		);
-	}
-	Super::Destroyed();
 }

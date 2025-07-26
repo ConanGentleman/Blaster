@@ -15,7 +15,6 @@ class BLASTER_API AHealthPickup : public APickup
 	GENERATED_BODY()
 public:
 	AHealthPickup();
-	virtual void Destroyed() override;
 protected:
 	/// <summary>
 	/// 重叠事件回调
@@ -46,16 +45,4 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float HealingTime = 5.f;
-
-	/// <summary>
-	/// 特效Niagara组件
-	/// </summary>
-	UPROPERTY(VisibleAnywhere)
-	class UNiagaraComponent* PickupEffectComponent;
-
-	/// <summary>
-	/// 血包被拾取时的动效
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* PickupEffect;
 };

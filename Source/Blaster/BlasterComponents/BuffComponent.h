@@ -25,6 +25,19 @@ public:
 	/// </summary>
 	friend class ABlasterCharacter;
 	void Heal(float HealAmount, float HealingTime);
+	/// <summary>
+	/// 开始增速buff
+	/// </summary>
+	/// <param name="BuffBaseSpeed"></param>
+	/// <param name="BuffCrouchSpeed"></param>
+	/// <param name="BuffTime"></param>
+	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
+	/// <summary>
+	/// 初始保存正常的速度
+	/// </summary>
+	/// <param name="BaseSpeed"></param>
+	/// <param name="CrouchSpeed"></param>
+	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>
@@ -36,12 +49,48 @@ private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
 
+	/**
+	* 血量回复 buff
+	*/
+
 	bool bHealing = false;
 	/// <summary>
 	/// 每秒回复多少
 	/// </summary>
 	float HealingRate = 0;
+	/// <summary>
+	/// 计时器
+	/// </summary>
 	float AmountToHeal = 0.f;
+
+	/**
+	* 移速 buff
+	*/
+
+	/// <summary>
+	/// 计时器
+	/// </summary>
+	FTimerHandle SpeedBuffTimer;
+	/// <summary>
+	/// buff结束后重置为正常速度
+	/// </summary>
+	void ResetSpeeds();
+	/// <summary>
+	/// 正常的步行速度
+	/// </summary>
+	float InitialBaseSpeed;
+	/// <summary>
+	/// 正常的蹲下行走速度
+	/// </summary>
+	float InitialCrouchSpeed;
+
+	/// <summary>
+	/// 多播设置速度
+	/// 用于角色速度射中的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	/// reliable可靠的，发送失败会尝试重发
+	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

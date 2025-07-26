@@ -346,6 +346,11 @@ void ABlasterCharacter::PostInitializeComponents() {
 	if (Buff)
 	{
 		Buff->Character = this;
+		//设置正常的移速buff的相关参数（方便buff结束后重置为正常的移速
+		Buff->SetInitialSpeeds(
+			GetCharacterMovement()->MaxWalkSpeed,
+			GetCharacterMovement()->MaxWalkSpeedCrouched
+		);
 	}
 }
 

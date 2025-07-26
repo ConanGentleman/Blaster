@@ -6,6 +6,8 @@
 #include "Sound/SoundCue.h"
 #include "Components/SphereComponent.h"
 #include "Blaster/Weapon/WeaponTypes.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 APickup::APickup()
 {
@@ -42,6 +44,10 @@ APickup::APickup()
 	PickupMesh->SetRenderCustomDepth(true);
 	//将外轮廓设置为紫色 
 	PickupMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+
+	//创建特效Niagara组件
+	PickupEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PickupEffectComponent"));
+	PickupEffectComponent->SetupAttachment(RootComponent);
 }
 
 void APickup::BeginPlay()
@@ -85,6 +91,16 @@ void APickup::Destroyed()
 			this,
 			PickupSound,
 			GetActorLocation()
+		);
+	}
+	if (PickupEffect)
+	{
+		// 被拾取后播放拾取动效
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			PickupEffect,
+			GetActorLocation(),
+			GetActorRotation()
 		);
 	}
 }

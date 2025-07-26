@@ -54,6 +54,18 @@ private:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PickupMesh;
 
+	/// <summary>
+	/// 特效Niagara组件
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	class UNiagaraComponent* PickupEffectComponent;
+
+	/// <summary>
+	/// 血包被拾取时的动效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* PickupEffect;
+
 public:
 
 };
