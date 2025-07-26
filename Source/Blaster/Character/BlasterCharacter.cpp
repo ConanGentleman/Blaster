@@ -830,10 +830,15 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 /// <summary>
 /// （在服务器上）血量变化时，通知各客户端调用的回调函数。
 /// </summary>
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();
-	PlayHitReactMontage();
+
+	/// 血量减少才播放受击动画
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
 }
 
 /// <summary>

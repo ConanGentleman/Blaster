@@ -82,6 +82,11 @@ public:
 	/// </summary>
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
+
+	/// <summary>
+	/// 更新角色HUD的血量信息
+	/// </summary>
+	void UpdateHUDHealth();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -129,10 +134,6 @@ protected:
 	/// <param name="DamageCauser"></param>
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
-	/// <summary>
-	/// 更新角色HUD的血量信息
-	/// </summary>
-	void UpdateHUDHealth();
 
 	// 轮询任何相关类并初始化我们的HUD。也就是当角色死亡重生后，需要将其玩家状态类的信息用以初始化HUD上的信息。
 	void PollInit();
@@ -304,7 +305,7 @@ private:
 	/// （在服务器上）血量变化时，通知各客户端调用的回调函数。
 	/// </summary>
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 
 	//加上UPROPERTY()的原因是让BlasterPlayerController初始化为nullptr，即与class ABlasterPlayerController* BlasterPlayerController=nullptr相同
 	UPROPERTY()
@@ -439,6 +440,7 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	/// <summary>
 	/// 获取战斗状态
@@ -461,4 +463,9 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
+	/// <summary>
+	/// 获取buff组件
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 };
