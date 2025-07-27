@@ -33,11 +33,23 @@ public:
 	/// <param name="BuffTime"></param>
 	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
 	/// <summary>
+	/// 开始跳跃buff
+	/// </summary>
+	/// <param name="BuffJumpVelocity"></param>
+	/// <param name="BuffTime"></param>
+	void BuffJump(float BuffJumpVelocity, float BuffTime);
+
+	/// <summary>
 	/// 初始保存正常的速度
 	/// </summary>
 	/// <param name="BaseSpeed"></param>
 	/// <param name="CrouchSpeed"></param>
 	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
+	/// <summary>
+	/// 初始保存正常的跳跃速度（高度）
+	/// </summary>
+	/// <param name="Velocity"></param>
+	void SetInitialJumpVelocity(float Velocity);
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>
@@ -86,11 +98,27 @@ private:
 
 	/// <summary>
 	/// 多播设置速度
-	/// 用于角色速度射中的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	/// 用于角色速度设置的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
 	/// reliable可靠的，发送失败会尝试重发
 	/// </summary>
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
+
+	/**
+	* 跳跃 buff
+	*/
+	FTimerHandle JumpBuffTimer;
+	void ResetJump();
+	float InitialJumpVelocity;
+
+	/// <summary>
+	/// 多播设置跳跃速度（高度
+	/// 用于角色跳跃设置的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
+	/// reliable可靠的，发送失败会尝试重发
+	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastJumpBuff(float JumpVelocity);
+
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

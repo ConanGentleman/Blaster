@@ -351,6 +351,8 @@ void ABlasterCharacter::PostInitializeComponents() {
 			GetCharacterMovement()->MaxWalkSpeed,
 			GetCharacterMovement()->MaxWalkSpeedCrouched
 		);
+		//设置正常的跳跃速度给到buff组件，以便buff持续时间到了只会恢复到正常的跳跃速度
+		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
 	}
 }
 
