@@ -87,6 +87,10 @@ public:
 	/// 更新角色HUD的血量信息
 	/// </summary>
 	void UpdateHUDHealth();
+	/// <summary>
+	/// 更新角色HUD的护盾信息
+	/// </summary>
+	void UpdateHUDShield();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -306,6 +310,30 @@ private:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
+
+
+	/**
+	* 玩家护盾
+	*/
+
+	/// <summary>
+	/// 最大护盾
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 100.f;
+
+	/// <summary>
+	/// 当前护盾（可复制，复制通知为OnRep_Shield）
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
+	float Shield = 100.f;
+
+	/// <summary>
+	/// （在服务器上）护盾变化时，通知各客户端调用的回调函数。
+	/// </summary>
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
+
 
 	//加上UPROPERTY()的原因是让BlasterPlayerController初始化为nullptr，即与class ABlasterPlayerController* BlasterPlayerController=nullptr相同
 	UPROPERTY()

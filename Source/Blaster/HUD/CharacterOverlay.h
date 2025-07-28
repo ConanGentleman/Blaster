@@ -28,6 +28,18 @@ public:
 	class UTextBlock* HealthText;
 
 	/// <summary>
+	/// 护盾进度条
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* ShieldBar;
+
+	/// <summary>
+	/// 护盾文本
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ShieldText;
+
+	/// <summary>
 	/// 分数文字
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))

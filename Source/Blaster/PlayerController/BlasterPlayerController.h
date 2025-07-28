@@ -20,6 +20,12 @@ public:
 	/// </summary>
 	void SetHUDHealth(float Health, float MaxHealth);
 	/// <summary>
+	/// 设置HUD中的护盾信息
+	/// </summary>
+	/// <param name="Shield"></param>
+	/// <param name="MaxShield"></param>
+	void SetHUDShield(float Shield, float MaxShield);
+	/// <summary>
 	/// 设置HUD中的分数信息
 	/// </summary>
 	/// <param name="Score"></param>
@@ -195,4 +201,12 @@ private:
 	/// 手榴弹数量
 	/// </summary>
 	int32 HUDGrenades;
+	/// <summary>
+	/// 护盾值
+	/// </summary>
+	float HUDShield;
+	/// <summary>
+	/// 最大护盾值
+	/// </summary>
+	float HUDMaxShield;
 };

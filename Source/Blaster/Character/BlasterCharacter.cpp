@@ -113,6 +113,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon,COND_OwnerOnly);
 
 	DOREPLIFETIME(ABlasterCharacter, Health);
+	DOREPLIFETIME(ABlasterCharacter, Shield);
 	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
 }
 
@@ -849,6 +850,20 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 }
 
 /// <summary>
+/// （在服务器上）护盾变化时，通知各客户端调用的回调函数。
+/// </summary>
+void ABlasterCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();
+	if (Shield < LastShield)
+	{
+		/// 护盾减少播放受击动画
+		PlayHitReactMontage();
+	}
+}
+
+
+/// <summary>
 /// 更新角色HUD的血量信息
 /// </summary>
 void ABlasterCharacter::UpdateHUDHealth()
@@ -859,6 +874,18 @@ void ABlasterCharacter::UpdateHUDHealth()
 	{
 		//更新角色HUD的血量信息
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+/// <summary>
+/// 更新角色HUD的护盾信息
+/// </summary>
+void ABlasterCharacter::UpdateHUDShield()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
 	}
 }
 
