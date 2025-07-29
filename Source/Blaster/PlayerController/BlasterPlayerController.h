@@ -189,22 +189,41 @@ private:
 	/// </summary>
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
-	bool bInitializeCharacterOverlay = false;
 	/// <summary>
 	/// 下面是用于在HUD还没有效的情况下的缓存数据存储
 	/// </summary>
 	float HUDHealth;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeHealth = false;
 	float HUDMaxHealth;
 	float HUDScore;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeScore = false;
 	int32 HUDDefeats;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeDefeats = false;
 	/// <summary>
 	/// 手榴弹数量
 	/// </summary>
 	int32 HUDGrenades;
 	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeGrenades = false;
+	/// <summary>
 	/// 护盾值
 	/// </summary>
 	float HUDShield;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeShield = false;
 	/// <summary>
 	/// 最大护盾值
 	/// </summary>

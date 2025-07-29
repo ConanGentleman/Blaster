@@ -257,7 +257,7 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UpdateHUDHealth();
-
+	UpdateHUDShield();
 	//只在服务器上进行伤害计算，因此只在服务器上注册函数回调
 	if (HasAuthority())
 	{
@@ -483,10 +483,29 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 {
 	//如果玩家死亡了，则不继续作用伤害了
 	if (bElimmed) return;
+
+	float DamageToHealth = Damage;
+	//如果有护盾先扣护盾
+	if (Shield > 0.f)
+	{
+		if (Shield >= Damage)
+		{
+			Shield = FMath::Clamp(Shield - Damage, 0.f, MaxShield);
+			DamageToHealth = 0.f;
+		}
+		else
+		{
+			Shield = 0.f;
+			DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.f, Damage);
+		}
+	}
 	//受伤修改血量。由于Health是复制变量，修改后会同步到各个客户端
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
+
 	//更新HUD上的血量信息（仅在服务器上更新，客户端的更新则通过OnRep_Health进行更新）
 	UpdateHUDHealth();
+	//更新HUD上的护盾信息（仅在服务器上更新，客户端的更新则通过OnRep_Shield进行更新）
+	UpdateHUDShield();
 	//播放角色受击动画（仅在服务器上播放，客户端的播放则通过OnRep_Health播放）
 	PlayHitReactMontage();
 
