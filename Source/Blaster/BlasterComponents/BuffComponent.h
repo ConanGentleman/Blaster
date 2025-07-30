@@ -25,6 +25,7 @@ public:
 	/// </summary>
 	friend class ABlasterCharacter;
 	void Heal(float HealAmount, float HealingTime);
+	void ReplenishShield(float ShieldAmount, float ReplenishTime);
 	/// <summary>
 	/// 开始增速buff
 	/// </summary>
@@ -57,6 +58,11 @@ protected:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	void HealRampUp(float DeltaTime);
+	/// <summary>
+	/// 回护盾buff
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void ShieldRampUp(float DeltaTime);
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
@@ -65,15 +71,35 @@ private:
 	* 血量回复 buff
 	*/
 
+	/// <summary>
+	/// 是否正在回血
+	/// </summary>
 	bool bHealing = false;
 	/// <summary>
 	/// 每秒回复多少
 	/// </summary>
-	float HealingRate = 0;
+	float HealingRate = 0.f;
 	/// <summary>
-	/// 计时器
+	/// 计时器（也就是记录回复多少血量了
 	/// </summary>
 	float AmountToHeal = 0.f;
+
+	/**
+	* 护盾回复 buff
+	*/
+
+	/// <summary>
+	/// 是否正在回护盾
+	/// </summary>
+	bool bReplenishingShield = false;
+	/// <summary>
+	/// 每秒回复多少
+	/// </summary>
+	float ShieldReplenishRate = 0.f;
+	/// <summary>
+	/// 计时器（也就是记录回复多少护盾了
+	/// </summary>
+	float ShieldReplenishAmount = 0.f;
 
 	/**
 	* 移速 buff

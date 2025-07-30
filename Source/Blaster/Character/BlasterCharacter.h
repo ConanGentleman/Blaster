@@ -325,8 +325,8 @@ private:
 	/// <summary>
 	/// 当前护盾（可复制，复制通知为OnRep_Shield）
 	/// </summary>
-	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
-	float Shield = 100.f;
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, EditAnywhere, Category = "Player Stats")
+	float Shield = 0.f;
 
 	/// <summary>
 	/// （在服务器上）护盾变化时，通知各客户端调用的回调函数。
@@ -470,6 +470,9 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	/// <summary>
 	/// 获取战斗状态
 	/// </summary>
