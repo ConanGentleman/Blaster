@@ -66,6 +66,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* PickupEffect;
 
+	/// <summary>
+	/// 重叠监听触发延时，避免刚一生成就直接被触发了
+	/// </summary>
+	FTimerHandle BindOverlapTimer;
+	/// <summary>
+	/// 延时时间
+	/// </summary>
+	float BindOverlapTime = 0.25f;
+	void BindOverlapTimerFinished();
+
 public:
 
 };
