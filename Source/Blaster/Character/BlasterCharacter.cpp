@@ -592,20 +592,24 @@ void ABlasterCharacter::EquipButtonPressed()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止武器操作
 	if (Combat) {
-		if (HasAuthority()) {
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		else {
-			//没有服务器权限，说明是由客户端调用的武器装备，因此使用RPC来调用服务器执行
-			ServerEquipButtonPressed();
+		//if (HasAuthority()) {
+		//	Combat->EquipWeapon(OverlappingWeapon);
+		//}
+		//else {
+		//	//没有服务器权限，说明是由客户端调用的武器装备，使用RPC来调用服务器执行
+		//	ServerEquipButtonPressed();
 
-		}
+		//}
+		ServerEquipButtonPressed();
 	}
 }
 /// <summary>
 /// 由于在装备武器时，使用if (HasAuthority())进行判断有服务器权限才能装备，基于此方法则只能在服务器上装备
 /// 因此使用RPC来解决这样的问题
 /// RPC 用于客户端调用服务器执行的函数。函数命名会比.h中的函数名多_Implementation
+/// ------------（20250810更新下方说明）---------------
+/// RPC的作用是，如果是当前是客户端，则会调用服务器执行该函数，如果是服务器则也会执行该函数
+/// ，总之无论如何都只会在服务器执行该函数
 /// </summary>
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {

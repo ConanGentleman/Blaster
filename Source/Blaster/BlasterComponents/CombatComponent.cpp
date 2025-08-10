@@ -35,6 +35,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	//可使用DOREPLIFETIME_CONDITION来指定向那些客户端复制变量
 	//DOREPLIFETIME_CONDITION参数：指定角色类（具有复制变量的类），复制变量，条件（这里COND_OwnerOnly，如果你在机器上控制Pawn，那么就是Pawn的Owner
@@ -223,7 +224,25 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+	{
+		//如果主武器有了则装备到副武器上
+		EquipSecondaryWeapon(WeaponToEquip);
+	}
+	else
+	{
+		EquipPrimaryWeapon(WeaponToEquip);
+	}
 
+	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (WeaponToEquip == nullptr) return;
 	//丢弃已经装备的武器
 	DropEquippedWeapon();
 	EquippedWeapon = WeaponToEquip;
@@ -237,13 +256,29 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	//装备武器更新子弹信息显示
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
-	PlayEquipWeaponSound();
+	PlayEquipWeaponSound(WeaponToEquip);
 	ReloadEmptyWeapon();
 
-	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
-	Character->bUseControllerRotationYaw = true;
+	//禁用深度颜色（轮廓）
+	EquippedWeapon->EnableCustomDepth(false);
+}
+
+void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (WeaponToEquip == nullptr) return;
+	SecondaryWeapon = WeaponToEquip;
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToBackpack(WeaponToEquip);
+	PlayEquipWeaponSound(WeaponToEquip);
+	if (SecondaryWeapon->GetWeaponMesh())
+	{
+		SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+		SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
+	}
+
+	if (EquippedWeapon == nullptr) return;
+	EquippedWeapon->SetOwner(Character);
+
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -288,6 +323,20 @@ void UCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 	}
 }
 
+/// <summary>
+/// 将某个actor添加到角色后背骨骼上
+/// </summary>
+/// <param name="ActorToAttach"></param>
+void UCombatComponent::AttachActorToBackpack(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
+	const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket"));
+	if (BackpackSocket)
+	{
+		BackpackSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
 void UCombatComponent::UpdateCarriedAmmo()
 {
 	if (EquippedWeapon == nullptr) return;
@@ -305,14 +354,15 @@ void UCombatComponent::UpdateCarriedAmmo()
 	}
 }
 
-void UCombatComponent::PlayEquipWeaponSound()
+
+void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
 {
-	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
+	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
 	{
 		//播放装备音效
 		UGameplayStatics::PlaySoundAtLocation(
 			this,
-			EquippedWeapon->EquipSound,
+			WeaponToEquip->EquipSound,
 			Character->GetActorLocation()
 		);
 	}
@@ -651,7 +701,34 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->bUseControllerRotationYaw = true;
 
 		//播放装备音效
-		PlayEquipWeaponSound();
+		PlayEquipWeaponSound(EquippedWeapon);
+		//装备武器禁用其深度颜色（轮廓）
+		EquippedWeapon->EnableCustomDepth(false);
+	}
+}
+
+/// <summary>
+/// 用于装备武器的变量复制前的调用（副武器用）
+/// </summary>
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if (SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		// 附加到背骨骼上
+		AttachActorToBackpack(SecondaryWeapon);
+		//播放装备音效
+		PlayEquipWeaponSound(EquippedWeapon);
+		//如果能够获取到武器网格
+		if (SecondaryWeapon->GetWeaponMesh())
+		{
+			//设置服务器其深度颜色（设置轮廓颜色）
+			SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+			//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
+			//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+			//也就是快速刷新轮廓设置
+			SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
+		}
 	}
 }
 

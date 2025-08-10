@@ -196,7 +196,11 @@ void AWeapon::OnRep_Owner()
 	}
 	else
 	{
-		SetHUDAmmo();
+		BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(Owner) : BlasterOwnerCharacter;
+		if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetEquippedWeapon() && BlasterOwnerCharacter->GetEquippedWeapon() == this)
+		{
+			SetHUDAmmo();
+		}
 	}
 }
 
@@ -226,8 +230,8 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
 		}
-		//装备武器禁用其深度颜色（轮廓）
-		EnableCustomDepth(false);
+		////装备武器禁用其深度颜色（轮廓）
+		//EnableCustomDepth(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		/*
@@ -285,8 +289,8 @@ void AWeapon::OnRep_WeaponState()
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
 		}
-		//装备武器禁用其深度颜色
-		EnableCustomDepth(false);
+		////装备武器禁用其深度颜色
+		//EnableCustomDepth(false);
 		break;
 	case EWeaponState::EWS_Dropped:
 		WeaponMesh->SetSimulatePhysics(true);

@@ -105,10 +105,17 @@ protected:
 
 	/// <summary>
 	/// 用于复制变量发生改变（被赋值），服务器通知客户端调用的函数
+	/// （主武器用）
 	/// </summary>
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	/// <summary>
+	/// 用于复制变量发生改变（被赋值），服务器通知客户端调用的函数
+	/// （副武器用）
+	/// </summary>
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
 
 	/// <summary>
 	/// 开火
@@ -187,13 +194,18 @@ protected:
 	/// <param name="ActorToAttach"></param>
 	void AttachActorToLeftHand(AActor* ActorToAttach);
 	/// <summary>
+	/// 将武器添加到角色后背骨骼上
+	/// </summary>
+	/// <param name="ActorToAttach"></param>
+	void AttachActorToBackpack(AActor* ActorToAttach);
+	/// <summary>
 	/// 更新子弹数量
 	/// </summary>
 	void UpdateCarriedAmmo();
 	/// <summary>
 	/// 播放装备武器音效
 	/// </summary>
-	void PlayEquipWeaponSound();
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
 	/// <summary>
 	/// 如果子弹打空了，则自动换弹
 	/// </summary>
@@ -203,7 +215,16 @@ protected:
 	/// </summary>
 	/// <param name="bShowGrenade"></param>
 	void ShowAttachedGrenade(bool bShowGrenade);
-
+	/// <summary>
+	/// 装备第一武器（主武器），当前装备的武器
+	/// </summary>
+	/// <param name="WeaponToEquip"></param>
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	/// <summary>
+	/// 装备第二武器（副武器）
+	/// </summary>
+	/// <param name="WeaponToEquip"></param>
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 private:
 	//下面三个变量加上UPROPERTY()的原因是让变量初始化为nullptr，即与变量=nullptr相同
 
@@ -233,6 +254,12 @@ private:
 	/// </summary>
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	class AWeapon* EquippedWeapon;
+
+	/// <summary>
+	/// 第二武器
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
 
 	/// <summary>
 	/// 是否正在瞄准(由于跟EquippedWeapon一样需要将服务器瞄准的操作同步到客户端，因此设置为复制变量
