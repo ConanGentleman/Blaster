@@ -134,6 +134,15 @@ protected:
 	/// 投掷手榴弹
 	/// </summary>
 	void GrenadeButtonPressed();
+	/// <summary>
+	/// 丢弃或销毁某个武器
+	/// </summary>
+	/// <param name="Weapon"></param>
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	/// <summary>
+	/// 丢弃或销毁所有武器
+	/// </summary>
+	void DropOrDestroyWeapons();
 
 	/// <summary>
 	/// 用于接收来自子弹类（如ProjectileBullet）中的ApplyDamage委托的回调函数。

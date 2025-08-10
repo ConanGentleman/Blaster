@@ -130,19 +130,7 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 /// </summary>
 void ABlasterCharacter::Elim()
 {
-	if (Combat && Combat->EquippedWeapon)
-	{
-		///如果武器是初始默认生成的，当角色淘汰或者死亡时应该被销毁而不是掉落（以防地图上武器太多
-		if (Combat->EquippedWeapon->bDestroyWeapon)
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			//淘汰则武器掉落
-			Combat->EquippedWeapon->Dropped();
-		}
-	}
+	DropOrDestroyWeapons();
 	MulticastElim();
 	//设置一个计时器，用于玩家淘汰后一段时间内重生
 	GetWorldTimerManager().SetTimer(
@@ -234,6 +222,35 @@ void ABlasterCharacter::ElimTimerFinished()
 	{
 		//调用游戏模式的角色重生
 		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon == nullptr) return;
+	///如果武器是初始默认生成的，当角色淘汰或者死亡时应该被销毁而不是掉落（以防地图上武器太多
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
+	}
+}
+
+void ABlasterCharacter::DropOrDestroyWeapons()
+{
+	if (Combat)
+	{
+		if (Combat->EquippedWeapon)
+		{
+			DropOrDestroyWeapon(Combat->EquippedWeapon);
+		}
+		if (Combat->SecondaryWeapon)
+		{
+			DropOrDestroyWeapon(Combat->SecondaryWeapon);
+		}
 	}
 }
 
