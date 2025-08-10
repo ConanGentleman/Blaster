@@ -23,6 +23,10 @@ enum class EWeaponState : uint8
 	/// </summary>
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
 	/// <summary>
+	/// 武器处于副武器状态
+	/// </summary>
+	EWS_EquippedSecondary UMETA(DisplayName = "Equipped Secondary"),
+	/// <summary>
 	/// 被丢弃
 	/// </summary>
 	EWS_Dropped UMETA(DisplayName = "Dropped"),
@@ -137,6 +141,22 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	/// <summary>
+	/// 设置武器状态
+	/// </summary>
+	virtual void OnWeaponStateSet();
+	/// <summary>
+	/// 装备武器
+	/// </summary>
+	virtual void OnEquipped();
+	/// <summary>
+	/// 丢下武器
+	/// </summary>
+	virtual void OnDropped();
+	/// <summary>
+	/// 装备副武器
+	/// </summary>
+	virtual void OnEquippedSecondary();
 	/// <summary>
 	/// 碰撞体重叠函数回调（该函数应当只在服务端调用）。
 	/// </summary>

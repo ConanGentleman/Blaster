@@ -31,7 +31,7 @@ public:
 
 	///装备武器
 	void EquipWeapon(class AWeapon* WeaponToEquip);
-
+	void SwapWeapons();
 	/// <summary>
 	/// 换弹
 	/// </summary>
@@ -484,4 +484,5 @@ public :
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+	bool ShouldSwapWeapons();
 };

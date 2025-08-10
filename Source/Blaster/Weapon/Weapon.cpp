@@ -212,58 +212,20 @@ void AWeapon::OnRep_Owner()
 /// <param name="State"></param>
 void AWeapon::SetWeaponState(EWeaponState State) {
 	WeaponState = State; //这里设置后会导致OnRep_WeaponState被调用！！！！
+	OnWeaponStateSet();
+}
+
+void AWeapon::OnWeaponStateSet()
+{
 	switch (WeaponState) {
 	case EWeaponState::EWS_Equipped://说明武器当前为装备状态
-		//装备武器后，隐藏其文字提示
-		ShowPickupWidget(false);
-		//装备武器后，禁用球体碰撞器（避免装备上的武器仍然能够检测重叠）
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//关闭武器物理模拟
-		WeaponMesh->SetSimulatePhysics(false);
-		//关闭武器受重力影响
-		WeaponMesh->SetEnableGravity(false);
-		//设置武器网格无法碰撞
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (WeaponType == EWeaponType::EWT_SubmachineGun) //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
-		{
-			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			WeaponMesh->SetEnableGravity(true);
-			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
-		}
-		////装备武器禁用其深度颜色（轮廓）
-		//EnableCustomDepth(false);
+		OnEquipped();
+		break;
+	case EWeaponState::EWS_EquippedSecondary:
+		OnEquippedSecondary();
 		break;
 	case EWeaponState::EWS_Dropped:
-		/*
-		现在set weapon state在服务器端被调用，但我们不知道是否会在客户端调用set weapons state。
-		所以我们需要确保，如果我们为区域球体启用碰撞，我们只在服务器上执行，这样我们就可以确保我们首先在服务器上执行。
-		*/
-		if (HasAuthority()) //武器被丢掉后，在服务器上启动球碰撞器
-		{
-			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}
-		//开启武器物理模拟
-		WeaponMesh->SetSimulatePhysics(true);
-		//开启受重力影响
-		WeaponMesh->SetEnableGravity(true);
-		//开启武器网格碰撞
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-		//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
-		//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		//但是碰撞忽略Pawn
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-		//但是碰撞忽略相机
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-		
-		
-		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
-		//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
-		//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
-		WeaponMesh->MarkRenderStateDirty();
-		//丢弃武器时开启轮廓显示
-		EnableCustomDepth(true);
+		OnDropped();
 		break;
 	}
 }
@@ -275,43 +237,98 @@ void AWeapon::SetWeaponState(EWeaponState State) {
 /// </summary>
 void AWeapon::OnRep_WeaponState()
 {
-	switch (WeaponState) {//这里的WeaponState是复制之后的
-	case EWeaponState::EWS_Equipped://说明武器当前为装备状态
-		//隐藏文字提示
-		ShowPickupWidget(false);
-		//不用像CombatComponent再设置Owener。因为本身Owener也用ReplicatedUsing标记了，所以在服务器上设置时，客户端也同步了
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetEnableGravity(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (WeaponType == EWeaponType::EWT_SubmachineGun)  //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
-		{
-			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			WeaponMesh->SetEnableGravity(true);
-			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
-		}
-		////装备武器禁用其深度颜色
-		//EnableCustomDepth(false);
-		break;
-	case EWeaponState::EWS_Dropped:
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetEnableGravity(true);
+	OnWeaponStateSet();
+}
+
+void AWeapon::OnEquipped()
+{
+	//装备武器后，隐藏其文字提示
+	ShowPickupWidget(false);
+	//装备武器后，禁用球体碰撞器（避免装备上的武器仍然能够检测重叠）
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//不用像CombatComponent再设置Owener。因为本身Owener也用ReplicatedUsing标记了，所以在服务器上设置时，客户端也同步了
+	//关闭武器物理模拟
+	WeaponMesh->SetSimulatePhysics(false);
+	//关闭武器受重力影响
+	WeaponMesh->SetEnableGravity(false);
+	//设置武器网格无法碰撞
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (WeaponType == EWeaponType::EWT_SubmachineGun) //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
+	{
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
+	}
+	//禁用深度颜色（轮廓）
+	EnableCustomDepth(false);
+}
 
-		//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
-		//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		//但是碰撞忽略Pawn
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-		//但是碰撞忽略相机
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+void AWeapon::OnDropped()
+{
+	/*
+	现在set weapon state在服务器端被调用，但我们不知道是否会在客户端调用set weapons state。
+	所以我们需要确保，如果我们为区域球体启用碰撞，我们只在服务器上执行，这样我们就可以确保我们首先在服务器上执行。
+	*/
+	if (HasAuthority()) //武器被丢掉后，在服务器上启动球碰撞器
+	{
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	//开启武器物理模拟
+	WeaponMesh->SetSimulatePhysics(true);
+	//开启受重力影响
+	WeaponMesh->SetEnableGravity(true);
+	//开启武器网格碰撞
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
+	//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
+	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	//但是碰撞忽略Pawn
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	//但是碰撞忽略相机
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+
+	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
+	//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+	WeaponMesh->MarkRenderStateDirty();
+	//丢弃武器时开启轮廓显示
+	EnableCustomDepth(true);
+}
+
+/// <summary>
+/// 装备副武器（与装备主武器的区别大概就是多了设置深度颜色
+/// </summary>
+void AWeapon::OnEquippedSecondary()
+{
+	//装备武器后，隐藏其文字提示
+	ShowPickupWidget(false);
+	//装备武器后，禁用球体碰撞器（避免装备上的武器仍然能够检测重叠）
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//不用像CombatComponent再设置Owener。因为本身Owener也用ReplicatedUsing标记了，所以在服务器上设置时，客户端也同步了
+	//关闭武器物理模拟
+	WeaponMesh->SetSimulatePhysics(false);
+	//关闭武器受重力影响
+	WeaponMesh->SetEnableGravity(false);
+	//设置武器网格无法碰撞
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (WeaponType == EWeaponType::EWT_SubmachineGun) //UZI冲锋枪的表现特殊设置一下(为其开启使用物理，即受重力影响
+	{
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
+	}
+	//启用深度颜色（轮廓）
+	EnableCustomDepth(true);
+	if (WeaponMesh)
+	{
+		//设置武器其深度颜色（设置轮廓颜色）
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
 		//用于标记渲染状态为脏状态，这意味着在当前帧结束时会将其发送到渲染线程
 		//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
+		//也就是快速刷新轮廓设置
 		WeaponMesh->MarkRenderStateDirty();
-		//丢弃武器时开启轮廓显示
-		EnableCustomDepth(true);
-		break;
 	}
 }
 

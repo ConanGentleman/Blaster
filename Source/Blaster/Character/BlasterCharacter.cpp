@@ -614,7 +614,15 @@ void ABlasterCharacter::EquipButtonPressed()
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (Combat) {//去除 HasAuthority() 因为RPC只会在服务器上执行
-		Combat->EquipWeapon(OverlappingWeapon);
+		//如果站在了地上的武器上，则捡起武器
+		if (OverlappingWeapon)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}//如果没有则切换主副武器
+		else if (Combat->ShouldSwapWeapons())
+		{
+			Combat->SwapWeapons();
+		}
 	}
 }
 /// <summary>
