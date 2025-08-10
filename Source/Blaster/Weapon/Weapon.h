@@ -129,7 +129,11 @@ public:
 	*/
 	void EnableCustomDepth(bool bEnable);
 
-
+	/// <summary>
+	/// 武器是否应该自动销毁（如果是玩家初始默认生成的武器，当玩家死亡时应该自动销毁）
+	/// 以防地图上武器太多
+	/// </summary>
+	bool bDestroyWeapon = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

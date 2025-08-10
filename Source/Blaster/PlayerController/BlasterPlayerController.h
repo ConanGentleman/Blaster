@@ -228,4 +228,20 @@ private:
 	/// 最大护盾值
 	/// </summary>
 	float HUDMaxShield;
+	/// <summary>
+	/// 携带子弹数
+	/// </summary>
+	float HUDCarriedAmmo;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeCarriedAmmo = false;
+	/// <summary>
+	/// 武器子弹数量
+	/// </summary>
+	float HUDWeaponAmmo;
+	/// <summary>
+	/// 标记是否初始化完成
+	/// </summary>
+	bool bInitializeWeaponAmmo = false;
 };

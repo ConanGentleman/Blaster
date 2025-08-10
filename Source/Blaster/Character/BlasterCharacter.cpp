@@ -132,8 +132,16 @@ void ABlasterCharacter::Elim()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		//淘汰则武器掉落
-		Combat->EquippedWeapon->Dropped();
+		///如果武器是初始默认生成的，当角色淘汰或者死亡时应该被销毁而不是掉落（以防地图上武器太多
+		if (Combat->EquippedWeapon->bDestroyWeapon)
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			//淘汰则武器掉落
+			Combat->EquippedWeapon->Dropped();
+		}
 	}
 	MulticastElim();
 	//设置一个计时器，用于玩家淘汰后一段时间内重生
@@ -256,6 +264,9 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SpawDefaultWeapon();
+	// 生成默认武器后也应该更新一下子弹数量
+	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 	//只在服务器上进行伤害计算，因此只在服务器上注册函数回调
@@ -905,6 +916,38 @@ void ABlasterCharacter::UpdateHUDShield()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+}
+
+/// <summary>
+/// 生成武器后也应该更新子弹数量
+/// </summary>
+void ABlasterCharacter::UpdateHUDAmmo()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+	}
+}
+
+/// <summary>
+/// 生成默认初始武器
+/// </summary>
+void ABlasterCharacter::SpawDefaultWeapon()
+{
+	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	//只在BlasterGameMode游戏模式下生成初始武器，在开始大厅不会
+	if (BlasterGameMode && World && !bElimmed && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
 	}
 }
 

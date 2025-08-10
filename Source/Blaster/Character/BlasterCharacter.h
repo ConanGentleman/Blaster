@@ -91,6 +91,14 @@ public:
 	/// 更新角色HUD的护盾信息
 	/// </summary>
 	void UpdateHUDShield();
+	/// <summary>
+	///  生成默认武器后也应该更新一下子弹数量
+	/// </summary>
+	void UpdateHUDAmmo();
+	/// <summary>
+	/// 生成默认初始武器
+	/// </summary>
+	void SpawDefaultWeapon();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -433,6 +441,13 @@ private:
 	*/
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+
+	/**
+	* 默认武器
+	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
