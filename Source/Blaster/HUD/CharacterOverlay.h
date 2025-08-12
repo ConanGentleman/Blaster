@@ -74,4 +74,18 @@ public:
 	/// </summary>
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GrenadesText;
+
+	/// <summary>
+	/// 高ping图片
+	/// </summary>
+	UPROPERTY(meta = (BindWidget))
+	class UImage* HighPingImage;
+
+	/// <summary>
+	/// 高ping动画
+	/// BindWidgetAnim表示绑定的是动画
+	/// Transient 这是一个属性说明符，表示该变量是 临时的，不会被保存（序列化）。 通常用于运行时动态生成的变量，或者不需要持久化的数据。例如，动画实例可能在运行时动态创建，不需要保存到磁盘。
+	/// </summary>
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* HighPingAnimation;
 };

@@ -15,6 +15,7 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/GameState/BlasterGameState.h"
+#include "Components/Image.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -48,7 +49,44 @@ void ABlasterPlayerController::Tick(float DeltaTime)
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	PollInit();
+	CheckPing(DeltaTime);
 }
+/// <summary>
+/// 检查延迟ping
+/// </summary>
+/// <param name="DeltaTime"></param>
+void ABlasterPlayerController::CheckPing(float DeltaTime)
+{
+	HighPingRunningTime += DeltaTime;
+	if (HighPingRunningTime > CheckPingFrequency)
+	{
+		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
+		if (PlayerState)
+		{
+			//if (PlayerState->GetPing() * 4 > HighPingThreshold) // ping is compressed; it's actually ping / 4
+			//用上面的接口使用Ctrl Alt F11会报错
+			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
+			{
+				HighPingWarning();
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		HighPingRunningTime = 0.f;
+	}
+	bool bHighPingAnimationPlaying =
+		BlasterHUD && BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation &&
+		BlasterHUD->CharacterOverlay->IsAnimationPlaying(BlasterHUD->CharacterOverlay->HighPingAnimation);
+	if (bHighPingAnimationPlaying)
+	{
+		PingAnimationRunningTime += DeltaTime;
+		if (PingAnimationRunningTime > HighPingDuration)
+		{
+			StopHighPingWarning();
+		}
+	}
+}
+
 /// <summary>
 /// 检查是否该同步时间了
 /// </summary>
@@ -60,6 +98,47 @@ void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
 		TimeSyncRunningTime = 0.f;
+	}
+}
+
+/// <summary>
+/// 高ping警告
+/// </summary>
+void ABlasterPlayerController::HighPingWarning()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingImage &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		BlasterHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f); //设置高ping警告图片的透明度为1
+		BlasterHUD->CharacterOverlay->PlayAnimation(
+			BlasterHUD->CharacterOverlay->HighPingAnimation,
+			0.f,//动画从哪个时间开始播放
+			5);//动画循环次数
+	}
+}
+
+/// <summary>
+/// 停止高ping警告
+/// </summary>
+void ABlasterPlayerController::StopHighPingWarning()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingImage &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		BlasterHUD->CharacterOverlay->HighPingImage->SetOpacity(0.f); //设置高ping警告图片的透明度为0
+		//如果动画在播放则停止动画播放
+		if (BlasterHUD->CharacterOverlay->IsAnimationPlaying(BlasterHUD->CharacterOverlay->HighPingAnimation))
+		{
+			BlasterHUD->CharacterOverlay->StopAnimation(BlasterHUD->CharacterOverlay->HighPingAnimation);
+		}
 	}
 }
 

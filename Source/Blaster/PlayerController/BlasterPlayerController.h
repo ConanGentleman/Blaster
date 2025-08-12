@@ -145,6 +145,19 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 
+	/// <summary>
+	/// 高ping警告
+	/// </summary>
+	void HighPingWarning();
+	/// <summary>
+	/// 停止高ping警告
+	/// </summary>
+	void StopHighPingWarning();
+	/// <summary>
+	/// 检查ping
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	void CheckPing(float DeltaTime);
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
@@ -244,4 +257,32 @@ private:
 	/// 标记是否初始化完成
 	/// </summary>
 	bool bInitializeWeaponAmmo = false;
+
+	/// <summary>
+	/// 检查延迟的计时器，每过CheckPingFrequency秒后检查一次
+	/// </summary>
+	float HighPingRunningTime = 0.f;
+
+	/// <summary>
+	/// 显示高ping警告的时间，不是让高ping警告图标一直显示
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.f;
+
+	/// <summary>
+	/// 延迟图标播放计时器
+	/// </summary>
+	float PingAnimationRunningTime = 0.f;
+
+	/// <summary>
+	/// 检查延迟频率
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+
+	/// <summary>
+	/// 高ping阈值，超过该额度才算是高ping
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;
 };
