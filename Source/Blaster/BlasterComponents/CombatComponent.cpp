@@ -257,6 +257,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 /// </summary>
 void UCombatComponent::SwapWeapons()
 {
+	//不处于非战斗状态则无法切换武器
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
 	//交互主副武器
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
