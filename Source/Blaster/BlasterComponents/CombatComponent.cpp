@@ -148,6 +148,7 @@ void UCombatComponent::Fire()
 		//在下次开火计时完成之前 无法再次开火，所以设置为false
 		bCanFire = false;
 		ServerFire(HitTarget);
+		LocalFire(HitTarget);
 		if (EquippedWeapon)//如果开火并且装备了武器，则让准星收到射击因素的影响为.75f
 		{
 			CrosshairShootingFactor = .75f;//射击因素直接赋值
@@ -200,6 +201,17 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 /// </summary>
 /// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	//如果本地角色为客户端角色则返回，
+	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;
+	LocalFire(TraceHitTarget);
+}
+
+/// <summary>
+/// 开火后相关的调用（播放开火蒙太奇、生成子弹、播放音效）
+/// </summary>
+/// <param name="TraceHitTarget"></param>
+void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
 	//霰弹枪在装弹状态下也能够开火

@@ -123,6 +123,12 @@ protected:
 	void Fire();
 
 	/// <summary>
+	/// 开火后相关的调用（播放开火蒙太奇、生成子弹、播放音效）
+	/// </summary>
+	/// <param name="TraceHitTarget"></param>
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+
+	/// <summary>
 	/// 开火RPC。用于客户端调用，服务器执行的武器开火函数。在定义时需在函数名后补充_Implementation
 	/// </summary>
 	/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>

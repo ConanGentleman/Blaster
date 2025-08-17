@@ -369,8 +369,11 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	//开火则会消耗子弹
-	SpendRound();
+	if (HasAuthority())
+	{
+		//开火则会消耗子弹
+		SpendRound();
+	}
 }
 /// <summary>
 /// 丢弃武器（例如角色死亡时掉落
