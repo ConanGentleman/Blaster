@@ -77,18 +77,21 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//判断是否是服务器。可以使用GetLocalRole() == ENetRole::ROLE_Authority 也可以直接用HasAuthority()
-	//因此服务器将负责所有武器对象,所以武器只能在服务器上拥有权限，因此需要在构造函数中设置bReplicates = true;
-	////当 bReplicates 设为 True，只要Actor的权威副本存在于服务器上，就会尝试将该Actor复制到所有已连接的客户端。
-	if (HasAuthority()) {
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		//设置对Pawn可以检测重叠事件（碰撞触发事件）
-		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-		//添加开始重叠事件委托。参数：用户对象，回调函数
-		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
-		//添加结束重叠事件委托。参数：用户对象，回调函数
-		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
-	}
+	////判断是否是服务器。可以使用GetLocalRole() == ENetRole::ROLE_Authority 也可以直接用HasAuthority()
+	////因此服务器将负责所有武器对象,所以武器只能在服务器上拥有权限，因此需要在构造函数中设置bReplicates = true;
+	//////当 bReplicates 设为 True，只要Actor的权威副本存在于服务器上，就会尝试将该Actor复制到所有已连接的客户端。
+	//if (HasAuthority()) {
+
+	//}
+
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//设置对Pawn可以检测重叠事件（碰撞触发事件）
+	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	//添加开始重叠事件委托。参数：用户对象，回调函数
+	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
+	//添加结束重叠事件委托。参数：用户对象，回调函数
+	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
+
 	if (PickupWidget)
 	{
 		PickupWidget->SetVisibility(false);
