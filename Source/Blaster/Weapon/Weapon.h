@@ -222,6 +222,23 @@ protected:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	);
+
+	/**
+	*  带分散点的检测追踪终点（霰弹枪用）
+	*/
+
+	/// <summary>
+	/// 霰弹枪生成点位的球心距离（用以调整散射的程度）
+	/// 实际上代表的就是霰弹枪的射程
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+
+	/// <summary>
+	///球的半径（击中范围）
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
 private:
 	//用于武器和拥有的所有资产的骨架网格组件
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -294,23 +311,6 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
-
-	/**
-	*  带分散点的检测追踪终点（霰弹枪用）
-	*/
-
-	/// <summary>
-	/// 霰弹枪生成点位的球心距离（用以调整散射的程度）
-	/// 实际上代表的就是霰弹枪的射程
-	/// </summary>
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float DistanceToSphere = 800.f;
-
-	/// <summary>
-	///球的半径（击中范围）
-	/// </summary>
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float SphereRadius = 75.f;
 
 public:	
 	///设置武器状态 

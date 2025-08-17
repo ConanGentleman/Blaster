@@ -173,10 +173,10 @@ void UCombatComponent::Fire()
 /// </summary>
 void UCombatComponent::FireProjectileWeapon()
 {
-	if (EquippedWeapon)//跟扫射类武器一样的写法。这样如果榴弹类也想随机也可以直接修改bUseScatter为true
+	if (EquippedWeapon && Character)//跟扫射类武器一样的写法。这样如果榴弹类也想随机也可以直接修改bUseScatter为true
 	{
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-		LocalFire(HitTarget);
+		if (!Character->HasAuthority()) LocalFire(HitTarget);
 		ServerFire(HitTarget);
 	}
 }
@@ -185,10 +185,10 @@ void UCombatComponent::FireProjectileWeapon()
 /// </summary>
 void UCombatComponent::FireHitScanWeapon()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && Character)
 	{
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-		LocalFire(HitTarget);
+		if (!Character->HasAuthority()) LocalFire(HitTarget);
 		ServerFire(HitTarget);
 	}
 }
@@ -198,11 +198,12 @@ void UCombatComponent::FireHitScanWeapon()
 void UCombatComponent::FireShotgun()
 {
 	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
-	if (Shotgun)
+	if (Shotgun && Character)
 	{
-		TArray<FVector> HitTargets;//存储生成的随机生成子弹目标位置
+		TArray<FVector_NetQuantize> HitTargets;//存储生成的随机生成子弹目标位置
 		Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
-
+		if (!Character->HasAuthority()) ShotgunLocalFire(HitTargets);
+		ServerShotgunFire(HitTargets);
 	}
 }
 
@@ -257,23 +258,54 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 }
 
 /// <summary>
-/// 开火后相关的调用（播放开火蒙太奇、生成子弹、播放音效）
+/// 霰弹枪开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
+/// </summary>
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	MulticastShotgunFire(TraceHitTargets);
+}
+
+/// <summary>
+/// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
+/// 多播RPC被执行时，会在服务器和所有客户端上执行函数
+/// </summary>
+/// <param name="TraceHitTargets">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;
+	ShotgunLocalFire(TraceHitTargets);
+}
+
+/// <summary>
+/// 通用开火后相关的调用（播放开火蒙太奇、生成子弹、播放音效）
 /// </summary>
 /// <param name="TraceHitTarget"></param>
 void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
-	//霰弹枪在装弹状态下也能够开火
-	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	//保证是空闲状态才能开火
+	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
-		return;
 	}
-	if (Character && CombatState == ECombatState::ECS_Unoccupied) {//保证是空闲状态才能开火
+}
+
+/// <summary>
+/// 本地霰弹枪开火处理
+/// </summary>
+/// <param name="TraceHitTargets"></param>
+void UCombatComponent::ShotgunLocalFire(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun == nullptr || Character == nullptr) return;
+	//霰弹枪在装填弹药的时候也能开火
+	if (CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
+	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
+		Shotgun->FireShotgun(TraceHitTargets);
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 

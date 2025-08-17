@@ -15,16 +15,16 @@ class BLASTER_API AShotgun : public AHitScanWeapon
 	GENERATED_BODY()
 public:
 	/// <summary>
-	/// 重写开火函数
+	/// 开火函数
 	/// </summary>
-	virtual void Fire(const FVector& HitTarget) override; 
+	virtual void FireShotgun(const TArray<FVector_NetQuantize>& HitTargets);
 
 	/// <summary>
 	/// 生成子弹的随机发射方向和位置
 	/// </summary>
 	/// <param name="HitTarget"></param>
 	/// <param name="HitTargets"></param>
-	void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);
+	void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets);
 private:
 	/// <summary>
 	/// 霰弹数量（每发）

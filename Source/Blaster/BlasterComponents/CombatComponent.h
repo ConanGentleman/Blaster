@@ -142,6 +142,12 @@ protected:
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	/// <summary>
+	/// 本地散弹枪开火处理
+	/// </summary>
+	/// <param name="TraceHitTargets"></param>
+	void ShotgunLocalFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
+	/// <summary>
 	/// 开火RPC。用于客户端调用，服务器执行的武器开火函数。在定义时需在函数名后补充_Implementation
 	/// </summary>
 	/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
@@ -151,9 +157,15 @@ protected:
 	/// <summary>
 	/// 开火 多播RPC。如果在服务器上调用多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
 	/// </summary>
-/// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
+	/// <param name="TraceHitTarget">用于同步开火后射线检测到的目标位置到服务器盒所有客户端。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+
+	UFUNCTION(Server, Reliable)
+	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
 
 	/// <summary>
 	/// 从屏幕中心发射射线，进行用于射击的射线检测

@@ -9,10 +9,10 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void AShotgun::Fire(const FVector& HitTarget)
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
 	/// 调用爷类的开火方法，而不是父类的开火Super:Fire(HitTarget)
-	AWeapon::Fire(HitTarget);
+	AWeapon::Fire(FVector());
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 	AController* InstigatorController = OwnerPawn->GetController();
@@ -20,17 +20,18 @@ void AShotgun::Fire(const FVector& HitTarget)
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector Start = SocketTransform.GetLocation();
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		const FVector Start = SocketTransform.GetLocation();
 
+		//将命中角色映射到命中的次数
 		TMap<ABlasterCharacter*, uint32> HitMap;
-		for (uint32 i = 0; i < NumberOfPellets; i++) //遍历每个霰弹
+		for (FVector_NetQuantize HitTarget : HitTargets) //遍历每个霰弹
 		{
 			FHitResult FireHit;
 			WeaponTraceHit(Start, HitTarget, FireHit); //检测击中结果
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter && HasAuthority() && InstigatorController)
+			if (BlasterCharacter)
 			{
 				if (HitMap.Contains(BlasterCharacter))
 				{
@@ -40,36 +41,35 @@ void AShotgun::Fire(const FVector& HitTarget)
 				{
 					HitMap.Emplace(BlasterCharacter, 1); //原地构造键值，避免拷贝,记BlasterCharacter被一个子弹击中
 				}
-			}
-
-			if (ImpactParticles) //播放击中动效
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					ImpactParticles,
-					FireHit.ImpactPoint,
-					FireHit.ImpactNormal.Rotation()
-				);
-			}
-			if (HitSound) //击中音效
-			{
-				UGameplayStatics::PlaySoundAtLocation(
-					this,
-					HitSound,
-					FireHit.ImpactPoint,
-					.5f, //音量
-					FMath::FRandRange(-.5f, .5f) //音高随机增幅
-				);
+				if (ImpactParticles) //播放击中动效
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						ImpactParticles,
+						FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation()
+					);
+				}
+				if (HitSound) //击中音效
+				{
+					UGameplayStatics::PlaySoundAtLocation(
+						this,
+						HitSound,
+						FireHit.ImpactPoint,
+						.5f, //音量
+						FMath::FRandRange(-.5f, .5f) //音高随机增幅
+					);
+				}
 			}
 		}
 
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)//遍历子弹命中的玩家
+			if (HitPair.Key && HasAuthority() && InstigatorController)//遍历子弹命中的玩家，且在服务器处理
 			{
 				UGameplayStatics::ApplyDamage( // 命中直接造成伤害
-					HitPair.Key, //对应的BlasterCharacter
-					Damage * HitPair.Value,
+					HitPair.Key, //对应的受击BlasterCharacter
+					Damage * HitPair.Value,//伤害乘以命中次数
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
@@ -84,7 +84,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 /// </summary>
 /// <param name="HitTarget"></param>
 /// <param name="HitTargets"></param>
-void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket == nullptr) return;
