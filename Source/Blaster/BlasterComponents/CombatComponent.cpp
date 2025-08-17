@@ -16,6 +16,7 @@
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterAnimInstance.h"
 #include "Blaster/Weapon/Projectile.h"
+#include "Blaster/Weapon/Shotgun.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -147,13 +148,61 @@ void UCombatComponent::Fire()
 	{
 		//在下次开火计时完成之前 无法再次开火，所以设置为false
 		bCanFire = false;
-		ServerFire(HitTarget);
-		LocalFire(HitTarget);
 		if (EquippedWeapon)//如果开火并且装备了武器，则让准星收到射击因素的影响为.75f
 		{
 			CrosshairShootingFactor = .75f;//射击因素直接赋值
+			switch (EquippedWeapon->FireType)
+			{
+			case EFireType::EFT_Projectile:
+				FireProjectileWeapon();
+				break;
+			case EFireType::EFT_HitScan:
+				FireHitScanWeapon();
+				break;
+			case EFireType::EFT_Shotgun:
+				FireShotgun();
+				break;
+			}
 		}
 		StartFireTimer();
+	}
+}
+
+/// <summary>
+/// 发射类武器开火
+/// </summary>
+void UCombatComponent::FireProjectileWeapon()
+{
+	if (EquippedWeapon)//跟扫射类武器一样的写法。这样如果榴弹类也想随机也可以直接修改bUseScatter为true
+	{
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+		LocalFire(HitTarget);
+		ServerFire(HitTarget);
+	}
+}
+/// <summary>
+/// 扫射类武器开火（冲锋枪）
+/// </summary>
+void UCombatComponent::FireHitScanWeapon()
+{
+	if (EquippedWeapon)
+	{
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+		LocalFire(HitTarget);
+		ServerFire(HitTarget);
+	}
+}
+/// <summary>
+/// 霰弹枪类武器开火
+/// </summary>
+void UCombatComponent::FireShotgun()
+{
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun)
+	{
+		TArray<FVector> HitTargets;//存储生成的随机生成子弹目标位置
+		Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+
 	}
 }
 

@@ -123,6 +123,19 @@ protected:
 	void Fire();
 
 	/// <summary>
+	/// 发射类武器开火
+	/// </summary>
+	void FireProjectileWeapon();
+	/// <summary>
+	/// 扫射类武器开火（冲锋枪）
+	/// </summary>
+	void FireHitScanWeapon();
+	/// <summary>
+	/// 霰弹枪类武器开火
+	/// </summary>
+	void FireShotgun();
+
+	/// <summary>
 	/// 开火后相关的调用（播放开火蒙太奇、生成子弹、播放音效）
 	/// </summary>
 	/// <param name="TraceHitTarget"></param>
@@ -311,7 +324,7 @@ private:
 	float CrosshairShootingFactor;
 
 	/// <summary>
-	/// 射线检测到的目标位置（进队本地有效，用于调试而声明的变量，后续应该会删除）
+	/// 射线检测到的目标位置（仅对本地有效）
 	/// </summary>
 	FVector HitTarget;
 

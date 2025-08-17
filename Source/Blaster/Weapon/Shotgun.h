@@ -18,6 +18,13 @@ public:
 	/// 重写开火函数
 	/// </summary>
 	virtual void Fire(const FVector& HitTarget) override; 
+
+	/// <summary>
+	/// 生成子弹的随机发射方向和位置
+	/// </summary>
+	/// <param name="HitTarget"></param>
+	/// <param name="HitTargets"></param>
+	void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);
 private:
 	/// <summary>
 	/// 霰弹数量（每发）

@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void AShotgun::Fire(const FVector& HitTarget)
 {
@@ -75,5 +76,36 @@ void AShotgun::Fire(const FVector& HitTarget)
 				);
 			}
 		}
+	}
+}
+
+/// <summary>
+/// 生成子弹的随机发射方向和位置
+/// </summary>
+/// <param name="HitTarget"></param>
+/// <param name="HitTargets"></param>
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+{
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+	if (MuzzleFlashSocket == nullptr) return;
+
+	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector TraceStart = SocketTransform.GetLocation();
+
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal(); //归一化方向向量
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;//求出球心位置
+
+	for (uint32 i = 0; i < NumberOfPellets; i++)//实际上也可以调NumberOfPellets次父类的TraceEndWithScatter，但效率感觉不高
+	{
+		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius); //随机出一个半径为SphereRadius的球中的点
+		const FVector EndLoc = SphereCenter + RandVec;// 子弹散射的终点位置（注意：并不是子弹的最终检测击中位置）
+		FVector ToEndLoc = EndLoc - TraceStart;// 子弹散射的方向
+
+		//子弹检测击中的最远位置 = 子弹发出的位置 + 子弹散射的方向 * 检测距离 / 子弹散射的长度   
+		//。。注意除以长度主要就是为了归一化，可以理解为 方向/长度 * 检测距离 （个人理解）
+		//但是官方给出的原因是 ToEndLoc * TRACE_LENGTH可能会超出double 所以除以了ToEndLoc.Size()
+		ToEndLoc = TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size();
+
+		HitTargets.Add(ToEndLoc);
 	}
 }

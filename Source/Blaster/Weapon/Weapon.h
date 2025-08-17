@@ -37,6 +37,29 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+/// <summary>
+/// 武器开火枚举（且为蓝图中的类型）
+/// </summary>
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	/// <summary>
+	/// 扫射类
+	/// </summary>
+	EFT_HitScan UMETA(DisplayName = "Hit Scan Weapon"),
+	/// <summary>
+	/// 榴弹类
+	/// </summary>
+	EFT_Projectile UMETA(DisplayName = "Projectile Weapon"),
+	/// <summary>
+	/// 霰弹类
+	/// </summary>
+	EFT_Shotgun UMETA(DisplayName = "Shotgun Weapon"),
+
+	EFT_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
+
 
 UCLASS()
 class BLASTER_API AWeapon : public AActor
@@ -78,6 +101,13 @@ public:
 	/// </summary>
 	/// <param name="AmmoToAdd"></param>
 	void AddAmmo(int32 AmmoToAdd);
+	/// <summary>
+	/// 带分散点的检测追踪终点（霰弹枪的多个子弹终点计算，随机返回霰弹枪的某颗字段的终点）
+	/// </summary>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitTarget"></param>
+	/// <returns></returns>
+	FVector TraceEndWithScatter(const FVector& HitTarget);
 
 	/**
 	* 武器十字准星的贴图
@@ -138,6 +168,18 @@ public:
 	/// 以防地图上武器太多
 	/// </summary>
 	bool bDestroyWeapon = false;
+
+	/// <summary>
+	/// 武器开火类型
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	EFireType FireType;
+
+	/// <summary>
+	/// 是否使用散射（如霰弹枪，或者每次射击都会随机射出方向
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -252,6 +294,23 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+
+	/**
+	*  带分散点的检测追踪终点（霰弹枪用）
+	*/
+
+	/// <summary>
+	/// 霰弹枪生成点位的球心距离（用以调整散射的程度）
+	/// 实际上代表的就是霰弹枪的射程
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+
+	/// <summary>
+	///球的半径（击中范围）
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
 
 public:	
 	///设置武器状态 
