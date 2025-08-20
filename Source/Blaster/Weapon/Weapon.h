@@ -279,16 +279,28 @@ private:
 	TSubclassOf<class ACasing> CasingClass;
 
 	/// <summary>
-	/// 子弹数量（复制变量）
+	/// 子弹数量
 	/// </summary>
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
-	/// <summary>
+	/*/// <summary>
 	/// 子弹数量复制时调用的函数
 	/// </summary>
 	UFUNCTION()
-	void OnRep_Ammo();
+	void OnRep_Ammo();*/
+
+	/// <summary>
+	/// 客户端更新子弹RPC
+	/// </summary>
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	/// <summary>
+	/// 客户端添加子弹RPC
+	/// </summary>
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	/// <summary>
 	/// 花费子弹（由于设定的子弹都是一个一个的，所以在这里面就直接--。同时更新HUD上的子弹信息
@@ -300,6 +312,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
+
+	// 未处理的 Ammo 服务器请求数（子弹消耗请求数）。(也就是由于延迟导致没有被服务器接收的子弹消耗请求
+	// 在 SpendRound 中递增，在 ClientUpdateAmmo 中递减。即花费子弹的时候增加一次未处理请求数，当被服务器处理后服务器会通过RPC调用ClientUpdateAmmo，此时表示已处理好了，则-1
+	// The number of unprocessed server requests for Ammo.
+	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
+	int32 Sequence = 0;
 
 	UPROPERTY()
 	class ABlasterCharacter* BlasterOwnerCharacter;

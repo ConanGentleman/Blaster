@@ -111,8 +111,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//将武器状态注册为复制变量
 	DOREPLIFETIME(AWeapon, WeaponState);
-	//将子弹数量注册为复制变量
-	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 /// <summary>
@@ -176,10 +174,48 @@ void AWeapon::SpendRound()
 {
 	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
 	SetHUDAmmo();
+	if (HasAuthority())
+	{
+		//如果是服务器则通知服务器和各客户端设置子弹数量
+		ClientUpdateAmmo(Ammo);
+	}
+	else
+	{
+		//如果是客户端，则增加未被服务器处理的子弹消耗请求数
+		++Sequence;
+	}
 }
 
-void AWeapon::OnRep_Ammo()
+/// <summary>
+/// 客户端更新子弹
+/// </summary>
+void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 {
+	if (HasAuthority()) return;//下面的这些操作只会在客户端进行处理
+	Ammo = ServerAmmo;
+	--Sequence;//收到一次子弹更新，则子弹消耗处理数-1
+	Ammo -= Sequence;//并且本地的子弹显示数量依旧要减去未处理的子弹消耗请求数
+	SetHUDAmmo();
+}
+
+/// <summary>
+/// AddAmmo只在服务器上调用
+/// </summary>
+/// <param name="AmmoToAdd"></param>
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	SetHUDAmmo();
+	ClientAddAmmo(AmmoToAdd);
+}
+
+/// <summary>
+/// 客户端添加子弹
+/// </summary>
+void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
+{
+	if (HasAuthority()) return;	//如果是服务器则直接在AddAmmo()中进行了处理，所以需要返回。
+	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
 	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
 	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
 	{
@@ -373,11 +409,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	if (HasAuthority())
-	{
-		//开火则会消耗子弹
-		SpendRound();
-	}
+	//开火则会消耗子弹
+	SpendRound();
 }
 /// <summary>
 /// 丢弃武器（例如角色死亡时掉落
@@ -397,16 +430,16 @@ void AWeapon::Dropped()
 	BlasterOwnerController = nullptr;
 }
 
-/// <summary>
-/// 添加子弹
-/// </summary>
-/// <param name="AmmoToAdd"></param>
-void AWeapon::AddAmmo(int32 AmmoToAdd)
-{
-	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
-	//更新HUD子弹信息
-	SetHUDAmmo();
-}
+///// <summary>
+///// 添加子弹
+///// </summary>
+///// <param name="AmmoToAdd"></param>
+//void AWeapon::AddAmmo(int32 AmmoToAdd)
+//{
+//	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
+//	//更新HUD子弹信息
+//	SetHUDAmmo();
+//}
 
 
 /// <summary>
