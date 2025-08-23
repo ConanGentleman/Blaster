@@ -7,6 +7,40 @@
 #include "LagCompensationComponent.generated.h"
 
 
+/// 碰撞框信息
+USTRUCT(BlueprintType)
+struct FBoxInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FVector Location;
+
+	UPROPERTY()
+	FRotator Rotation;
+
+	UPROPERTY()
+	FVector BoxExtent;
+};
+
+/// 延迟补偿数据包
+USTRUCT(BlueprintType)
+struct FFramePackage
+{
+	GENERATED_BODY()
+
+	///某帧时间
+	UPROPERTY()
+	float Time;
+
+	/// <summary>
+	/// 帧时间角色所有碰撞框信息
+	/// </summary>
+	UPROPERTY()
+	TMap<FName, FBoxInformation> HitBoxInfo;
+};
+
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BLASTER_API ULagCompensationComponent : public UActorComponent
 {
@@ -14,10 +48,19 @@ class BLASTER_API ULagCompensationComponent : public UActorComponent
 
 public:
 	ULagCompensationComponent();
+	friend class ABlasterCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+
+	UPROPERTY()
+	ABlasterCharacter* Character;
+
+	UPROPERTY()
+	class ABlasterPlayerController* Controller;
 
 public:
 

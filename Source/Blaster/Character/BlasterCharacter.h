@@ -257,6 +257,11 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
+	/**
+	* Blaster 组件
+	*/
+
+
 	/// <summary>
 	/// 战斗组件，用于处理角色所有雨战斗相关的功能（也是一个可以被复制的变量
 	/// </summary>
@@ -265,6 +270,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
+
+	/// <summary>
+	/// 延迟补偿组件
+	/// </summary>
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;
 
 
 	//远程过程调用（RPC）具有在一台机器上调用并在另一台机器上执行的功能。例如可以从客户端上调用，并在服务器上执行对应函数

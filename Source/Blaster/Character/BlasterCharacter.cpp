@@ -23,6 +23,7 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Blaster/Weapon/WeaponTypes.h"
 #include "Components/BoxComponent.h"
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -64,6 +65,9 @@ ABlasterCharacter::ABlasterCharacter()
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	//设置为复制
 	Buff->SetIsReplicated(true);
+
+	//创建延迟补偿组件
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensation"));
 
 	//将该变量设置为true才能正常蹲下，因为Crouch函数会依据这个
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -462,6 +466,14 @@ void ABlasterCharacter::PostInitializeComponents() {
 		);
 		//设置正常的跳跃速度给到buff组件，以便buff持续时间到了只会恢复到正常的跳跃速度
 		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 }
 
