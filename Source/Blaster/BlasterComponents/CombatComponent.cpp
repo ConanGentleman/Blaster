@@ -387,6 +387,15 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 
 }
 
+void UCombatComponent::OnRep_Aiming()
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		//设置为本地缓存的瞄准状态
+		bAiming = bAimButtonPressed;
+	}
+}
+
 void UCombatComponent::DropEquippedWeapon()
 {
 	if (EquippedWeapon)//如果装备了武器
@@ -1030,6 +1039,8 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	{
 		Character->ShowSniperScopeWidget(bIsAiming);
 	}
+	//本地记录一下瞄准状态，以便复制变量回调时依旧设置为本地的瞄准状态
+	if (Character->IsLocallyControlled()) bAimButtonPressed = bIsAiming;
 }
 /// <summary>
 /// 用于客户端调用服务器执行的函数

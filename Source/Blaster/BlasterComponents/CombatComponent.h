@@ -295,8 +295,16 @@ private:
 	/// <summary>
 	/// 是否正在瞄准(由于跟EquippedWeapon一样需要将服务器瞄准的操作同步到客户端，因此设置为复制变量
 	/// </summary>
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+
+	bool bAimButtonPressed = false;
+
+	/// <summary>
+	/// 瞄准复制变量改变回调
+	/// </summary>
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	/// <summary>
 	/// 行走速度
