@@ -1102,3 +1102,13 @@ ECombatState ABlasterCharacter::GetCombatState() const
 	if (Combat == nullptr) return ECombatState::ECS_MAX;
 	return Combat->CombatState;
 }
+
+/// <summary>
+/// 本地是否处于装弹状态
+/// </summary>
+/// <returns></returns>
+bool ABlasterCharacter::IsLocallyReloading()
+{
+	if (Combat == nullptr) return false;
+	return Combat->bLocallyReloading;
+}

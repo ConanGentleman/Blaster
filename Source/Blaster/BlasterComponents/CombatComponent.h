@@ -87,6 +87,11 @@ public:
 	/// <param name="AmmoAmount">子弹数量</param>
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 
+	/// <summary>
+	/// 本地开火状态（不受服务器控制）
+	/// </summary>
+	bool bLocallyReloading = false;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -298,6 +303,9 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bAiming = false;
 
+	/// <summary>
+	/// 本地的是否正在瞄准（不受服务器控制）
+	/// </summary>
 	bool bAimButtonPressed = false;
 
 	/// <summary>

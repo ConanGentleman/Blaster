@@ -523,4 +523,9 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
+	/// <summary>
+	/// 本地是否处于装弹状态
+	/// </summary>
+	/// <returns></returns>
+	bool IsLocallyReloading();
 };

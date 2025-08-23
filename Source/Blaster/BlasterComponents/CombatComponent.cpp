@@ -500,10 +500,12 @@ void UCombatComponent::ReloadEmptyWeapon()
 /// </summary>
 void UCombatComponent::Reload()
 {
-	//携带子弹大于0且没有装满且处于空闲状态 才调用RPC。不然可能存在一直按R 的情况
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
+	//携带子弹大于0且没有装满且处于空闲状态且本地不处于换弹状态 才调用RPC。不然可能存在一直按R 的情况
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull() && !bLocallyReloading)
 	{
 		ServerReload();
+		HandleReload();
+		bLocallyReloading = true;
 	}
 }
 /// <summary>
@@ -514,7 +516,7 @@ void UCombatComponent::ServerReload_Implementation()
 	if (Character == nullptr || EquippedWeapon == nullptr) return;
 
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+	if (!Character->IsLocallyControlled()) HandleReload();
 }
 
 /// <summary>
@@ -523,6 +525,8 @@ void UCombatComponent::ServerReload_Implementation()
 void UCombatComponent::FinishReloading()
 {
 	if (Character == nullptr) return;
+	//装填完成本地的装填状态置为false
+	bLocallyReloading = false;
 	//由权限才能变换状态
 	if (Character->HasAuthority())
 	{
@@ -677,7 +681,7 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		HandleReload();
+		if (Character && !Character->IsLocallyControlled()) HandleReload();
 		break;
 	case ECombatState::ECS_Unoccupied:
 		//如果换弹完成并且按着左键，则开火
@@ -700,11 +704,14 @@ void UCombatComponent::OnRep_CombatState()
 }
 
 /// <summary>
-/// 处理发生在所有机器上的事情。（如播放换弹蒙太奇动画
+/// 处理发生在所有机器上的动画。（如播放换弹蒙太奇动画
 /// </summary>
 void UCombatComponent::HandleReload()
 {
-	Character->PlayReloadMontage();
+	if (Character)
+	{
+		Character->PlayReloadMontage();
+	}
 }
 
 /// <summary>
@@ -1064,8 +1071,17 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
-	//霰弹枪在装弹过程中仍然可以开枪射击
-	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) return true;
+	//本地处于装弹状态不能开枪
+	if (bLocallyReloading) {
+		//霰弹枪在装弹过程中仍然可以开枪射击
+		if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+		{
+			bLocallyReloading = false;
+			return true;
+		}
+		return false;
+	}
+	
 	//判断武器子弹是否不为空 且 能开火 且处于空闲状态（即不运行在装弹时开火）
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }

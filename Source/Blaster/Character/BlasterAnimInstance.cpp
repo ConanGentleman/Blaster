@@ -119,6 +119,11 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 	//如果在空闲状态，则打开IK
 	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+	//本地且不处于投掷状态，则IK开启状态依赖于本地是否处于装弹状态
+	if (BlasterCharacter->IsLocallyControlled() && BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+	{
+		bUseFABRIK = !BlasterCharacter->IsLocallyReloading();
+	}
 	//在空闲状态，可以瞄准偏移（后者条件是游戏是否处于禁止输入状态
 	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplay();
 	//在空闲状态，可以右手变换（后者条件是游戏是否处于禁止输入状态
