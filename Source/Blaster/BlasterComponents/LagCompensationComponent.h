@@ -4,18 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "LagCompensationComponent.generated.h"#include "LagCompensationComponent.generated.h"
+#include "LagCompensationComponent.generated.h"
 
-/*
-* ÑÓ³Ù²¹³¥×é¼þ
-*/
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BLASTER_API ULagCompensationComponent : public UActorComponentclass BLASTER_API ULagCompensationComponent : public UActorComponent
+class BLASTER_API ULagCompensationComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	ULagCompensationComponent();	ULagCompensationComponent();
+	ULagCompensationComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
