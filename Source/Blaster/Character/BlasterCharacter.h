@@ -99,6 +99,12 @@ public:
 	/// 生成默认初始武器
 	/// </summary>
 	void SpawDefaultWeapon();
+
+	/// <summary>
+	/// 名字映射box组件表
+	/// </summary>
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

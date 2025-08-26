@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "LagCompensationComponent.generated.h"
 
 
-/// ��ײ����Ϣ
+/// 碰撞框信息
 USTRUCT(BlueprintType)
 struct FBoxInformation
 {
@@ -23,18 +23,18 @@ struct FBoxInformation
 	FVector BoxExtent;
 };
 
-/// �ӳٲ������ݰ�
+/// 延迟补偿数据包
 USTRUCT(BlueprintType)
 struct FFramePackage
 {
 	GENERATED_BODY()
 
-	///ĳ֡ʱ��
+	///某帧时间
 	UPROPERTY()
 	float Time;
 
 	/// <summary>
-	/// ֡ʱ���ɫ������ײ����Ϣ
+	/// 帧时间角色所有碰撞框信息
 	/// </summary>
 	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
@@ -50,10 +50,21 @@ public:
 	ULagCompensationComponent();
 	friend class ABlasterCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	/// <summary>
+	/// 打印数据包中包含的命中狂（显示用，方便查看而已）
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="Color"></param>
+	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
 protected:
 	virtual void BeginPlay() override;
-
+	/// <summary>
+	/// 存储数据包
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="Color"></param>
+	void SaveFramePackage(FFramePackage& Package);
 private:
 
 	UPROPERTY()
