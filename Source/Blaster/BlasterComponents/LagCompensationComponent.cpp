@@ -15,10 +15,6 @@ ULagCompensationComponent::ULagCompensationComponent()
 void ULagCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	//初始化数据包
-	FFramePackage Package;
-	SaveFramePackage(Package);
-	ShowFramePackage(Package, FColor::Orange);
 }
 
 /// <summary>
@@ -58,7 +54,8 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 			BoxInfo.Value.BoxExtent,
 			FQuat(BoxInfo.Value.Rotation),
 			Color,
-			true //是否是持续性的（绘制出来不消失）
+			false, //是否是持续性的（绘制出来不消失）
+			4.f //多久消失
 		);
 	}
 }
@@ -66,5 +63,27 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (FrameHistory.Num() <= 1)
+	{
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		FrameHistory.AddHead(ThisFrame);
+	}
+	else
+	{
+		float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		//时间差过大的就不保留了
+		while (HistoryLength > MaxRecordTime)
+		{
+			FrameHistory.RemoveNode(FrameHistory.GetTail());
+			HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		}
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		FrameHistory.AddHead(ThisFrame);
+
+		ShowFramePackage(ThisFrame, FColor::Red);
+	}
 
 }

@@ -73,6 +73,18 @@ private:
 	UPROPERTY()
 	class ABlasterPlayerController* Controller;
 
+	/// <summary>
+	/// 历史记录的延迟补偿数据包
+	/// 双向链表
+	/// </summary>
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	/// <summary>
+	/// 历史记录内包含的帧数据最大记录时间差
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float MaxRecordTime = 4.f;
+
 public:
 
 
