@@ -4,6 +4,7 @@
 #include "LagCompensationComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
@@ -66,12 +67,163 @@ FFramePackage ULagCompensationComponent::InterpBetweenFrames(const FFramePackage
 
 		InterpBoxInfo.Location = FMath::VInterpTo(OlderBox.Location, YoungerBox.Location, 1.f, InterpFraction);
 		InterpBoxInfo.Rotation = FMath::RInterpTo(OlderBox.Rotation, YoungerBox.Rotation, 1.f, InterpFraction);
-		InterpBoxInfo.BoxExtent = YoungerBox.BoxExtent;
+		InterpBoxInfo.BoxExtent = YoungerBox.BoxExtent; //碰撞框大小不会变，所以取哪一个都可以
 
 		InterpFramePackage.HitBoxInfo.Add(BoxInfoName, InterpBoxInfo);
 	}
 
 	return InterpFramePackage;
+}
+
+
+/// <summary>
+/// 击中判定
+/// </summary>
+/// <param name="Package">判定的延迟补偿数据包</param>
+/// <param name="HitCharacter">击中的玩家</param>
+/// <param name="TraceStart">检测的起始位置</param>
+/// <param name="HitLocation">击中的位置</param>
+/// <returns></returns>
+FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation)
+{
+	// 没有命中返回空
+	if (HitCharacter == nullptr) return FServerSideRewindResult();
+
+	//缓存击中的玩家最初的帧信息（便于判定击中成功后，将角色命中框移回最初位置）
+	FFramePackage CurrentFrame;
+	
+	CacheBoxPositions(HitCharacter, CurrentFrame);
+	//根据延迟补偿包将角色的命中框移动到包所对应的位置
+	MoveBoxes(HitCharacter, Package);
+	//先关闭所有角色网格的碰撞检测，避免对命中框的碰撞检测造成影响！！！！！！！！！！！！！！！！！！！！
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+	// Enable collision for the head first 先开启头部的碰撞检测，如果未能命中再对其他部分进行检测
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	//开启命中框的碰撞检测
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//追踪可见性碰撞通道
+	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
+	FHitResult ConfirmHitResult;
+	const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f; //*1.25f是因为怕刚好在碰撞框表面无法触发碰撞，所以延长一下
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->LineTraceSingleByChannel(
+			ConfirmHitResult,
+			TraceStart,
+			TraceEnd,
+			ECollisionChannel::ECC_Visibility
+		);
+		if (ConfirmHitResult.bBlockingHit) // we hit the head, return early 命中头部，则先返回击中结果
+		{
+			ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
+			//有命中框碰撞结果，复原角色网格的碰撞检测
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+			return FServerSideRewindResult{ true, true };
+		}
+		else // didn't hit head, check the rest of the boxes 如果头部没有命中，则对其他部位进行碰撞检测
+		{
+			for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+			{
+				if (HitBoxPair.Value != nullptr)
+				{
+					//开启命中框的碰撞检测
+					HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+				}
+			}
+			World->LineTraceSingleByChannel(
+				ConfirmHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+			);
+			if (ConfirmHitResult.bBlockingHit)
+			{
+				//命中后将命中框重置回原来的位置
+				ResetHitBoxes(HitCharacter, CurrentFrame);
+				//有命中框碰撞结果，复原角色网格的碰撞检测
+				EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+				return FServerSideRewindResult{ true, false };
+			}
+		}
+	}
+	//将命中框重置回原来的位置
+	ResetHitBoxes(HitCharacter, CurrentFrame);
+	//复原角色网格的碰撞检测
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+	return FServerSideRewindResult{ false, false };
+}
+
+/// <summary>
+/// 将HitCharacter中的命中框信息赋值给OutFramePackage
+/// </summary>
+/// <param name="HitCharacter"></param>
+/// <param name="OutFramePackage"></param>
+void ULagCompensationComponent::CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage)
+{
+	if (HitCharacter == nullptr) return;
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	{
+		if (HitBoxPair.Value != nullptr)
+		{
+			FBoxInformation BoxInfo;
+			BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();
+			BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();
+			BoxInfo.BoxExtent = HitBoxPair.Value->GetScaledBoxExtent();
+			OutFramePackage.HitBoxInfo.Add(HitBoxPair.Key, BoxInfo);
+		}
+	}
+}
+
+/// <summary>
+/// 移动所有命中框，即将Package中的命中框位置旋转等信息赋值给与HitCharacter的命中框
+/// 与CacheBoxPositions函数作用相反
+/// </summary>
+/// <param name="HitCharacter"></param>
+/// <param name="Package"></param>
+void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
+{
+	if (HitCharacter == nullptr) return;
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	{
+		if (HitBoxPair.Value != nullptr)
+		{
+			HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
+			HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
+			HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].BoxExtent);
+		}
+	}
+}
+
+void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
+{
+	if (HitCharacter == nullptr) return;
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	{
+		if (HitBoxPair.Value != nullptr)
+		{
+			HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
+			HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
+			HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].BoxExtent);
+			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}
+
+/// <summary>
+/// 开启或关闭角色网格的碰撞检测(在倒带进行击中判定时需要关闭网格碰撞来避免影响到命中框命中的判定）
+/// </summary>
+/// <param name="HitCharacter"></param>
+/// <param name="CollisionEnabled"></param>
+void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled)
+{
+	if (HitCharacter && HitCharacter->GetMesh())
+	{
+		HitCharacter->GetMesh()->SetCollisionEnabled(CollisionEnabled);
+	}
 }
 
 
@@ -103,13 +255,14 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 /// <param name="TraceStart">击中检测起始位置</param>
 /// <param name="HitLocation">击中位置</param>
 /// <param name="HitTime">击中时间</param>
-void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
+FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
 	bool bReturn =
 		HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||//获取延迟补偿组件
 		HitCharacter->GetLagCompensation()->FrameHistory.GetHead() == nullptr ||//获取延迟补偿组件帧数据头
 		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr;//获取延迟补偿组件帧数据尾部
+	if (bReturn) return FServerSideRewindResult();
 	// Frame package that we check to verify a hit
 	//用于返回最终倒带到历史的哪一帧
 	FFramePackage FrameToCheck;
@@ -123,7 +276,7 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 	{
 		// too far back - too laggy to do SSR (ServerSideRewind)
 		// 太久了 - 延迟太高无法进行SSR
-		return;
+		return FServerSideRewindResult();
 	}
 	//如果击中时间正好等于了记录的最早时间（最旧的那组数据的时间），则直接取尾数据（最旧的那组数据）
 	if (OldestHistoryTime == HitTime)
@@ -162,9 +315,10 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 	if (bShouldInterpolate)
 	{
 		// Interpolate between Younger and Older
+		FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 	}
 
-	if (bReturn) return;
+	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
 }
 
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

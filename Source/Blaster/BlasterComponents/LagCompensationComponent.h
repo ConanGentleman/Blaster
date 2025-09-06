@@ -43,6 +43,26 @@ struct FFramePackage
 	TMap<FName, FBoxInformation> HitBoxInfo;
 };
 
+// 延迟补充算法-倒带击中结果数据包
+USTRUCT(BlueprintType)
+struct FServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	/// <summary>
+	/// 是否命中
+	/// </summary>
+	UPROPERTY()
+	bool bHitConfirmed;
+
+	/// <summary>
+	/// 是否命中的是头部
+	/// </summary>
+	UPROPERTY()
+	bool bHeadShot;
+};
+
+
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BLASTER_API ULagCompensationComponent : public UActorComponent
@@ -67,7 +87,7 @@ public:
 	/// <param name="TraceStart">击中检测起始位置</param>
 	/// <param name="HitLocation">击中位置</param>
 	/// <param name="HitTime">击中时间</param>
-	void ServerSideRewind(
+	FServerSideRewindResult ServerSideRewind(
 		class ABlasterCharacter* HitCharacter,
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitLocation,
@@ -90,6 +110,44 @@ protected:
 	/// <returns></returns>
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
 
+	/// <summary>
+	/// 击中判定
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="HitCharacter"></param>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitLocation"></param>
+	/// <returns></returns>
+	FServerSideRewindResult ConfirmHit(
+		const FFramePackage& Package,
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation);
+	/// <summary>
+	/// 将HitCharacter中的命中框信息赋值给OutFramePackage
+	/// </summary>
+	/// <param name="HitCharacter"></param>
+	/// <param name="OutFramePackage"></param>
+	void CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);
+	/// <summary>
+	/// 移动所有命中框，即将Package中的命中框位置旋转等信息赋值给与HitCharacter的命中框
+	/// 与CacheBoxPositions函数作用相反
+	/// </summary>
+	/// <param name="HitCharacter"></param>
+	/// <param name="Package"></param>
+	void MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
+	/// <summary>
+	/// 重置所有命中框
+	/// </summary>
+	/// <param name="HitCharacter"></param>
+	/// <param name="Package"></param>
+	void ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
+	/// <summary>
+	/// 开启或关闭角色网格的碰撞检测(在倒带进行击中判定时需要关闭网格碰撞来避免影响到命中框命中的判定）
+	/// </summary>
+	/// <param name="HitCharacter"></param>
+	/// <param name="CollisionEnabled"></param>
+	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
 private:
 
 	UPROPERTY()
