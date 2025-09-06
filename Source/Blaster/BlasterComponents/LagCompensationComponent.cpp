@@ -40,6 +40,42 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 }
 
 /// <summary>
+/// 依据击中时间进行插值以计算命中框的位置、旋转等信息
+/// </summary>
+/// <param name="OlderFrame"></param>
+/// <param name="YoungerFrame"></param>
+/// <param name="HitTime"></param>
+/// <returns></returns>
+FFramePackage ULagCompensationComponent::InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime)
+{
+	const float Distance = YoungerFrame.Time - OlderFrame.Time;
+	//计算插值百分比
+	const float InterpFraction = FMath::Clamp((HitTime - OlderFrame.Time) / Distance, 0.f, 1.f);
+	//插值结果存储变量
+	FFramePackage InterpFramePackage;
+	InterpFramePackage.Time = HitTime;
+	//对每一个命中框进行插值
+	for (auto& YoungerPair : YoungerFrame.HitBoxInfo)
+	{
+		const FName& BoxInfoName = YoungerPair.Key;
+
+		const FBoxInformation& OlderBox = OlderFrame.HitBoxInfo[BoxInfoName];
+		const FBoxInformation& YoungerBox = YoungerFrame.HitBoxInfo[BoxInfoName];
+
+		FBoxInformation InterpBoxInfo;
+
+		InterpBoxInfo.Location = FMath::VInterpTo(OlderBox.Location, YoungerBox.Location, 1.f, InterpFraction);
+		InterpBoxInfo.Rotation = FMath::RInterpTo(OlderBox.Rotation, YoungerBox.Rotation, 1.f, InterpFraction);
+		InterpBoxInfo.BoxExtent = YoungerBox.BoxExtent;
+
+		InterpFramePackage.HitBoxInfo.Add(BoxInfoName, InterpBoxInfo);
+	}
+
+	return InterpFramePackage;
+}
+
+
+/// <summary>
 /// 打印数据包中包含的命中狂（显示用，方便查看而已）
 /// </summary>
 /// <param name="Package"></param>

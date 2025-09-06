@@ -19,6 +19,9 @@ struct FBoxInformation
 	UPROPERTY()
 	FRotator Rotation;
 
+	/// <summary>
+	/// 框体大小
+	/// </summary>
 	UPROPERTY()
 	FVector BoxExtent;
 };
@@ -57,15 +60,6 @@ public:
 	/// <param name="Color"></param>
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
-protected:
-	virtual void BeginPlay() override;
-	/// <summary>
-	/// 存储数据包
-	/// </summary>
-	/// <param name="Package"></param>
-	/// <param name="Color"></param>
-	void SaveFramePackage(FFramePackage& Package);
-
 	/// <summary>
 	/// 服务器延迟补偿倒带回放
 	/// </summary>
@@ -78,6 +72,24 @@ protected:
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitLocation,
 		float HitTime);
+protected:
+	virtual void BeginPlay() override;
+	/// <summary>
+	/// 存储数据包
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="Color"></param>
+	void SaveFramePackage(FFramePackage& Package);
+
+	/// <summary>
+	/// 依据击中时间进行插值以计算命中框的位置、旋转等信息
+	/// </summary>
+	/// <param name="OlderFrame"></param>
+	/// <param name="YoungerFrame"></param>
+	/// <param name="HitTime"></param>
+	/// <returns></returns>
+	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
+
 private:
 
 	UPROPERTY()
