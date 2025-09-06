@@ -65,6 +65,19 @@ protected:
 	/// <param name="Package"></param>
 	/// <param name="Color"></param>
 	void SaveFramePackage(FFramePackage& Package);
+
+	/// <summary>
+	/// 服务器延迟补偿倒带回放
+	/// </summary>
+	/// <param name="HitCharacter">击中的角色</param>
+	/// <param name="TraceStart">击中检测起始位置</param>
+	/// <param name="HitLocation">击中位置</param>
+	/// <param name="HitTime">击中时间</param>
+	void ServerSideRewind(
+		class ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation,
+		float HitTime);
 private:
 
 	UPROPERTY()

@@ -605,4 +605,9 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	bool IsLocallyReloading();
+	/// <summary>
+	/// 获取延迟补偿组件
+	/// </summary>
+	/// <returns></returns>
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 };

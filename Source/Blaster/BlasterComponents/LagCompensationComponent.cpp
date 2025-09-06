@@ -60,6 +60,76 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
+/// <summary>
+/// 服务器延迟补偿倒带回放
+/// </summary>
+/// <param name="HitCharacter">击中的角色</param>
+/// <param name="TraceStart">击中检测起始位置</param>
+/// <param name="HitLocation">击中位置</param>
+/// <param name="HitTime">击中时间</param>
+void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
+{
+	bool bReturn =
+		HitCharacter == nullptr ||
+		HitCharacter->GetLagCompensation() == nullptr ||//获取延迟补偿组件
+		HitCharacter->GetLagCompensation()->FrameHistory.GetHead() == nullptr ||//获取延迟补偿组件帧数据头
+		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr;//获取延迟补偿组件帧数据尾部
+	// Frame package that we check to verify a hit
+	//用于返回最终倒带到历史的哪一帧
+	FFramePackage FrameToCheck;
+	bool bShouldInterpolate = true;
+	// Frame history of the HitCharacter
+	const TDoubleLinkedList<FFramePackage>& History = HitCharacter->GetLagCompensation()->FrameHistory;
+	const float OldestHistoryTime = History.GetTail()->GetValue().Time;
+	const float NewestHistoryTime = History.GetHead()->GetValue().Time;
+	//如果击中时间低于了延迟补偿历史记录的最早时间（最旧的那组数据的时间），则直接不处理了
+	if (OldestHistoryTime > HitTime)
+	{
+		// too far back - too laggy to do SSR (ServerSideRewind)
+		// 太久了 - 延迟太高无法进行SSR
+		return;
+	}
+	//如果击中时间正好等于了记录的最早时间（最旧的那组数据的时间），则直接取尾数据（最旧的那组数据）
+	if (OldestHistoryTime == HitTime)
+	{
+		FrameToCheck = History.GetTail()->GetValue();
+		bShouldInterpolate = false;
+	}
+	//如果击中时间早于了记录的最晚时间（最新的数据的时间），则直接取头数据（最新的数据）
+	if (NewestHistoryTime <= HitTime)
+	{
+		FrameToCheck = History.GetHead()->GetValue();
+		bShouldInterpolate = false;
+	}
+
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Younger = History.GetHead();
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Older = Younger;
+	//开始循环遍历，击中时间处于哪些数据之间（利用新旧指针）
+	while (Older->GetValue().Time > HitTime) // is Older still younger than HitTime? 如果当前更早时间指针（旧指针） 指向的数据时间大于击中时间则继续往尾部遍历
+	{
+		// March back until: OlderTime < HitTime < YoungerTime
+		if (Older->GetNextNode() == nullptr) break;
+		Older = Older->GetNextNode();
+		if (Older->GetValue().Time > HitTime)//如果更新旧指针后，指向的时间依旧大于击中时间，则更新新指针
+		{
+			Younger = Older;
+		}
+	}
+	//如果击中时间正好等于了记录节点的时间，则不在需要插值
+	if (Older->GetValue().Time == HitTime) // highly unlikely, but we found our frame to check
+	{
+		FrameToCheck = Older->GetValue();
+		bShouldInterpolate = false;
+	}
+	//否则利用新旧指针进行插值
+	if (bShouldInterpolate)
+	{
+		// Interpolate between Younger and Older
+	}
+
+	if (bReturn) return;
+}
+
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
