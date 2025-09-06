@@ -108,6 +108,7 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 	while (Older->GetValue().Time > HitTime) // is Older still younger than HitTime? 如果当前更早时间指针（旧指针） 指向的数据时间大于击中时间则继续往尾部遍历
 	{
 		// March back until: OlderTime < HitTime < YoungerTime
+		//直到匹配到OlderTime < HitTime < YoungerTime结束
 		if (Older->GetNextNode() == nullptr) break;
 		Older = Older->GetNextNode();
 		if (Older->GetValue().Time > HitTime)//如果更新旧指针后，指向的时间依旧大于击中时间，则更新新指针
