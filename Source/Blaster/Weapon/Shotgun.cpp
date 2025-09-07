@@ -4,6 +4,8 @@
 #include "Shotgun.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
@@ -62,17 +64,39 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				}
 			}
 		}
+		TArray<ABlasterCharacter*> HitCharacters;
 
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)//遍历子弹命中的玩家，且在服务器处理
+			if (HitPair.Key && InstigatorController)//遍历子弹命中的玩家
 			{
-				UGameplayStatics::ApplyDamage( // 命中直接造成伤害
-					HitPair.Key, //对应的受击BlasterCharacter
-					Damage * HitPair.Value,//伤害乘以命中次数
-					InstigatorController,
-					this,
-					UDamageType::StaticClass()
+				if (HasAuthority() && !bUseServerSideRewind)//如果在服务器且没有使用延迟补偿算法，则直接造成伤害
+				{
+					UGameplayStatics::ApplyDamage( // 命中直接造成伤害
+						HitPair.Key, //对应的受击BlasterCharacter
+						Damage * HitPair.Value,//伤害乘以命中次数
+						InstigatorController,
+						this,
+						UDamageType::StaticClass()
+					);
+				}
+
+				HitCharacters.Add(HitPair.Key);
+			}
+		}
+
+		//如果是客户端，且使用延迟补偿算法
+		if (!HasAuthority() && bUseServerSideRewind)
+		{
+			BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+			BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+			if (BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation() && BlasterOwnerCharacter->IsLocallyControlled())
+			{
+				BlasterOwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(
+					HitCharacters,
+					Start,
+					HitTargets,
+					BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime
 				);
 			}
 		}
