@@ -462,7 +462,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 /// </summary>
 /// <param name="HitCharacter">击中的玩家</param>
 /// <param name="TraceStart">检测开始位置</param>
-/// <param name="HitLocation">集中位置</param>
+/// <param name="HitLocation">击中位置</param>
 /// <param name="HitTime">击中的时间用于倒带算法倒回到HitTime进行计算</param>
 /// <param name="DamageCauser">造成伤害的武器</param>
 void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
@@ -476,6 +476,44 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 			DamageCauser->GetDamage(),
 			Character->Controller,
 			DamageCauser,
+			UDamageType::StaticClass()
+		);
+	}
+}
+
+/// <summary>
+/// 服务器霰弹枪伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
+/// </summary>
+/// </summary>
+/// <param name="HitCharacter">击中的所有玩家</param>
+/// <param name="TraceStart">检测开始位置</param>
+/// <param name="HitLocation">击中的所有位置</param>
+/// <param name="HitTime">击中的时间用于倒带算法倒回到HitTime进行计算</param>
+void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
+{
+	FShotgunServerSideRewindResult Confirm = ShotgunServerSideRewind(HitCharacters, TraceStart, HitLocations, HitTime);
+
+	for (auto& HitCharacter : HitCharacters)
+	{
+		if (HitCharacter == nullptr || HitCharacter->GetEquippedWeapon() == nullptr || Character == nullptr) continue;
+		float TotalDamage = 0.f;
+		if (Confirm.HeadShots.Contains(HitCharacter))
+		{
+			float HeadShotDamage = Confirm.HeadShots[HitCharacter] * HitCharacter->GetEquippedWeapon()->GetDamage();//不太清楚这里的伤害为什么会用被击中者所装备的武器伤害来算
+			//如果击中头部里面包含了该玩家则累加伤害（加上击中次数*单次伤害）
+			TotalDamage += HeadShotDamage;
+		}
+		if (Confirm.BodyShots.Contains(HitCharacter))
+		{
+			float BodyShotDamage = Confirm.BodyShots[HitCharacter] * HitCharacter->GetEquippedWeapon()->GetDamage();
+			//如果击中身体里面包含了该玩家则累加伤害（加上击中次数*单次伤害）
+			TotalDamage += BodyShotDamage;
+		}
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			TotalDamage,
+			Character->Controller,
+			HitCharacter->GetEquippedWeapon(),
 			UDamageType::StaticClass()
 		);
 	}
