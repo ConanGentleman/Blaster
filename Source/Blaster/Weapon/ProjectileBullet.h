@@ -21,4 +21,6 @@ protected:
 	/// 这里主要调用伤害函数。
 	/// </summary>
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+
+	virtual void BeginPlay() override;
 };

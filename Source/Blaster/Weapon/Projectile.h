@@ -23,6 +23,19 @@ public:
 	/// 销毁Actor（这里即子弹销毁）。也会在网络上通知本 Actor被摧毁，通知服务器在服务端和各客户端之间删除当前 Actor。即能够同步调用所有的客户端上的摧毁
 	/// </summary>
 	virtual void Destroyed() override;
+
+	/**
+	* Used with server-side rewind
+	* 使用延迟补偿算法
+	*/
+
+	bool bUseServerSideRewind = false;
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitialVelocity;
+
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 15000;
+
 protected:
 	virtual void BeginPlay() override;
 	void StartDestroyTimer();
