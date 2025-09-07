@@ -41,6 +41,12 @@ struct FFramePackage
 	/// </summary>
 	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
+
+	/// <summary>
+	/// 被击中的角色
+	/// </summary>
+	UPROPERTY()
+	ABlasterCharacter* Character;
 };
 
 // 延迟补充算法-倒带击中结果数据包
@@ -62,6 +68,25 @@ struct FServerSideRewindResult
 	bool bHeadShot;
 };
 
+// 延迟补充算法-霰弹枪倒带击中结果数据包
+USTRUCT(BlueprintType)
+struct FShotgunServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	/// <summary>
+	/// 各玩家头部命中次数
+	/// </summary>
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> HeadShots;
+
+	/// <summary>
+	/// 各玩家身体命中次数
+	/// </summary>
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> BodyShots;
+
+};
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -107,7 +132,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>
-	/// 存储数据包
+	/// 赋值单个延迟补偿数据包
 	/// </summary>
 	/// <param name="Package"></param>
 	/// <param name="Color"></param>
@@ -164,6 +189,45 @@ protected:
 	/// 存储延迟补偿（倒带算法）历史数据
 	/// </summary>
 	void SaveFramePackage();
+
+	/// <summary>
+	/// 获取延迟补偿应该检测哪一个帧数据
+	/// </summary>
+	/// <param name="HitCharacter"></param>
+	/// <param name="HitTime"></param>
+	/// <returns></returns>
+	FFramePackage GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime);
+
+	/**
+	* Shotgun霰弹枪延迟补偿
+	*/
+
+	/// <summary>
+	/// 霰弹枪延迟补偿
+	/// </summary>
+	/// <param name="HitCharacters"></param>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitLocations"></param>
+	/// <param name="HitTime"></param>
+	/// <returns></returns>
+	FShotgunServerSideRewindResult ShotgunServerSideRewind(
+		const TArray<ABlasterCharacter*>& HitCharacters,
+		const FVector_NetQuantize& TraceStart,
+		const TArray<FVector_NetQuantize>& HitLocations,
+		float HitTime);
+
+	/// <summary>
+	/// 霰弹枪延迟补偿伤害判定
+	/// </summary>
+	/// <param name="FramePackages"></param>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitLocations"></param>
+	/// <returns></returns>
+	FShotgunServerSideRewindResult ShotgunConfirmHit(
+		const TArray<FFramePackage>& FramePackages,
+		const FVector_NetQuantize& TraceStart,
+		const TArray<FVector_NetQuantize>& HitLocations
+	);
 private:
 
 	UPROPERTY()

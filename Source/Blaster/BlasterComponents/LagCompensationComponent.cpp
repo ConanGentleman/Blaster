@@ -21,28 +21,6 @@ void ULagCompensationComponent::BeginPlay()
 }
 
 /// <summary>
-/// 存储延迟补偿数据包
-/// </summary>
-/// <param name="Package"></param>
-void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
-{
-	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : Character;
-	if (Character)
-	{
-		Package.Time = GetWorld()->GetTimeSeconds(); //用于只会在服务器上调用该函数，因此这里获取的时间是服务器上的时间
-		//遍历（包含所有碰撞块的）映射表并将相应信息存到数据包中
-		for (auto& BoxPair : Character->HitCollisionBoxes)
-		{
-			FBoxInformation BoxInformation;
-			BoxInformation.Location = BoxPair.Value->GetComponentLocation();
-			BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
-			BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
-			Package.HitBoxInfo.Add(BoxPair.Key, BoxInformation);//Key代表命中框(碰撞体）  命名大部分跟骨骼名一致
-		}
-	}
-}
-
-/// <summary>
 /// 依据击中时间进行插值以计算命中框的位置、旋转等信息
 /// </summary>
 /// <param name="OlderFrame"></param>
@@ -160,6 +138,18 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 }
 
 /// <summary>
+/// 霰弹枪延迟补偿伤害判定
+/// </summary>
+/// <param name="FramePackages"></param>
+/// <param name="TraceStart"></param>
+/// <param name="HitLocations"></param>
+/// <returns></returns>
+FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
+{
+	return FShotgunServerSideRewindResult();
+}
+
+/// <summary>
 /// 将HitCharacter中的命中框信息赋值给OutFramePackage
 /// </summary>
 /// <param name="HitCharacter"></param>
@@ -259,12 +249,44 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 /// <param name="HitTime">击中时间</param>
 FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
+	FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
+	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
+}
+
+/// <summary>
+/// 霰弹枪延迟补偿
+/// </summary>
+/// <param name="HitCharacters">所有被击中的玩家</param>
+/// <param name="TraceStart">击中检测起始位置</param>
+/// <param name="HitLocations">所有被击中的位置</param>
+/// <param name="HitTime"></param>
+/// <returns></returns>
+FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunServerSideRewind(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
+{
+	TArray<FFramePackage> FramesToCheck;
+	//遍历每个击中的玩家得到应该检测哪一帧的数据包
+	for (ABlasterCharacter* HitCharacter : HitCharacters)
+	{
+		FramesToCheck.Add(GetFrameToCheck(HitCharacter, HitTime));
+	}
+
+	return FShotgunServerSideRewindResult();
+}
+
+/// <summary>
+/// 获取延迟补偿应该检测哪一个帧数据
+/// </summary>
+/// <param name="HitCharacter"></param>
+/// <param name="HitTime"></param>
+/// <returns></returns>
+FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime)
+{
 	bool bReturn =
 		HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||//获取延迟补偿组件
 		HitCharacter->GetLagCompensation()->FrameHistory.GetHead() == nullptr ||//获取延迟补偿组件帧数据头
 		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr;//获取延迟补偿组件帧数据尾部
-	if (bReturn) return FServerSideRewindResult();
+	if (bReturn) return FFramePackage();
 	// Frame package that we check to verify a hit
 	//用于返回最终倒带到历史的哪一帧
 	FFramePackage FrameToCheck;
@@ -278,7 +300,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 	{
 		// too far back - too laggy to do SSR (ServerSideRewind)
 		// 太久了 - 延迟太高无法进行SSR
-		return FServerSideRewindResult();
+		return FFramePackage();
 	}
 	//如果击中时间正好等于了记录的最早时间（最旧的那组数据的时间），则直接取尾数据（最旧的那组数据）
 	if (OldestHistoryTime == HitTime)
@@ -320,7 +342,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 		FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 	}
 
-	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
+	return FrameToCheck;
 }
 
 /// <summary>
@@ -384,4 +406,27 @@ void ULagCompensationComponent::SaveFramePackage()
 		//ShowFramePackage(ThisFrame, FColor::Red);
 	}
 
+}
+
+/// <summary>
+/// 赋值单个延迟补偿数据包
+/// </summary>
+/// <param name="Package"></param>
+void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
+{
+	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : Character;
+	if (Character)
+	{
+		Package.Time = GetWorld()->GetTimeSeconds(); //用于只会在服务器上调用该函数，因此这里获取的时间是服务器上的时间
+		Package.Character = Character;
+		//遍历（包含所有碰撞块的）映射表并将相应信息存到数据包中
+		for (auto& BoxPair : Character->HitCollisionBoxes)
+		{
+			FBoxInformation BoxInformation;
+			BoxInformation.Location = BoxPair.Value->GetComponentLocation();
+			BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
+			BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
+			Package.HitBoxInfo.Add(BoxPair.Key, BoxInformation);//Key代表命中框(碰撞体）  命名大部分跟骨骼名一致
+		}
+	}
 }
