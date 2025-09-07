@@ -239,6 +239,22 @@ protected:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	float SphereRadius = 75.f;
+
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+	/// <summary>
+	/// 武器是否使用延迟补偿算法
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
+
 private:
 	//用于武器和拥有的所有资产的骨架网格组件
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -319,11 +335,6 @@ private:
 	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
 	int32 Sequence = 0;
 
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter;
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterOwnerController;
-
 	/// <summary>
 	/// 武器类型
 	/// </summary>
@@ -347,4 +358,5 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 };

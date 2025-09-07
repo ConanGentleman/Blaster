@@ -3,9 +3,11 @@
 
 #include "LagCompensationComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "Components/BoxComponent.h"
 #include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
 {
@@ -228,7 +230,7 @@ void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* 
 
 
 /// <summary>
-/// 打印数据包中包含的命中狂（显示用，方便查看而已）
+/// 打印数据包中包含的命中框（显示用，方便查看而已）
 /// </summary>
 /// <param name="Package"></param>
 /// <param name="Color"></param>
@@ -321,10 +323,45 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
 }
 
+/// <summary>
+/// 服务器伤害/得分请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
+/// </summary>
+/// </summary>
+/// <param name="HitCharacter">击中的玩家</param>
+/// <param name="TraceStart">检测开始位置</param>
+/// <param name="HitLocation">集中位置</param>
+/// <param name="HitTime">击中的时间用于倒带算法倒回到HitTime进行计算</param>
+/// <param name="DamageCauser">造成伤害的武器</param>
+void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+{
+	FServerSideRewindResult Confirm = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
+
+	if (Character && HitCharacter && DamageCauser && Confirm.bHitConfirmed)
+	{
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			DamageCauser->GetDamage(),
+			Character->Controller,
+			DamageCauser,
+			UDamageType::StaticClass()
+		);
+	}
+}
+
+
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	SaveFramePackage();
+}
+
+/// <summary>
+/// 存储延迟补偿（倒带算法）历史数据
+/// </summary>
+void ULagCompensationComponent::SaveFramePackage()
+{
+	if (Character == nullptr || !Character->HasAuthority()) return;
 	if (FrameHistory.Num() <= 1)
 	{
 		FFramePackage ThisFrame;
@@ -344,7 +381,7 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		SaveFramePackage(ThisFrame);
 		FrameHistory.AddHead(ThisFrame);
 
-		ShowFramePackage(ThisFrame, FColor::Red);
+		//ShowFramePackage(ThisFrame, FColor::Red);
 	}
 
 }

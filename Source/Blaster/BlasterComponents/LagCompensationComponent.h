@@ -92,6 +92,18 @@ public:
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitLocation,
 		float HitTime);
+
+	/// <summary>
+	/// 服务器伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+		void ServerScoreRequest(
+			ABlasterCharacter* HitCharacter, //击中的玩家
+			const FVector_NetQuantize& TraceStart,//检测判定开始位置
+			const FVector_NetQuantize& HitLocation,//击中位置
+			float HitTime, //击中的时间用于倒带算法倒回到HitTime进行计算
+			class AWeapon* DamageCauser //造成击中的武器
+		);
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>
@@ -148,6 +160,10 @@ protected:
 	/// <param name="HitCharacter"></param>
 	/// <param name="CollisionEnabled"></param>
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
+	/// <summary>
+	/// 存储延迟补偿（倒带算法）历史数据
+	/// </summary>
+	void SaveFramePackage();
 private:
 
 	UPROPERTY()

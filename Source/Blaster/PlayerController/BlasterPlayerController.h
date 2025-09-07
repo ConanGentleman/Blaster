@@ -91,6 +91,11 @@ public:
 	/// 统一处理当游戏结束时的逻辑
 	/// </summary>
 	void HandleCooldown();
+
+	/// <summary>
+	/// 网络单次延迟，即（客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
+	/// </summary>
+	float SingleTripTime = 0.f;
 protected:
 	virtual void BeginPlay() override;
 

@@ -492,7 +492,8 @@ void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeO
 	//计算客户端从请求获取时间到接收到返回结果的总时间
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
 	//客户端的时间 = 服务器的时间 + （客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
-	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+	SingleTripTime = 0.5f * RoundTripTime;
+	float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
 	//保存服务器时间和客户端时间的时间差
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
