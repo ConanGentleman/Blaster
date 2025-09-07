@@ -43,7 +43,7 @@ struct FFramePackage
 	TMap<FName, FBoxInformation> HitBoxInfo;
 
 	/// <summary>
-	/// 被击中的角色
+	/// 对应的角色
 	/// </summary>
 	UPROPERTY()
 	ABlasterCharacter* Character;
