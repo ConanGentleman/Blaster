@@ -32,7 +32,7 @@ void ABlasterPlayerState::AddToScore(float ScoreAmount)
 		if (Controller)
 		{
 			//设置HUD分数信息
-			Controller->SetHUDScore(Score);
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }

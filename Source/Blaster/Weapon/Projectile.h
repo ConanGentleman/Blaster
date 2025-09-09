@@ -29,10 +29,16 @@ public:
 	* 使用延迟补偿算法
 	*/
 
+	//是否开启延迟补偿
 	bool bUseServerSideRewind = false;
+	//初始发射位置
 	FVector_NetQuantize TraceStart;
+	//初始速度
 	FVector_NetQuantize100 InitialVelocity;
 
+	/// <summary>
+	/// 初始速度
+	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed = 15000;
 

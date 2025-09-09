@@ -44,21 +44,21 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 void AProjectileBullet::BeginPlay()
 {
 	Super::BeginPlay();
-
+	//构建预测子弹轨迹参数
 	FPredictProjectilePathParams PathParams;
-	PathParams.bTraceWithChannel = true;
-	PathParams.bTraceWithCollision = true;
-	PathParams.DrawDebugTime = 5.f;
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
-	PathParams.LaunchVelocity = GetActorForwardVector() * InitialSpeed;
-	PathParams.MaxSimTime = 4.f;
-	PathParams.ProjectileRadius = 5.f;
-	PathParams.SimFrequency = 30.f;
-	PathParams.StartLocation = GetActorLocation();
-	PathParams.TraceChannel = ECollisionChannel::ECC_Visibility;
-	PathParams.ActorsToIgnore.Add(this);
+	PathParams.bTraceWithChannel = true;//是否使用特定的碰撞通道
+	PathParams.bTraceWithCollision = true;//是否开启碰撞检测
+	PathParams.DrawDebugTime = 5.f;//绘制调试路径保留市场
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;//绘制调试类型
+	PathParams.LaunchVelocity = GetActorForwardVector() * InitialSpeed;//发送初始速度速度
+	PathParams.MaxSimTime = 4.f;//空中飞行时间
+	PathParams.ProjectileRadius = 5.f;//子弹半径
+	PathParams.SimFrequency = 30.f;//模拟精度：SimFrequency 越高，单位时间内模拟的点数就越多。意味着能更准确地捕捉到抛射物复杂飞行轨迹的细节，能更精确地检测到与较小或较薄物体的碰撞
+	PathParams.StartLocation = GetActorLocation();//起始位置
+	PathParams.TraceChannel = ECollisionChannel::ECC_Visibility;//碰撞检测批到
+	PathParams.ActorsToIgnore.Add(this);//忽略碰撞角色
 
 	FPredictProjectilePathResult PathResult;
-
+	//预测子弹轨迹（参数：世界，路径参数，路劲结果
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
 }
