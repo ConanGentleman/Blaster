@@ -15,6 +15,11 @@ class BLASTER_API AProjectileBullet : public AProjectile
 	GENERATED_BODY()
 public:
 	AProjectileBullet();
+
+#if WITH_EDITOR //表示只在编辑器中使用
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& Event) override;
+#endif
+
 protected:
 	/// <summary>
 	/// 重写子弹父类中的子弹碰撞函数。父类中的子弹碰撞函数已经完成了子弹销毁等功能。
