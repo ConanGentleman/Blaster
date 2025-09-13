@@ -42,6 +42,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed = 15000;
 
+	/// <summary>
+	/// 子弹伤害（武器伤害直接复制给子弹，不通过蓝图设置了
+	/// </summary>
+	float Damage = 20.f;
+
 protected:
 	virtual void BeginPlay() override;
 	void StartDestroyTimer();
@@ -64,13 +69,6 @@ protected:
 	/// <param name="Hit">击中结果</param>
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-	/// <summary>
-	/// 子弹伤害
-	/// </summary>
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
-
 
 	/// <summary>
 	/// 撞击特效
