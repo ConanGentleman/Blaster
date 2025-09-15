@@ -83,7 +83,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
 	//开启命中框的碰撞检测
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	//追踪可见性碰撞通道
+	//追踪自定义碰撞通道
 	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 
 	FHitResult ConfirmHitResult;
@@ -157,6 +157,103 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 	return FServerSideRewindResult{ false, false };
 }
+
+/// <summary>
+/// 火箭筒类枪延迟补偿伤害判定
+/// </summary>
+/// <param name="Package"></param>
+/// <param name="HitCharacter"></param>
+/// <param name="TraceStart"></param>
+/// <param name="InitialVelocity"></param>
+/// <param name="HitTime"></param>
+/// <returns></returns>
+FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
+{
+	//缓存击中的玩家最初的帧信息（便于判定击中成功后，将角色命中框移回最初位置）
+	FFramePackage CurrentFrame;
+	CacheBoxPositions(HitCharacter, CurrentFrame);
+	//根据延迟补偿包将角色的命中框移动到包所对应的位置
+	MoveBoxes(HitCharacter, Package);
+	//先关闭所有角色网格的碰撞检测，避免对命中框的碰撞检测造成影响！！！！！！！！！！！！！！！！！！！！
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+	// Enable collision for the head first 先开启头部的碰撞检测，如果未能命中再对其他部分进行检测
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	//开启命中框的碰撞检测
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//追踪自定义碰撞通道
+	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+
+	//设置抛物线碰撞检测参数（构建预测子弹轨迹参数）
+	FPredictProjectilePathParams PathParams;
+	PathParams.bTraceWithCollision = true;//是否使用特定的碰撞通道
+	PathParams.MaxSimTime = MaxRecordTime;//空中飞行时间
+	PathParams.LaunchVelocity = InitialVelocity;//发射初始速度速度
+	PathParams.StartLocation = TraceStart;//起始位置
+	PathParams.SimFrequency = 15.f;//模拟精度：SimFrequency 越高，单位时间内模拟的点数就越多。意味着能更准确地捕捉到抛射物复杂飞行轨迹的细节，能更精确地检测到与较小或较薄物体的碰撞
+	PathParams.ProjectileRadius = 5.f;//子弹半径
+	PathParams.TraceChannel = ECC_HitBox;//碰撞检测通道
+	PathParams.ActorsToIgnore.Add(GetOwner());//忽略碰撞角色
+	PathParams.DrawDebugTime = 5.f;//绘制调试路径保留时长
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;//绘制调试类型
+
+	FPredictProjectilePathResult PathResult;
+	//预测子弹轨迹碰撞（参数：世界，路径参数，路径结果
+	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+
+	if (PathResult.HitResult.bBlockingHit) // we hit the head, return early 命中头部，则先返回击中结果
+	{
+		if (PathResult.HitResult.Component.IsValid()) //绘制调试盒子
+		{
+			UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
+			if (Box)
+			{
+				DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+			}
+		}
+
+		ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
+		//已经命中头部了，则复原角色网格的碰撞检测
+		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+		return FServerSideRewindResult{ true, true };
+	}
+	else // we didn't hit the head; check the rest of the boxes 头部未命中，则检测剩余的部位的碰撞
+	{
+		for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+		{
+			if (HitBoxPair.Value != nullptr)
+			{
+				//开启命中框的碰撞检测
+				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+			}
+		}
+		//预测子弹轨迹碰撞
+		UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+		if (PathResult.HitResult.bBlockingHit)
+		{
+			if (PathResult.HitResult.Component.IsValid())
+			{
+				UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
+				if (Box)
+				{
+					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+				}
+			}
+
+			ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
+			//已经命中，则复原角色网格的碰撞检测
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+			return FServerSideRewindResult{ true, false };
+		}
+	}
+	//将命中框重置回原来的位置
+	ResetHitBoxes(HitCharacter, CurrentFrame);
+	//复原角色网格的碰撞检测
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+	return FServerSideRewindResult{ false, false };
+}
+
 
 /// <summary>
 /// 霰弹枪延迟补偿伤害判定
@@ -403,6 +500,12 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 {
 	FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
 	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
+}
+
+FServerSideRewindResult ULagCompensationComponent::ProjectileServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
+{
+	FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
+	return ProjectileConfirmHit(FrameToCheck, HitCharacter, TraceStart, InitialVelocity, HitTime);
 }
 
 /// <summary>

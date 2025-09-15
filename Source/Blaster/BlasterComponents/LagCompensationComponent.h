@@ -105,6 +105,10 @@ public:
 	/// <param name="Color"></param>
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
+	/**
+	* Hitscan 散射枪
+	*/
+
 	/// <summary>
 	/// 服务器延迟补偿倒带回放
 	/// </summary>
@@ -118,6 +122,19 @@ public:
 		const FVector_NetQuantize& HitLocation,
 		float HitTime);
 
+	/**
+	* Projectile 火箭筒类枪
+	*/
+	FServerSideRewindResult ProjectileServerSideRewind(
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize100& InitialVelocity,
+		float HitTime
+	);
+
+	/**
+	* Shotgun 霰弹类枪
+	*/
 
 	/// <summary>
 	/// 服务器霰弹枪延迟补偿倒带回放
@@ -174,19 +191,6 @@ protected:
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
 
 	/// <summary>
-	/// 击中判定
-	/// </summary>
-	/// <param name="Package"></param>
-	/// <param name="HitCharacter"></param>
-	/// <param name="TraceStart"></param>
-	/// <param name="HitLocation"></param>
-	/// <returns></returns>
-	FServerSideRewindResult ConfirmHit(
-		const FFramePackage& Package,
-		ABlasterCharacter* HitCharacter,
-		const FVector_NetQuantize& TraceStart,
-		const FVector_NetQuantize& HitLocation);
-	/// <summary>
 	/// 将HitCharacter中的命中框信息赋值给OutFramePackage
 	/// </summary>
 	/// <param name="HitCharacter"></param>
@@ -225,7 +229,47 @@ protected:
 	FFramePackage GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime);
 
 	/**
-	* Shotgun霰弹枪延迟补偿
+	* Hitscan散射枪
+	*/
+
+	/// <summary>
+	/// 散射枪延迟补偿击中判定
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="HitCharacter"></param>
+	/// <param name="TraceStart"></param>
+	/// <param name="HitLocation"></param>
+	/// <returns></returns>
+	FServerSideRewindResult ConfirmHit(
+		const FFramePackage& Package,
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation);
+
+	/**
+	* Projectile火箭筒类枪
+	*/
+
+	/// <summary>
+	/// 火箭筒类枪延迟补偿伤害判定
+	/// </summary>
+	/// <param name="Package"></param>
+	/// <param name="HitCharacter"></param>
+	/// <param name="TraceStart"></param>
+	/// <param name="InitialVelocity"></param>
+	/// <param name="HitTime"></param>
+	/// <returns></returns>
+	FServerSideRewindResult ProjectileConfirmHit(
+		const FFramePackage& Package,
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize100& InitialVelocity,
+		float HitTime
+	);
+
+
+	/**
+	* Shotgun霰弹类枪
 	*/
 
 	/// <summary>
