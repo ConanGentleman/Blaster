@@ -154,24 +154,35 @@ public:
 	/// 服务器伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
 	/// </summary>
 	UFUNCTION(Server, Reliable)
-		void ServerScoreRequest(
-			ABlasterCharacter* HitCharacter, //击中的玩家
-			const FVector_NetQuantize& TraceStart,//检测判定开始位置
-			const FVector_NetQuantize& HitLocation,//击中位置
-			float HitTime, //击中的时间用于倒带算法倒回到HitTime进行计算
-			class AWeapon* DamageCauser //造成击中的武器
-		);
+	void ServerScoreRequest(
+		ABlasterCharacter* HitCharacter, //击中的玩家
+		const FVector_NetQuantize& TraceStart,//检测判定开始位置
+		const FVector_NetQuantize& HitLocation,//击中位置
+		float HitTime, //击中的时间用于倒带算法倒回到HitTime进行计算
+		class AWeapon* DamageCauser //造成击中的武器
+	);
+
+	/// <summary>
+	/// 服务器火箭筒类伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ProjectileServerScoreRequest(
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize100& InitialVelocity,
+		float HitTime
+	);
 
 	/// <summary>
 	/// 服务器霰弹枪伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
 	/// </summary>
 	UFUNCTION(Server, Reliable)
-		void ShotgunServerScoreRequest(
-			const TArray<ABlasterCharacter*>& HitCharacters,
-			const FVector_NetQuantize& TraceStart,
-			const TArray<FVector_NetQuantize>& HitLocations,
-			float HitTime
-		);
+	void ShotgunServerScoreRequest(
+		const TArray<ABlasterCharacter*>& HitCharacters,
+		const FVector_NetQuantize& TraceStart,
+		const TArray<FVector_NetQuantize>& HitLocations,
+		float HitTime
+	);
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>

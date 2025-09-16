@@ -3,7 +3,9 @@
 
 #include "ProjectileBullet.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Character.h"
+#include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 AProjectileBullet::AProjectileBullet()
@@ -45,15 +47,34 @@ void AProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& Event)
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	//获取子弹的所有者（ 在combatcomponent.cpp中，将装备武器的所有者设置为了角色）
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
 	if (OwnerCharacter)
 	{
 		//获取控制器
-		AController* OwnerController = OwnerCharacter->Controller;
+		ABlasterPlayerController* OwnerController = Cast<ABlasterPlayerController>(OwnerCharacter->Controller);
 		if (OwnerController)
 		{
-			//命中时施加伤害，使用ue自带的伤害函数。参数：受伤害的actor，伤害值，造成此伤害的控制器（例如射击武器的玩家），实际造成伤害的actor，描述所造成上海的类
 			UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+			//如果是服务器，且未开启倒带算法，则命中时施加伤害
+			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)
+			{
+				//命中时施加伤害，使用ue自带的伤害函数。参数：受伤害的actor，伤害值，造成此伤害的控制器（例如射击武器的玩家），实际造成伤害的actor，描述所造成上海的类
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+				return;
+			}
+			ABlasterCharacter* HitCharacter = Cast<ABlasterCharacter>(OtherActor);
+			//如果开启了延迟补偿算法，并且子弹所有者是本地控制的
+			if (bUseServerSideRewind && OwnerCharacter->GetLagCompensation() && OwnerCharacter->IsLocallyControlled() && HitCharacter)
+			{
+				//则向服务器发送分数请求
+				OwnerCharacter->GetLagCompensation()->ProjectileServerScoreRequest(
+					HitCharacter,
+					TraceStart,
+					InitialVelocity,
+					OwnerController->GetServerTime() - OwnerController->SingleTripTime //减去一半的时间
+				);
+			}
 		}
 	}
 	//由于父类中是对子弹进行销毁，因此将父类的子弹碰撞函数调用放在最后，保证正常运行。

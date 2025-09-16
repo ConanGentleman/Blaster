@@ -70,7 +70,7 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		{
 			if (HitPair.Key && InstigatorController)//遍历子弹命中的玩家
 			{
-				if (HasAuthority() && !bUseServerSideRewind)//如果在服务器且没有使用延迟补偿算法，则直接造成伤害
+				if (HasAuthority() && OwnerPawn->IsLocallyControlled())//如果在服务器且本地控制，则直接造成伤害
 				{
 					UGameplayStatics::ApplyDamage( // 命中直接造成伤害
 						HitPair.Key, //对应的受击BlasterCharacter
@@ -85,12 +85,12 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 		}
 
-		//如果是客户端，且使用延迟补偿算法
-		if (!HasAuthority() && bUseServerSideRewind)
+		//如果是客户端，且使用延迟补偿算法，且本地控制
+		if (!HasAuthority() && bUseServerSideRewind && OwnerPawn->IsLocallyControlled())
 		{
 			BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
 			BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
-			if (BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation() && BlasterOwnerCharacter->IsLocallyControlled())
+			if (BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation())
 			{
 				BlasterOwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(
 					HitCharacters,

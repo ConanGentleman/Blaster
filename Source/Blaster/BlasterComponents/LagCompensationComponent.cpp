@@ -626,6 +626,29 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 }
 
 /// <summary>
+/// 服务器火箭筒类伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
+/// </summary>
+/// <param name="HitCharacter"></param>
+/// <param name="TraceStart"></param>
+/// <param name="InitialVelocity"></param>
+/// <param name="HitTime"></param>
+void ULagCompensationComponent::ProjectileServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
+{
+	FServerSideRewindResult Confirm = ProjectileServerSideRewind(HitCharacter, TraceStart, InitialVelocity, HitTime);
+	//获取检测结果
+	if (Character && HitCharacter && Confirm.bHitConfirmed)
+	{
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			Character->GetEquippedWeapon()->GetDamage(),
+			Character->Controller,
+			Character->GetEquippedWeapon(),
+			UDamageType::StaticClass()
+		);
+	}
+}
+
+/// <summary>
 /// 服务器霰弹枪伤害/请求RPC（通过倒带算法判定击中玩家后，进行伤害判定和得分结算
 /// </summary>
 /// </summary>
