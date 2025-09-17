@@ -13,7 +13,6 @@
 #include "Blaster/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
-#include "Blaster/Weapon/Weapon.h"
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Components/Image.h"
 
@@ -57,18 +56,25 @@ void ABlasterPlayerController::Tick(float DeltaTime)
 /// <param name="DeltaTime"></param>
 void ABlasterPlayerController::CheckPing(float DeltaTime)
 {
+	if (HasAuthority()) return;
 	HighPingRunningTime += DeltaTime;
 	if (HighPingRunningTime > CheckPingFrequency)
 	{
 		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
 		if (PlayerState)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPing() * 4 : %d"), PlayerState->GetPing() * 4);
 			//if (PlayerState->GetPing() * 4 > HighPingThreshold) // ping is compressed; it's actually ping / 4
 			//用上面的接口使用Ctrl Alt F11会报错
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
 				HighPingWarning();
 				PingAnimationRunningTime = 0.f;
+				ServerReportPingStatus(true);
+			}
+			else
+			{
+				ServerReportPingStatus(false);
 			}
 		}
 		HighPingRunningTime = 0.f;
@@ -86,6 +92,13 @@ void ABlasterPlayerController::CheckPing(float DeltaTime)
 		}
 	}
 }
+
+// Is the ping too high? 设置是否延迟太高
+void ABlasterPlayerController::ServerReportPingStatus_Implementation(bool bHighPing)
+{
+	HighPingDelegate.Broadcast(bHighPing);
+}
+
 
 /// <summary>
 /// 检查是否该同步时间了

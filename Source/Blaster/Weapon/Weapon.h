@@ -247,7 +247,7 @@ protected:
 	/// <summary>
 	/// 武器是否使用延迟补偿算法
 	/// </summary>
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = false;
 
 	UPROPERTY()
@@ -255,6 +255,11 @@ protected:
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterOwnerController;
 
+	/// <summary>
+	/// ping过高回调
+	/// </summary>
+	UFUNCTION()
+	void OnPingTooHigh(bool bPingTooHigh);
 private:
 	//用于武器和拥有的所有资产的骨架网格组件
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")

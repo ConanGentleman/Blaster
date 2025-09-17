@@ -6,6 +6,15 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+/// <summary>
+/// 过高ping多播
+/// </summary>
+/// <param name=""></param>
+/// <param name=""></param>
+/// <param name=""></param>
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
+
+
 /**
  * 目前的功能：更新HUD的血量信息
  */
@@ -96,6 +105,11 @@ public:
 	/// 网络单次延迟，即（客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
 	/// </summary>
 	float SingleTripTime = 0.f;
+
+	/// <summary>
+	/// 过高ping委托
+	/// </summary>
+	FHighPingDelegate HighPingDelegate;
 protected:
 	virtual void BeginPlay() override;
 
@@ -284,6 +298,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float CheckPingFrequency = 20.f;
+
+	/// <summary>
+	/// 设置是否延迟太高
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerReportPingStatus(bool bHighPing);
 
 	/// <summary>
 	/// 高ping阈值，超过该额度才算是高ping

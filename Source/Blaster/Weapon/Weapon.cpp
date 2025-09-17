@@ -111,6 +111,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//将武器状态注册为复制变量
 	DOREPLIFETIME(AWeapon, WeaponState);
+	//在网络复制时的条件，这里指定了只在满足 COND_OwnerOnly 条件时进行复制,意味着该属性仅会发送给该武器（AWeapon）的所有者（Owner）客户端。
+	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);
 }
 
 /// <summary>
@@ -269,6 +271,17 @@ void AWeapon::OnWeaponStateSet()
 		break;
 	}
 }
+
+/// <summary>
+/// ping过高回调
+/// </summary>
+/// <param name="bPingTooHigh"></param>
+void AWeapon::OnPingTooHigh(bool bPingTooHigh)
+{
+	bUseServerSideRewind = !bPingTooHigh;
+}
+
+
 /// <summary>
 /// 服务器通知客户端调用
 /// 当绑定的武器状态 复制前 调用的函数可以无参也可以有一个参数（该参数为复制变量）
@@ -301,6 +314,18 @@ void AWeapon::OnEquipped()
 	}
 	//禁用深度颜色（轮廓）
 	EnableCustomDepth(false);
+
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		//IsBound用于检查一个代理（Delegate） 是否已经被绑定了具体的函数，绑定了才敢调用
+		if (BlasterOwnerController && HasAuthority() && !BlasterOwnerController->HighPingDelegate.IsBound())
+		{
+			//装备武器绑定多播委托
+			BlasterOwnerController->HighPingDelegate.AddDynamic(this, &AWeapon::OnPingTooHigh);
+		}
+	}
 }
 
 void AWeapon::OnDropped()
@@ -335,6 +360,17 @@ void AWeapon::OnDropped()
 	WeaponMesh->MarkRenderStateDirty();
 	//丢弃武器时开启轮廓显示
 	EnableCustomDepth(true);
+
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if (BlasterOwnerController && HasAuthority() && BlasterOwnerController->HighPingDelegate.IsBound())
+		{
+			//丢弃武器解除委托绑定
+			BlasterOwnerController->HighPingDelegate.RemoveDynamic(this, &AWeapon::OnPingTooHigh);
+		}
+	}
 }
 
 /// <summary>
@@ -369,6 +405,17 @@ void AWeapon::OnEquippedSecondary()
 		//通常在需要更新组件的视觉表现时使用，例如更改材质或变换
 		//也就是快速刷新轮廓设置
 		WeaponMesh->MarkRenderStateDirty();
+	}
+
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if (BlasterOwnerController && HasAuthority() && BlasterOwnerController->HighPingDelegate.IsBound())
+		{
+			//更换武器解除委托绑定
+			BlasterOwnerController->HighPingDelegate.RemoveDynamic(this, &AWeapon::OnPingTooHigh);
+		}
 	}
 }
 
