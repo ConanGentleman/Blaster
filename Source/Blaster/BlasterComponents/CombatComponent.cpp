@@ -250,7 +250,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 }
 
 /// <summary>
-/// 开火验证函数 （先执行该函数，验证成功了再执行ServerFire_Implementation）
+/// 开火验证函数 （先执行该函数，验证成功了再执行ServerFire_Implementation） 验证失败可能断开客户端的连接。
 /// </summary>
 /// <param name="TraceHitTarget"></param>
 /// <param name="FireDelay"></param>
@@ -288,7 +288,7 @@ void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_Net
 }
 
 /// <summary>
-/// 霰弹枪开火RPC验证函数（先执行该函数，验证成功了再执行ServerShotgunFire_Implementation）
+/// 霰弹枪开火RPC验证函数（先执行该函数，验证成功了再执行ServerShotgunFire_Implementation）  验证失败可能断开客户端的连接。
 /// </summary>
 /// <param name="TraceHitTargets"></param>
 /// <param name="FireDelay"></param>
