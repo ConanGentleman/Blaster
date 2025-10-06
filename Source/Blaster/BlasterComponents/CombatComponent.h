@@ -44,6 +44,18 @@ public:
 	void FinishReloading();
 
 	/// <summary>
+	/// 完成切换武器动画通知
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void FinishSwap();
+
+	/// <summary>
+	/// 完成切换武器骨骼绑定动画通知
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+	void FinishSwapAttachWeapons();
+
+	/// <summary>
 	/// 按下开火键，调用开火，并且进行射线检测
 	/// </summary>
 	/// <param name="bPressed"></param>

@@ -57,7 +57,7 @@ ABlasterCharacter::ABlasterCharacter()
 	//添加到跟组件上
 	OverheadWidget->SetupAttachment(RootComponent);
 
-	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat"));
 	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
 	Combat->SetIsReplicated(true);
 
@@ -577,6 +577,18 @@ void ABlasterCharacter::PlayThrowGrenadeMontage()
 }
 
 /// <summary>
+/// 播放切换武器动画
+/// </summary>
+void ABlasterCharacter::PlaySwapMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SwapMontage)
+	{
+		AnimInstance->Montage_Play(SwapMontage);
+	}
+}
+
+/// <summary>
 /// 用于播放角色受击动画.
 /// </summary>
 void ABlasterCharacter::PlayHitReactMontage()
@@ -709,7 +721,7 @@ void ABlasterCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 /// <summary>
-/// 装备武器和捡起武器（需要服务器来负责处理
+/// 装备武器和捡起武器和切换武器（需要服务器来负责处理
 /// </summary>
 void ABlasterCharacter::EquipButtonPressed()
 {
@@ -723,7 +735,20 @@ void ABlasterCharacter::EquipButtonPressed()
 		//	ServerEquipButtonPressed();
 
 		//}
-		ServerEquipButtonPressed();
+
+		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
+		//是否能够播放切换武器蒙太奇动画
+		bool bSwap = Combat->ShouldSwapWeapons() &&
+			!HasAuthority() &&
+			Combat->CombatState == ECombatState::ECS_Unoccupied &&
+			OverlappingWeapon == nullptr;
+
+		if (bSwap)
+		{
+			PlaySwapMontage();
+			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			bFinishedSwapping = false;
+		}
 	}
 }
 /// <summary>

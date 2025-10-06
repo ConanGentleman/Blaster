@@ -338,8 +338,30 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 /// </summary>
 void UCombatComponent::SwapWeapons()
 {
+	//不处于非战斗状态或不是服务器则无法切换武器
+	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr || !Character->HasAuthority()) return;
+
+	Character->PlaySwapMontage();
+	CombatState = ECombatState::ECS_SwappingWeapons;
+	Character->bFinishedSwapping = false;
+	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(false);
+
 	//不处于非战斗状态则无法切换武器
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
+}
+
+void UCombatComponent::FinishSwap()
+{
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	if (Character) Character->bFinishedSwapping = true;
+	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(true);
+}
+
+void UCombatComponent::FinishSwapAttachWeapons()
+{
 	//交互主副武器
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
@@ -698,6 +720,12 @@ void UCombatComponent::OnRep_CombatState()
 			AttachActorToLeftHand(EquippedWeapon);
 			//投掷手榴弹时显示手榴弹
 			ShowAttachedGrenade(true);
+		}
+		break;
+	case ECombatState::ECS_SwappingWeapons:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapMontage();
 		}
 		break;
 	}
@@ -1071,16 +1099,13 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr) return false;
+
+	//霰弹枪在装弹过程中仍然可以开枪射击
+	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+		return true;
+
 	//本地处于装弹状态不能开枪
-	if (bLocallyReloading) {
-		//霰弹枪在装弹过程中仍然可以开枪射击
-		if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-		{
-			bLocallyReloading = false;
-			return true;
-		}
-		return false;
-	}
+	if (bLocallyReloading) return false;
 	
 	//判断武器子弹是否不为空 且 能开火 且处于空闲状态（即不运行在装弹时开火）
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;

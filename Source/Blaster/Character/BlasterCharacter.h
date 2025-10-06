@@ -29,6 +29,13 @@ public:
 	/// </summary>
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+
+
+	/**
+	* Play montages
+	* 播放蒙太奇
+	*/
+
 	/// <summary>
 	/// 播放开火蒙太奇动画
 	/// </summary>
@@ -45,6 +52,10 @@ public:
 	/// 投掷手榴弹蒙太奇动画
 	/// </summary>
 	void PlayThrowGrenadeMontage();
+	/// <summary>
+	/// 播放切换武器蒙太奇动画
+	/// </summary>
+	void PlaySwapMontage();
 
 	///// <summary>
 	///// 用于同步角色受击动画的 多播RPC。客户端调用，服务器执行的函数。如果在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
@@ -105,6 +116,11 @@ public:
 	/// </summary>
 	UPROPERTY()
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+
+	/// <summary>
+	/// 是否完成切换武器(主要用于切换枪时左手附着IK的时机
+	/// </summary>
+	bool bFinishedSwapping = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -356,6 +372,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* ThrowGrenadeMontage;
+
+	/// <summary>
+	/// 切换武器动画蒙太奇
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* SwapMontage;
 
 	/// <summary>
 	/// 用于当角色靠墙时，角色模型就会挡住视野，靠墙时隐藏角色

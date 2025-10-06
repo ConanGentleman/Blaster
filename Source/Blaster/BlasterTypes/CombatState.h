@@ -18,6 +18,10 @@ enum class ECombatState : uint8
 	/// 投掷手榴弹状态
 	/// </summary>
 	ECS_ThrowingGrenade UMETA(DisplayName = "Throwing Grenade"),
+	/// <summary>
+	/// 切换武器状态
+	/// </summary>
+	ECS_SwappingWeapons UMETA(DisplayName = "Swapping Weapons"),
 
 
 	/// <summary>

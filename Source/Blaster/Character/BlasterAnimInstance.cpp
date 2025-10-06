@@ -119,8 +119,11 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 	//如果在空闲状态，则打开IK
 	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	//本地且不处于投掷状态，则IK开启状态依赖于本地是否处于装弹状态
-	if (BlasterCharacter->IsLocallyControlled() && BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+	//本地且不处于投掷状态且完成切换武器，则IK开启状态依赖于本地是否处于装弹状态
+	bool bFABRIKOverride = BlasterCharacter->IsLocallyControlled() &&
+		BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
+		BlasterCharacter->bFinishedSwapping;
+	if (bFABRIKOverride)
 	{
 		bUseFABRIK = !BlasterCharacter->IsLocallyReloading();
 	}

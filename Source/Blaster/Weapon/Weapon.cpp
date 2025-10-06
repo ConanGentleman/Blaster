@@ -396,7 +396,7 @@ void AWeapon::OnEquippedSecondary()
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);//忽略所有网格的碰撞
 	}
 	//启用深度颜色（轮廓）
-	EnableCustomDepth(true);
+	//EnableCustomDepth(true);
 	if (WeaponMesh)
 	{
 		//设置武器其深度颜色（设置轮廓颜色）
