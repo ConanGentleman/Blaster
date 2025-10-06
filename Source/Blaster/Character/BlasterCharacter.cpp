@@ -57,9 +57,9 @@ ABlasterCharacter::ABlasterCharacter()
 	//添加到跟组件上
 	OverheadWidget->SetupAttachment(RootComponent);
 
-	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat"));
+	Combat1 = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat1"));
 	///使其可复制，由于组件有些特殊，因此并不需要在getlifetimereplicatedprops中注册。直接设置即可
-	Combat->SetIsReplicated(true);
+	Combat1->SetIsReplicated(true);
 
 	//创建buff组件
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
@@ -269,9 +269,9 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	bDisableGameplay = true; 
 	// 死亡时让其停止移动，不然会受重力影响
 	GetCharacterMovement()->DisableMovement();
-	if (Combat)
+	if (Combat1)
 	{
-		Combat->FireButtonPressed(false);//死亡时，取消开火，避免一直处于开火状态
+		Combat1->FireButtonPressed(false);//死亡时，取消开火，避免一直处于开火状态
 	}
 	// 溶解时使碰撞体无效，禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
@@ -301,10 +301,10 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	}
 	//玩家死亡时隐藏开镜效果
 	bool bHideSniperScope = IsLocallyControlled() && 
-		Combat &&
-		Combat->bAiming &&
-		Combat->EquippedWeapon &&
-		Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+		Combat1 &&
+		Combat1->bAiming &&
+		Combat1->EquippedWeapon &&
+		Combat1->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
 	if (bHideSniperScope)
 	{
 		ShowSniperScopeWidget(false);
@@ -339,15 +339,15 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 
 void ABlasterCharacter::DropOrDestroyWeapons()
 {
-	if (Combat)
+	if (Combat1)
 	{
-		if (Combat->EquippedWeapon)
+		if (Combat1->EquippedWeapon)
 		{
-			DropOrDestroyWeapon(Combat->EquippedWeapon);
+			DropOrDestroyWeapon(Combat1->EquippedWeapon);
 		}
-		if (Combat->SecondaryWeapon)
+		if (Combat1->SecondaryWeapon)
 		{
-			DropOrDestroyWeapon(Combat->SecondaryWeapon);
+			DropOrDestroyWeapon(Combat1->SecondaryWeapon);
 		}
 	}
 }
@@ -367,9 +367,9 @@ void ABlasterCharacter::Destroyed()
 	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
 	//获取游戏匹配状态（如果不是正在游戏则销毁武器
 	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
-	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
+	if (Combat1 && Combat1->EquippedWeapon && bMatchNotInProgress)
 	{
-		Combat->EquippedWeapon->Destroy();//销毁武器
+		Combat1->EquippedWeapon->Destroy();//销毁武器
 	}
 }
 
@@ -466,9 +466,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 /// </summary>
 void ABlasterCharacter::PostInitializeComponents() {
 	Super::PostInitializeComponents();
-	if (Combat)
+	if (Combat1)
 	{
-		Combat->Character = this;
+		Combat1->Character = this;
 	}
 	if (Buff)
 	{
@@ -496,7 +496,7 @@ void ABlasterCharacter::PostInitializeComponents() {
 /// </summary>
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	if (Combat1 == nullptr || Combat1->EquippedWeapon == nullptr) return;
 	///获取动画实例
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && FireWeaponMontage) {
@@ -513,7 +513,7 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 
 void ABlasterCharacter::PlayReloadMontage()
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	if (Combat1 == nullptr || Combat1->EquippedWeapon == nullptr) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && ReloadMontage)
@@ -521,7 +521,7 @@ void ABlasterCharacter::PlayReloadMontage()
 		AnimInstance->Montage_Play(ReloadMontage);
 		FName SectionName;
 		//根据不同的武器类型播放不同的换弹蒙太奇
-		switch (Combat->EquippedWeapon->GetWeaponType())
+		switch (Combat1->EquippedWeapon->GetWeaponType())
 		{
 		case EWeaponType::EWT_AssaultRifle:
 			SectionName = FName("Rifle");
@@ -594,7 +594,7 @@ void ABlasterCharacter::PlaySwapMontage()
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	//由于受击动画资源是拿着装备的，因此需要判断是否装备了装备
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	if (Combat1 == nullptr || Combat1->EquippedWeapon == nullptr) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HitReactMontage)
@@ -611,9 +611,9 @@ void ABlasterCharacter::PlayHitReactMontage()
 /// </summary>
 void ABlasterCharacter::GrenadeButtonPressed()
 {
-	if (Combat)
+	if (Combat1)
 	{
-		Combat->ThrowGrenade();
+		Combat1->ThrowGrenade();
 	}
 }
 
@@ -726,9 +726,9 @@ void ABlasterCharacter::LookUp(float Value)
 void ABlasterCharacter::EquipButtonPressed()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止武器操作
-	if (Combat) {
+	if (Combat1) {
 		//if (HasAuthority()) {
-		//	Combat->EquipWeapon(OverlappingWeapon);
+		//	Combat1->EquipWeapon(OverlappingWeapon);
 		//}
 		//else {
 		//	//没有服务器权限，说明是由客户端调用的武器装备，使用RPC来调用服务器执行
@@ -736,17 +736,17 @@ void ABlasterCharacter::EquipButtonPressed()
 
 		//}
 
-		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
+		if (Combat1->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
 		//是否能够播放切换武器蒙太奇动画
-		bool bSwap = Combat->ShouldSwapWeapons() &&
+		bool bSwap = Combat1->ShouldSwapWeapons() &&
 			!HasAuthority() &&
-			Combat->CombatState == ECombatState::ECS_Unoccupied &&
+			Combat1->CombatState == ECombatState::ECS_Unoccupied &&
 			OverlappingWeapon == nullptr;
 
 		if (bSwap)
 		{
 			PlaySwapMontage();
-			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			Combat1->CombatState = ECombatState::ECS_SwappingWeapons;
 			bFinishedSwapping = false;
 		}
 	}
@@ -761,15 +761,15 @@ void ABlasterCharacter::EquipButtonPressed()
 /// </summary>
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
-	if (Combat) {//去除 HasAuthority() 因为RPC只会在服务器上执行
+	if (Combat1) {//去除 HasAuthority() 因为RPC只会在服务器上执行
 		//如果站在了地上的武器上，则捡起武器
 		if (OverlappingWeapon)
 		{
-			Combat->EquipWeapon(OverlappingWeapon);
+			Combat1->EquipWeapon(OverlappingWeapon);
 		}//如果没有则切换主副武器
-		else if (Combat->ShouldSwapWeapons())
+		else if (Combat1->ShouldSwapWeapons())
 		{
-			Combat->SwapWeapons();
+			Combat1->SwapWeapons();
 		}
 	}
 }
@@ -794,9 +794,9 @@ void ABlasterCharacter::CrouchButtonPressed()
 void ABlasterCharacter::ReloadButtonPressed()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止装填弹药
-	if (Combat)
+	if (Combat1)
 	{
-		Combat->Reload();
+		Combat1->Reload();
 	}
 }
 
@@ -806,8 +806,8 @@ void ABlasterCharacter::ReloadButtonPressed()
 void ABlasterCharacter::AimButtonPressed()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止瞄准
-	if (Combat) {
-		Combat->SetAiming(true);
+	if (Combat1) {
+		Combat1->SetAiming(true);
 	}
 }
 /// <summary>
@@ -816,8 +816,8 @@ void ABlasterCharacter::AimButtonPressed()
 void ABlasterCharacter::AimButtonReleased()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止取消瞄准
-	if (Combat) {
-		Combat->SetAiming(false);
+	if (Combat1) {
+		Combat1->SetAiming(false);
 	}
 }
 /// <summary>
@@ -839,7 +839,7 @@ float ABlasterCharacter::CalculateSpeed()
 /// <param name="DeltaTime"></param>
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
-	if (Combat && Combat->EquippedWeapon == nullptr) return;
+	if (Combat1 && Combat1->EquippedWeapon == nullptr) return;
 	//获取速度
 	float Speed = CalculateSpeed();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
@@ -901,7 +901,7 @@ void ABlasterCharacter::CalculateAO_Pitch()
 /// </summary>
 void ABlasterCharacter::SimProxiesTurn()
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+	if (Combat1 == nullptr || Combat1->EquippedWeapon == nullptr) return;
 	//如果是模拟代理，则不旋转根骨骼
 	bRotateRootBone = false;
 	float Speed = CalculateSpeed();
@@ -954,15 +954,15 @@ void ABlasterCharacter::Jump()
 void ABlasterCharacter::FireButtonPressed() 
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
-	if (Combat) {
-		Combat->FireButtonPressed(true);
+	if (Combat1) {
+		Combat1->FireButtonPressed(true);
 	}
 }
 void ABlasterCharacter::FireButtonReleased()
 {
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
-	if (Combat) {
-		Combat->FireButtonPressed(false);
+	if (Combat1) {
+		Combat1->FireButtonPressed(false);
 	}
 }
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
@@ -1009,18 +1009,18 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 		//隐藏角色网格
 		GetMesh()->SetVisibility(false);
 		//隐藏武器网格
-		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		if (Combat1 && Combat1->EquippedWeapon && Combat1->EquippedWeapon->GetWeaponMesh())
 		{
-			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+			Combat1->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
 	}
 	else
 	{
 		//还原
 		GetMesh()->SetVisibility(true);
-		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		if (Combat1 && Combat1->EquippedWeapon && Combat1->EquippedWeapon->GetWeaponMesh())
 		{
-			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+			Combat1->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
@@ -1085,10 +1085,10 @@ void ABlasterCharacter::UpdateHUDShield()
 void ABlasterCharacter::UpdateHUDAmmo()
 {
 	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-	if (BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	if (BlasterPlayerController && Combat1 && Combat1->EquippedWeapon)
 	{
-		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
-		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+		BlasterPlayerController->SetHUDCarriedAmmo(Combat1->CarriedAmmo);
+		BlasterPlayerController->SetHUDWeaponAmmo(Combat1->EquippedWeapon->GetAmmo());
 	}
 }
 
@@ -1104,9 +1104,9 @@ void ABlasterCharacter::SpawDefaultWeapon()
 	{
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
 		StartingWeapon->bDestroyWeapon = true;
-		if (Combat)
+		if (Combat1)
 		{
-			Combat->EquipWeapon(StartingWeapon);
+			Combat1->EquipWeapon(StartingWeapon);
 		}
 	}
 }
@@ -1204,25 +1204,25 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 bool ABlasterCharacter::IsWeaponEquipped()
 {
 	//战斗组件以及战斗组件上装备的武器不为空，则装备了武器
-	return (Combat && Combat->EquippedWeapon);
+	return (Combat1 && Combat1->EquippedWeapon);
 }
 
 bool ABlasterCharacter::IsAiming()
 {
 	//战斗组件以及战斗组件上的瞄准状态
-	return (Combat && Combat->bAiming);
+	return (Combat1 && Combat1->bAiming);
 }
 
 AWeapon* ABlasterCharacter::GetEquippedWeapon()
 {
-	 if (Combat == nullptr) return nullptr;
-	 return Combat->EquippedWeapon;
+	 if (Combat1 == nullptr) return nullptr;
+	 return Combat1->EquippedWeapon;
 }
 
 FVector ABlasterCharacter::GetHitTarget() const
 {
-	if (Combat == nullptr) return FVector();
-	return Combat->HitTarget;
+	if (Combat1 == nullptr) return FVector();
+	return Combat1->HitTarget;
 }
 /// <summary>
 /// 获取战斗状态
@@ -1230,8 +1230,8 @@ FVector ABlasterCharacter::GetHitTarget() const
 /// <returns></returns>
 ECombatState ABlasterCharacter::GetCombatState() const
 {
-	if (Combat == nullptr) return ECombatState::ECS_MAX;
-	return Combat->CombatState;
+	if (Combat1 == nullptr) return ECombatState::ECS_MAX;
+	return Combat1->CombatState;
 }
 
 /// <summary>
@@ -1240,6 +1240,6 @@ ECombatState ABlasterCharacter::GetCombatState() const
 /// <returns></returns>
 bool ABlasterCharacter::IsLocallyReloading()
 {
-	if (Combat == nullptr) return false;
-	return Combat->bLocallyReloading;
+	if (Combat1 == nullptr) return false;
+	return Combat1->bLocallyReloading;
 }

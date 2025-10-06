@@ -288,7 +288,7 @@ private:
 	/// 战斗组件，用于处理角色所有雨战斗相关的功能（也是一个可以被复制的变量
 	/// </summary>
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UCombatComponent* Combat;
+	class UCombatComponent* Combat1;
 
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
@@ -345,38 +345,38 @@ private:
 	/// <summary>
 	/// 开火动画的蒙太奇动画
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	class UAnimMontage* FireWeaponMontage;
 
 	/// <summary>
 	/// 换弹动画蒙太奇
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	UAnimMontage* ReloadMontage;
 
 
 	/// <summary>
 	/// 受击动画蒙太奇
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	UAnimMontage* HitReactMontage;
 
 	/// <summary>
 	/// 淘汰（死亡）动画蒙太奇
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	UAnimMontage* ElimMontage;
 
 	/// <summary>
 	/// 投掷手榴弹动画蒙太奇
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	UAnimMontage* ThrowGrenadeMontage;
 
 	/// <summary>
 	/// 切换武器动画蒙太奇
 	/// </summary>
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Combat1)
 	UAnimMontage* SwapMontage;
 
 	/// <summary>
@@ -601,7 +601,7 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	ECombatState GetCombatState() const;
-	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat1; }
 	/// <summary>
 	/// 获取游戏当前是否处于禁止输入状态（游戏冷却状态）
 	/// </summary>
