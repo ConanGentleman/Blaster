@@ -31,9 +31,10 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		WeaponTraceHit(Start, HitTarget, FireHit);
 
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-		if (BlasterCharacter && InstigatorController && OwnerPawn->IsLocallyControlled())
+		if (BlasterCharacter && InstigatorController)
 		{
-			if (HasAuthority()) { //如果是服务端，则不需要使用延迟补偿算法
+			bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+			if (HasAuthority() && bCauseAuthDamage) { //如果是服务端，则不需要使用延迟补偿算法
 				UGameplayStatics::ApplyDamage(// 命中直接造成伤害
 					BlasterCharacter,
 					Damage,
