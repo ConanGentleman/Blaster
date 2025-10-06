@@ -177,7 +177,7 @@ void UCombatComponent::FireProjectileWeapon()
 	{
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
 		if (!Character->HasAuthority()) LocalFire(HitTarget);
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->FireDelay);
 	}
 }
 /// <summary>
@@ -189,7 +189,7 @@ void UCombatComponent::FireHitScanWeapon()
 	{
 		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
 		if (!Character->HasAuthority()) LocalFire(HitTarget);
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->FireDelay);
 	}
 }
 /// <summary>
@@ -203,7 +203,7 @@ void UCombatComponent::FireShotgun()
 		TArray<FVector_NetQuantize> HitTargets;//存储生成的随机生成子弹目标位置
 		Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
 		if (!Character->HasAuthority()) ShotgunLocalFire(HitTargets);
-		ServerShotgunFire(HitTargets);
+		ServerShotgunFire(HitTargets, EquippedWeapon->FireDelay);
 	}
 }
 
@@ -239,12 +239,34 @@ void UCombatComponent::FireTimerFinished()
 
 /// <summary>
 /// 开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
+/// WithValidation表示使用一个验证函数用于安全检测（检查作弊、外挂等）
+/// 当使用 WithValidation 时，必须同时实现一个 _Validate 函数。
+/// 在服务器执行主函数之前，会自动先调用 _Validate 函数。
 /// </summary>
 /// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
 {
 	MulticastFire(TraceHitTarget);
 }
+
+/// <summary>
+/// 开火验证函数
+/// </summary>
+/// <param name="TraceHitTarget"></param>
+/// <param name="FireDelay"></param>
+/// <returns></returns>
+bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
+{
+	if (EquippedWeapon)
+	{
+		//判断由客户端发过来的武器射速是否与服务器的值相近，不相近则说明通过作弊的方式被修改了
+		bool bNearlyEqual = FMath::IsNearlyEqual(EquippedWeapon->FireDelay, FireDelay, 0.001f);
+		return bNearlyEqual;
+	}
+	return true;
+}
+
+
 /// <summary>
 /// 服务器执行的多播RPC 开火函数。在服务器上执行多播RPC，那么将在服务器以及所有客户端上调用。（RPC函数的特点：如果客户端调用则在服务器上执行，如果服务器上调用也在服务器上执行，但仅在服务器上执行）。
 /// 多播RPC被执行时，会在服务器和所有客户端上执行函数
@@ -260,9 +282,20 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 /// <summary>
 /// 霰弹枪开火RPC。用于客户端或服务器调用，服务器执行的武器开火函数。
 /// </summary>
-void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
 {
 	MulticastShotgunFire(TraceHitTargets);
+}
+
+bool UCombatComponent::ServerShotgunFire_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
+{
+	if (EquippedWeapon)
+	{
+		//判断由客户端发过来的武器射速是否与服务器的值相近，不相近则说明通过作弊的方式被修改了
+		bool bNearlyEqual = FMath::IsNearlyEqual(EquippedWeapon->FireDelay, FireDelay, 0.001f);
+		return bNearlyEqual;
+	}
+	return true;
 }
 
 /// <summary>

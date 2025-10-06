@@ -166,10 +166,13 @@ protected:
 
 	/// <summary>
 	/// 开火RPC。用于客户端调用，服务器执行的武器开火函数。在定义时需在函数名后补充_Implementation
+	/// WithValidation表示使用一个验证函数用于安全检测（检查作弊、外挂等）
+	/// 当使用 WithValidation 时，必须同时实现一个 _Validate 函数。
+	/// 在服务器执行主函数之前，会自动先调用 _Validate 函数。
 	/// </summary>
 	/// <param name="TraceHitTarget">用于传递开火后射线检测到的目标位置传递到服务器。FVector_NetQuantize是为了便于网络传输对FVector的封装（序列化），截断小数点，四舍五入取整，使消息大小降低。这里当成正常的FVector即可。</param>
-	UFUNCTION(Server, Reliable)
-	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget, float FireDelay);
 
 	/// <summary>
 	/// 开火 多播RPC。如果在服务器上调用多播RPC，那么将在服务器以及所有客户端上调用。在定义时需在函数名后补充_Implementation
@@ -178,8 +181,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
-	UFUNCTION(Server, Reliable)
-	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
