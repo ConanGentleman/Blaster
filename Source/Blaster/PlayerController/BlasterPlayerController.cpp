@@ -17,6 +17,56 @@
 #include "Components/Image.h"
 #include "Blaster/HUD/ReturnToMainMenu.h"
 
+/// <summary>
+/// 广播某个玩家被击杀通知
+/// </summary>
+/// <param name="Attacker"></param>
+/// <param name="Victim"></param>
+void ABlasterPlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
+{
+	ClientElimAnnouncement(Attacker, Victim);
+}
+
+/// <summary>
+/// 客户端RPC
+/// 每个玩家控制器向其自己的客户端玩家控制器广播
+/// </summary>
+/// <param name="Attacker">击杀者</param>
+/// <param name="Victim">被击杀者</param>
+void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
+{
+	//玩家自己
+	APlayerState* Self = GetPlayerState<APlayerState>();
+	if (Attacker && Victim && Self)
+	{
+		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if (BlasterHUD)
+		{
+			if (Attacker == Self && Victim != Self)
+			{
+				BlasterHUD->AddElimAnnouncement("You", Victim->GetPlayerName());
+				return;
+			}
+			if (Victim == Self && Attacker != Self)
+			{
+				BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "you");
+				return;
+			}
+			if (Attacker == Victim && Attacker == Self)
+			{
+				BlasterHUD->AddElimAnnouncement("You", "yourself");
+				return;
+			}
+			if (Attacker == Victim && Attacker != Self)
+			{
+				BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "themselves");
+				return;
+			}
+			BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
+}
+
 void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

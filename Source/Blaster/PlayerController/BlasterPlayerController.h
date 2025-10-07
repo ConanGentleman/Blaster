@@ -110,6 +110,13 @@ public:
 	/// 过高ping委托
 	/// </summary>
 	FHighPingDelegate HighPingDelegate;
+
+	/// <summary>
+	/// 广播玩家被击杀
+	/// </summary>
+	/// <param name="Attacker"></param>
+	/// <param name="Victim"></param>
+	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
 protected:
 	virtual void BeginPlay() override;
 
@@ -182,6 +189,13 @@ protected:
 	void CheckPing(float DeltaTime);
 
 	void ShowReturnToMainMenu();
+
+	/// <summary>
+	/// 客户端RPC
+	/// 每个玩家控制器向其自己的客户端玩家控制器广播
+	/// </summary>
+	UFUNCTION(Client, Reliable)
+	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同

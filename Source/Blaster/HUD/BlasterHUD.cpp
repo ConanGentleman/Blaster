@@ -5,11 +5,36 @@
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
 #include "Announcement.h"
+#include "ElimAnnouncement.h"
 
 void ABlasterHUD::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+/// <summary>
+/// 添加击杀公告
+/// </summary>
+/// <param name="Attacker"></param>
+/// <param name="Victim"></param>
+void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && ElimAnnouncementClass)
+	{
+		//创建界面
+		UElimAnnouncement* ElimAnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayer, ElimAnnouncementClass);
+		if (ElimAnouncementWidget)
+		{
+			//设置文本
+			ElimAnouncementWidget->SetElimAnnouncementText(Attacker, Victim);
+			//设置到屏幕
+			ElimAnouncementWidget->AddToViewport();
+		}
+	}
+}
+
+
 /// <summary>
 /// （用于在游戏开始时）添加血量界面到屏幕
 /// </summary>

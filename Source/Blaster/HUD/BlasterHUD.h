@@ -70,9 +70,21 @@ public:
 
 	void AddAnnouncement();
 
+	/// <summary>
+	/// 添加玩家被击杀的公告
+	/// </summary>
+	/// <param name="Attacker"></param>
+	/// <param name="Victim"></param>
+	void AddElimAnnouncement(FString Attacker, FString Victim);
+
 protected:
 	virtual void BeginPlay() override;
 private:
+
+	UPROPERTY()
+	class APlayerController* OwningPlayer;
+
+
 	/// <summary>
 	/// 准星贴图
 	/// </summary>
@@ -92,6 +104,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.f;
+
+	/// <summary>
+	/// 死亡通知类
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
 public:
 	/// <summary>
 	/// 设置准星贴图

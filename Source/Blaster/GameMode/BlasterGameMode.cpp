@@ -146,6 +146,16 @@ void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacte
 		//传false表示不是主动退出游戏导致的死亡
 		ElimmedCharacter->Elim(false);
 	}
+
+	//遍历所有玩家控制器，将某个玩家被击杀信息，遍历通知给每个控制器
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if (BlasterPlayer && AttackerPlayerState && VictimPlayerState)
+		{
+			BlasterPlayer->BroadcastElim(AttackerPlayerState, VictimPlayerState);
+		}
+	}
 }
 
 /// <summary>
