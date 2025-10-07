@@ -121,6 +121,9 @@ protected:
 	/// 初始化HUD信息
 	/// </summary>
 	void PollInit();
+
+	virtual void SetupInputComponent() override;
+
 	/**
 	* 同步客户端和服务器之间的时间（用于比赛时间显示）
 	* 客户端的时间 = 服务器的时间 + （客户端发送请求获取服务器的时间+客户端接收到服务器返回时的时间)/2
@@ -177,14 +180,30 @@ protected:
 	/// </summary>
 	/// <param name="DeltaTime"></param>
 	void CheckPing(float DeltaTime);
+
+	void ShowReturnToMainMenu();
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
-	//存储BlasterGameMode类。以便于当角色为服务器上的角色时，直接获取BlasterGameMode中的数据
+	////存储BlasterGameMode类。以便于当角色为服务器上的角色时，直接获取BlasterGameMode中的数据
+	//UPROPERTY()
+	//class ABlasterGameMode* BlasterGameMode;
+
+	/**
+	* Return to main menu 返回菜单
+	*/
+
+	//菜单蓝图
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	//菜单类
 	UPROPERTY()
-	class ABlasterGameMode* BlasterGameMode;
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
 
 	/// <summary>
 	/// 进入关卡的时间（但游戏还未开始
