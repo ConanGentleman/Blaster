@@ -10,6 +10,9 @@
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "BlasterCharacter.generated.h"
 
+//离开（退出）游戏多播委托
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -69,13 +72,13 @@ public:
 	/// </summary>
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 
 	/// <summary>
 	/// 淘汰（角色死亡） 。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 	/// </summary>
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);
 
 	/// <summary>
 	/// 角色生命周期函数，在角色销毁时调用,在服务器上销毁一个复制的actor的行为会传播到所有客户端。用以销毁淘汰机器人粒子组件
@@ -121,6 +124,14 @@ public:
 	/// 是否完成切换武器(主要用于切换枪时左手附着IK的时机
 	/// </summary>
 	bool bFinishedSwapping = false;
+
+	/// <summary>
+	/// 离开游戏RPC（让服务器知道该玩家已经离开游戏了）
+	/// </summary>
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+
+	FOnLeftGame OnLeftGame;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -474,6 +485,11 @@ private:
 	/// 淘汰计时器完成后调用的函数
 	/// </summary>
 	void ElimTimerFinished();
+
+	/// <summary>
+	/// 是否退出游戏
+	/// </summary>
+	bool bLeftGame = false;
 
 	/**
 	* 溶解效果

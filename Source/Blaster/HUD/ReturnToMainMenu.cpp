@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "GameFramework/GameModeBase.h"
+#include "Blaster/Character/BlasterCharacter.h"
 
 /// <summary>
 /// 菜单初始化
@@ -41,7 +42,7 @@ void UReturnToMainMenu::MenuSetup()
 	if (GameInstance)
 	{
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-		if (MultiplayerSessionsSubsystem && !MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
+		if (MultiplayerSessionsSubsystem)
 		{
 			//用于将 UReturnToMainMenu 类的 OnDestroySession 函数绑定到会话子系统的销毁会话完成委托上
 			// 当 MultiplayerSessionsSubsystem 完成销毁会话的操作后，会自动调用 UReturnToMainMenu 实例中的 OnDestroySession 函数。这对于在会话销毁后执行界面跳转、清理资源等操作非常有用。
@@ -118,8 +119,39 @@ void UReturnToMainMenu::ReturnButtonClicked()
 	//点击后禁用点击交互
 	ReturnButton->SetIsEnabled(false);
 
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		APlayerController* FirstPlayerController = World->GetFirstPlayerController();
+		if (FirstPlayerController)
+		{
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FirstPlayerController->GetPawn());
+			if (BlasterCharacter)
+			{
+				//调用退出游戏函数
+				BlasterCharacter->ServerLeaveGame();
+				//注册多播
+				BlasterCharacter->OnLeftGame.AddDynamic(this, &UReturnToMainMenu::OnPlayerLeftGame);
+			}
+			else
+			{
+				ReturnButton->SetIsEnabled(true);
+			}
+		}
+	}
+
+
+}
+
+/// <summary>
+/// 退出游戏回调（断开会话连接
+/// </summary>
+void UReturnToMainMenu::OnPlayerLeftGame()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnPlayerLeftGame()"))
 	if (MultiplayerSessionsSubsystem)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("MultiplayerSessionsSubsystem valid"))
 		MultiplayerSessionsSubsystem->DestroySession();
 	}
 }

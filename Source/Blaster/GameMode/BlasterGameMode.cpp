@@ -114,7 +114,8 @@ void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacte
 
 	if (ElimmedCharacter)
 	{
-		ElimmedCharacter->Elim();
+		//传false表示不是主动退出游戏导致的死亡
+		ElimmedCharacter->Elim(false);
 	}
 }
 
@@ -144,5 +145,26 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		//游戏模式自带的 重生角色 的函数。
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+	}
+}
+
+/// <summary>
+/// 处理某个玩家离开游戏
+/// </summary>
+/// <param name="PlayerLeaving"></param>
+void ABlasterGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
+{
+	if (PlayerLeaving == nullptr) return;
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
+	//将玩家从最高积分内中删除
+	if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(PlayerLeaving))
+	{
+		BlasterGameState->TopScoringPlayers.Remove(PlayerLeaving);
+	}
+	//设置玩家为淘汰/死亡状态
+	ABlasterCharacter* CharacterLeaving = Cast<ABlasterCharacter>(PlayerLeaving->GetPawn());
+	if (CharacterLeaving)
+	{
+		CharacterLeaving->Elim(true);
 	}
 }

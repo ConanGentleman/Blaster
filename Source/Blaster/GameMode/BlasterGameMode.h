@@ -40,6 +40,8 @@ public:
 	/// <param name="ElimmedController">淘汰的控制器</param>
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 
+	void PlayerLeftGame(class ABlasterPlayerState* PlayerLeaving);
+
 	/// <summary>
 	/// 预热时间（游戏开始前的等待时间）
 	/// </summary>

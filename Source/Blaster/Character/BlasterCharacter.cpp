@@ -226,24 +226,18 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 /// 角色淘汰或死亡的处理函数。（仅用于服务器上调用）。
 /// 可以在这里处理一些游戏模式相关的东西（例如重生）。因为游戏模式仅存于服务器上。
 /// </summary>
-void ABlasterCharacter::Elim()
+void ABlasterCharacter::Elim(bool bPlayerLeftGame)
 {
 	DropOrDestroyWeapons();
-	MulticastElim();
-	//设置一个计时器，用于玩家淘汰后一段时间内重生
-	GetWorldTimerManager().SetTimer(
-		ElimTimer,
-		this,
-		&ABlasterCharacter::ElimTimerFinished,
-		ElimDelay
-	);
+	MulticastElim(bPlayerLeftGame);
 }
 
 /// <summary>
 /// 角色淘汰（死亡）。多播RPC，客户端调用，服务器执行并让各个客户端同步执行。
 /// </summary>
-void ABlasterCharacter::MulticastElim_Implementation()
+void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;
 	if (BlasterPlayerController)
 	{
 		//设置子弹数量
@@ -309,6 +303,13 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	{
 		ShowSniperScopeWidget(false);
 	}
+	//设置一个计时器，用于玩家淘汰后一段时间内重生
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay
+	);
 }
 /// <summary>
 /// 角色淘汰计时器完成后调用的函数。（这里用于复活角色
@@ -316,10 +317,28 @@ void ABlasterCharacter::MulticastElim_Implementation()
 void ABlasterCharacter::ElimTimerFinished()
 {
 	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-	if (BlasterGameMode)
+	if (BlasterGameMode && !bLeftGame)
 	{
 		//调用游戏模式的角色重生
 		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+	//倒计时结束后如果玩家处于退出游戏状态，则广播一下，加上IsLocallyControlled是确保只会在试图离开的客户端上进行广播
+	if (bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
+	}
+}
+
+/// <summary>
+/// 角色离开（退出游戏）RPC
+/// </summary>
+void ABlasterCharacter::ServerLeaveGame_Implementation()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
+	if (BlasterGameMode && BlasterPlayerState)
+	{
+		BlasterGameMode->PlayerLeftGame(BlasterPlayerState);
 	}
 }
 
