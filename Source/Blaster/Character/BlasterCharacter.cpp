@@ -24,6 +24,9 @@
 #include "Blaster/Weapon/WeaponTypes.h"
 #include "Components/BoxComponent.h"
 #include "Blaster/BlasterComponents/LagCompensationComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Blaster/GameState/BlasterGameState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -303,6 +306,11 @@ void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 	{
 		ShowSniperScopeWidget(false);
 	}
+	if (CrownComponent)
+	{
+		//死亡时销毁皇冠
+		CrownComponent->DestroyComponent();
+	}
 	//设置一个计时器，用于玩家淘汰后一段时间内重生
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -389,6 +397,38 @@ void ABlasterCharacter::Destroyed()
 	if (Combat1 && Combat1->EquippedWeapon && bMatchNotInProgress)
 	{
 		Combat1->EquippedWeapon->Destroy();//销毁武器
+	}
+}
+
+void ABlasterCharacter::MulticastGainedTheLead_Implementation()
+{
+	if (CrownSystem == nullptr) return;
+	if (CrownComponent == nullptr)
+	{
+		//生成特效
+		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			CrownSystem,
+			GetCapsuleComponent(),//附加到角色胶囊上
+			FName(),
+			GetActorLocation() + FVector(0.f, 0.f, 110.f),//偏移位置加在头顶
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+	if (CrownComponent)
+	{
+		//启用特效
+		CrownComponent->Activate();
+	}
+}
+
+void ABlasterCharacter::MulticastLostTheLead_Implementation()
+{
+	if (CrownComponent)
+	{
+		//销毁特效
+		CrownComponent->DestroyComponent();
 	}
 }
 
@@ -1144,6 +1184,14 @@ void ABlasterCharacter::PollInit()
 			BlasterPlayerState->AddToScore(0.f);
 			//死亡同理
 			BlasterPlayerState->AddToDefeats(0);
+
+			ABlasterGameState* BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this));
+
+			//玩家死亡重生后看一下是否重新获得皇冠
+			if (BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(BlasterPlayerState))
+			{
+				MulticastGainedTheLead();
+			}
 		}
 	}
 }

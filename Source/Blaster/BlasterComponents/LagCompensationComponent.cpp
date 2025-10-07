@@ -99,15 +99,15 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		);
 		if (ConfirmHitResult.bBlockingHit) // we hit the head, return early 命中头部，则先返回击中结果
 		{
-			//绘制调试盒子
-			if (ConfirmHitResult.Component.IsValid())
-			{
-				UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-				if (Box)
-				{
-					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
-				}
-			}
+			////绘制调试盒子
+			//if (ConfirmHitResult.Component.IsValid())
+			//{
+			//	UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
+			//	if (Box)
+			//	{
+			//		DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+			//	}
+			//}
 
 			ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
 			//有命中框碰撞结果，复原角色网格的碰撞检测
@@ -133,15 +133,15 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 			);
 			if (ConfirmHitResult.bBlockingHit)
 			{
-				//绘制调试盒子
-				if (ConfirmHitResult.Component.IsValid())
-				{
-					UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-					if (Box)
-					{
-						DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
-					}
-				}
+				////绘制调试盒子
+				//if (ConfirmHitResult.Component.IsValid())
+				//{
+				//	UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
+				//	if (Box)
+				//	{
+				//		DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+				//	}
+				//}
 
 				//命中后将命中框重置回原来的位置
 				ResetHitBoxes(HitCharacter, CurrentFrame);
@@ -194,8 +194,8 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	PathParams.ProjectileRadius = 5.f;//子弹半径
 	PathParams.TraceChannel = ECC_HitBox;//碰撞检测通道
 	PathParams.ActorsToIgnore.Add(GetOwner());//忽略碰撞角色
-	PathParams.DrawDebugTime = 5.f;//绘制调试路径保留时长
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;//绘制调试类型
+	//PathParams.DrawDebugTime = 5.f;//绘制调试路径保留时长
+	//PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;//绘制调试类型
 
 	FPredictProjectilePathResult PathResult;
 	//预测子弹轨迹碰撞（参数：世界，路径参数，路径结果
@@ -203,14 +203,14 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 
 	if (PathResult.HitResult.bBlockingHit) // we hit the head, return early 命中头部，则先返回击中结果
 	{
-		if (PathResult.HitResult.Component.IsValid()) //绘制调试盒子
-		{
-			UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
-			if (Box)
-			{
-				DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
-			}
-		}
+		//if (PathResult.HitResult.Component.IsValid()) //绘制调试盒子
+		//{
+		//	UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
+		//	if (Box)
+		//	{
+		//		DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+		//	}
+		//}
 
 		ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
 		//已经命中头部了，则复原角色网格的碰撞检测
@@ -232,14 +232,14 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 		UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
 		if (PathResult.HitResult.bBlockingHit)
 		{
-			if (PathResult.HitResult.Component.IsValid())
+			/*if (PathResult.HitResult.Component.IsValid())
 			{
 				UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
 				if (Box)
 				{
 					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 				}
-			}
+			}*/
 
 			ResetHitBoxes(HitCharacter, CurrentFrame);//命中后将命中框重置回原来的位置
 			//已经命中，则复原角色网格的碰撞检测
@@ -311,15 +311,15 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
 			if (BlasterCharacter)//击中结果能获取到角色组件，则说明集中了
 			{
-				//绘制调试盒子
-				if (ConfirmHitResult.Component.IsValid())
-				{
-					UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-					if (Box)
-					{
-						DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
-					}
-				}
+				////绘制调试盒子
+				//if (ConfirmHitResult.Component.IsValid())
+				//{
+				//	UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
+				//	if (Box)
+				//	{
+				//		DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+				//	}
+				//}
 
 				if (ShotgunResult.HeadShots.Contains(BlasterCharacter))
 				{
@@ -365,15 +365,15 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor());
 			if (BlasterCharacter)
 			{
-				//绘制调试盒子
-				if (ConfirmHitResult.Component.IsValid())
-				{
-					UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-					if (Box)
-					{
-						DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
-					}
-				}
+				////绘制调试盒子
+				//if (ConfirmHitResult.Component.IsValid())
+				//{
+				//	UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
+				//	if (Box)
+				//	{
+				//		DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+				//	}
+				//}
 
 				if (ShotgunResult.BodyShots.Contains(BlasterCharacter))
 				{

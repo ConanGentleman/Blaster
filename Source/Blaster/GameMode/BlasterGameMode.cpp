@@ -101,10 +101,39 @@ void ABlasterGameMode::PlayerEliminated(class ABlasterCharacter* ElimmedCharacte
 	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
 	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && BlasterGameState)
 	{
+		//获取更新分数前最高分数的玩家
+		TArray<ABlasterPlayerState*> PlayersCurrentlyInTheLead;
+		for (auto LeadPlayer : BlasterGameState->TopScoringPlayers)
+		{
+			PlayersCurrentlyInTheLead.Add(LeadPlayer);
+		}
+
 		//玩家死亡，则给予攻击者1分
 		AttackerPlayerState->AddToScore(1.f);
 		//得分则更新一下最高得分
 		BlasterGameState->UpdateTopScore(AttackerPlayerState);
+
+		//更新最高分数玩家后，看当前玩家是否是最高分数玩家，是则多播获得皇冠
+		if (BlasterGameState->TopScoringPlayers.Contains(AttackerPlayerState))
+		{
+			ABlasterCharacter* Leader = Cast<ABlasterCharacter>(AttackerPlayerState->GetPawn());
+			if (Leader)
+			{
+				Leader->MulticastGainedTheLead();
+			}
+		}
+		//更新最高分数玩家后，与更新分数前最高分数的玩家数组做对比，如果不在数组了，则销毁皇冠
+		for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
+		{
+			if (!BlasterGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))
+			{
+				ABlasterCharacter* Loser = Cast<ABlasterCharacter>(PlayersCurrentlyInTheLead[i]->GetPawn());
+				if (Loser)
+				{
+					Loser->MulticastLostTheLead();
+				}
+			}
+		}
 	}
 	//死亡的玩家死亡次数+1
 	if (VictimPlayerState)
@@ -137,7 +166,7 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 	}
 	if (ElimmedController)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ElimmedController valid"))
+		//UE_LOG(LogTemp, Warning, TEXT("ElimmedController valid"))
 		TArray<AActor*> PlayerStarts;
 		//获取场景中所有玩家重生点
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);

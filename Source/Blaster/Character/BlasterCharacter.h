@@ -132,6 +132,18 @@ public:
 	void ServerLeaveGame();
 
 	FOnLeftGame OnLeftGame;
+
+	/// <summary>
+	/// 获得皇冠多播
+	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+
+	/// <summary>
+	/// 丢失皇冠多播
+	/// </summary>
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -532,7 +544,7 @@ private:
 	UMaterialInstance* DissolveMaterialInstance;
 
 	/**
-	* 淘汰机器人
+	* Elim effects死亡/淘汰特效
 	*/
 
 	/// <summary>
@@ -559,6 +571,18 @@ private:
 	//加上UPROPERTY()的原因是让BlasterPlayerState初始化为nullptr，即与class ABlasterPlayerState* BlasterPlayerState=nullptr相同
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	/// <summary>
+	/// 皇冠特效（第一名玩家显示的特效
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* CrownSystem;
+
+	/// <summary>
+	/// 皇冠特效组件
+	/// </summary>
+	UPROPERTY()
+	class UNiagaraComponent* CrownComponent;
 
 	/**
 	* 手榴弹网格组件（预制模型）

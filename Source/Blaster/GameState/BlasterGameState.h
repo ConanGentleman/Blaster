@@ -26,7 +26,7 @@ public:
 	void UpdateTopScore(class ABlasterPlayerState* ScoringPlayer);
 
 	/// <summary>
-	/// 所有玩家的状态数组（复制变量
+	/// 最高得分玩家的状态数组（复制变量
 	/// </summary>
 	UPROPERTY(Replicated)
 	TArray<ABlasterPlayerState*> TopScoringPlayers;
