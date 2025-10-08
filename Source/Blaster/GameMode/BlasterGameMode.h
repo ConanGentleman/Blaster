@@ -74,6 +74,10 @@ public:
 	/// </summary>
 	float LevelStartingTime = 0.f;
 
+	/// <summary>
+	/// 是否是团队竞技模式
+	/// </summary>
+	bool bTeamsMatch = false;
 protected:
 	virtual void BeginPlay() override;
 	/// <summary>

@@ -82,6 +82,24 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	/// <summary>
+	/// 隐藏分数文本（当不是团建竞技模式时会调用该函数
+	/// </summary>
+	void HideTeamScores();
+	/// <summary>
+	/// 初始化（显示）分数文本（团队竞技模式会调用该函数）
+	/// </summary>
+	void InitTeamScores();
+	/// <summary>
+	/// 设置红队分数
+	/// </summary>
+	/// <param name="RedScore"></param>
+	void SetHUDRedTeamScore(int32 RedScore);
+	/// <summary>
+	/// 设置蓝队分数
+	/// </summary>
+	/// <param name="BlueScore"></param>
+	void SetHUDBlueTeamScore(int32 BlueScore);
+	/// <summary>
 	/// 获取服务器时间（与服务器时间同步）
 	/// </summary>
 	/// <returns></returns>
@@ -91,11 +109,11 @@ public:
 	/// 用于BlasterGameMode类将游戏模式状态设置过来（但只会发生在服务器上，因为只有服务器才有游戏模式）
 	/// </summary>
 	/// <param name="State"></param>
-	void OnMatchStateSet(FName State);
+	void OnMatchStateSet(FName State, bool bTeamsMatch = false);
 	/// <summary>
 	/// 统一处理当倒计时结束（即游戏开始时）的逻辑
 	/// </summary>
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bTeamsMatch = false);
 	/// <summary>
 	/// 统一处理当游戏结束时的逻辑
 	/// </summary>
@@ -196,6 +214,18 @@ protected:
 	/// </summary>
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	/// <summary>
+	/// 是否显示团队分数复制变量
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+
+	/// <summary>
+	/// 是否显示团队分数复制变量 赋值回调
+	/// </summary>
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同

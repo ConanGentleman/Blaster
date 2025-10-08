@@ -77,7 +77,7 @@ void ABlasterGameMode::OnMatchStateSet()
 		if (BlasterPlayer)
 		{
 			//每次状态改变都告诉玩家控制器，一旦转换到 进行中 状态玩家控制器就显示响应的HUD
-			BlasterPlayer->OnMatchStateSet(MatchState);
+			BlasterPlayer->OnMatchStateSet(MatchState, bTeamsMatch);
 		}
 	}
 }

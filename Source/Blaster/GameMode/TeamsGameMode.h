@@ -14,6 +14,7 @@ class BLASTER_API ATeamsGameMode : public ABlasterGameMode
 {
 	GENERATED_BODY()
 public:
+	ATeamsGameMode();
 	/// <summary>
 	/// 玩家连接游戏进入房间
 	/// 在一位新玩家完全登录并准备好进入游戏世界之后。这发生在玩家控制器被创建、初始化并与游戏世界关联之后，比 BeginPlay 更晚。

@@ -31,6 +31,8 @@ public:
 	UPROPERTY(Replicated)
 	TArray<ABlasterPlayerState*> TopScoringPlayers;
 
+	void RedTeamScores();
+	void BlueTeamScores();
 
 	/**
 	* Teams
