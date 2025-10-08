@@ -8,6 +8,7 @@
 #include "Blaster/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "BlasterCharacter.generated.h"
 
 //离开（退出）游戏多播委托
@@ -144,6 +145,12 @@ public:
 	/// </summary>
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
+
+	/// <summary>
+	/// 根据所属队伍设置衣服颜色
+	/// </summary>
+	/// <param name="Team"></param>
+	void SetTeamColor(ETeam Team);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -540,8 +547,43 @@ private:
 
 	// Material instance set on the Blueprint, used with the dynamic material instance
 	//在蓝图上设置材质实例，与动态材质实例一起使用。相当于初始材质了。
-	UPROPERTY(EditAnywhere, Category = Elim)
+	UPROPERTY(VisibleAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	/**
+	* Team colors 队伍颜色
+	*/
+
+	/// <summary>
+	/// 红色队伍溶解
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* RedDissolveMatInst;
+
+	/// <summary>
+	/// 红色队伍衣服材质
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* RedMaterial;
+
+	/// <summary>
+	/// 蓝色队伍溶解
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* BlueDissolveMatInst;
+
+	/// <summary>
+	/// 蓝色队伍衣服材质
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* BlueMaterial;
+
+	/// <summary>
+	/// 最原始材质
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* OriginalMaterial;
+
 
 	/**
 	* Elim effects死亡/淘汰特效

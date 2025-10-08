@@ -62,10 +62,17 @@ private:
 	/// <summary>
 	/// 所属队伍
 	/// </summary>
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Team)
 	ETeam Team = ETeam::ET_NoTeam;
+
+	/// <summary>
+	/// 队伍变量赋值回调
+	/// </summary>
+	/// <param name="TeamToSet"></param>
+	UFUNCTION()
+	void OnRep_Team();
 
 public:
 	FORCEINLINE ETeam GetTeam() const { return Team; }
-	FORCEINLINE void SetTeam(ETeam TeamToSet) { Team = TeamToSet; }
+	void SetTeam(ETeam TeamToSet);
 };

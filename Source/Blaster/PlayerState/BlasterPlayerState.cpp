@@ -99,3 +99,30 @@ void ABlasterPlayerState::OnRep_Defeats()
 		}
 	}
 }
+
+/// <summary>
+/// 设置队伍
+/// </summary>
+/// <param name="TeamToSet"></param>
+void ABlasterPlayerState::SetTeam(ETeam TeamToSet)
+{
+	Team = TeamToSet;
+
+	ABlasterCharacter* BCharacter = Cast <ABlasterCharacter>(GetPawn());
+	if (BCharacter)
+	{
+		BCharacter->SetTeamColor(Team);
+	}
+}
+
+/// <summary>
+/// 队伍变量赋值回调
+/// </summary>
+void ABlasterPlayerState::OnRep_Team()
+{
+	ABlasterCharacter* BCharacter = Cast <ABlasterCharacter>(GetPawn());
+	if (BCharacter)
+	{
+		BCharacter->SetTeamColor(Team);
+	}
+}
