@@ -35,9 +35,11 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 			bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
 			if (HasAuthority() && bCauseAuthDamage) { //如果是服务端，则不需要使用延迟补偿算法
+				//如果命中头部，伤害更高
+				const float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
 				UGameplayStatics::ApplyDamage(// 命中直接造成伤害
 					BlasterCharacter,
-					Damage,
+					DamageToCause,
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
@@ -121,6 +123,10 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		if (OutHit.bBlockingHit) //如果命中了
 		{
 			BeamEnd = OutHit.ImpactPoint; //光束终点（检测终点）
+		}
+		else //没有命中则命中点设置为射线终点
+		{
+			OutHit.ImpactPoint = End;
 		}
 
 		//DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Orange, true);
