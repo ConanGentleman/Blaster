@@ -502,6 +502,14 @@ void ABlasterCharacter::Tick(float DeltaTime)
 
 void ABlasterCharacter::RotateInPlace(float DeltaTime)
 {
+	//如果持旗，禁止对角色本身进行原地旋转，但可以让角色朝向自己的运动方向
+	if (Combat1 && Combat1->bHoldingTheFlag)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	if (bDisableGameplay)//游戏冷却状态时，禁止对角色本身进行原地旋转
 	{
 		bUseControllerRotationYaw = false;

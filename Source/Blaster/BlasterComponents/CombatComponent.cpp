@@ -44,6 +44,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME(UCombatComponent, Grenades);
+	DOREPLIFETIME(UCombatComponent, bHoldingTheFlag);
 }
 
 /// <summary>
@@ -357,20 +358,37 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
-	if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+	//如果装备的是旗帜
+	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		//如果主武器有了则装备到副武器上
-		EquipSecondaryWeapon(WeaponToEquip);
+		//玩家执行蹲下
+		Character->Crouch();
+		//持有旗帜
+		bHoldingTheFlag = true;
+		//旗帜绑定到左手
+		AttachFlagToLeftHand(WeaponToEquip);
+		//设置武器装备状态
+		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		//设置所有者
+		WeaponToEquip->SetOwner(Character);
 	}
 	else
 	{
-		EquipPrimaryWeapon(WeaponToEquip);
-	}
+		if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+		{
+			//如果主武器有了则装备到副武器上
+			EquipSecondaryWeapon(WeaponToEquip);
+		}
+		else
+		{
+			EquipPrimaryWeapon(WeaponToEquip);
+		}
 
-	//为true时，朝向跟移动方向一致，也就是说角色不会横着走
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
-	Character->bUseControllerRotationYaw = true;
+		//为true时，朝向跟移动方向一致，也就是说角色不会横着走
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		//为true,设置角色朝向和Controller的朝向一致。也是朝向和相机一致
+		Character->bUseControllerRotationYaw = true;
+	}
 }
 
 /// <summary>
@@ -479,6 +497,16 @@ void UCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
 	if (HandSocket) {
 		//将武器放在人物网格插槽处
 		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::AttachFlagToLeftHand(AWeapon* Flag)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || Flag == nullptr) return;
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(Flag, Character->GetMesh());
 	}
 }
 
@@ -1190,4 +1218,16 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingShotgunAmmo);
 
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
+}
+
+/// <summary>
+/// 手持旗帜变量赋值回调
+/// </summary>
+void UCombatComponent::OnRep_HoldingTheFlag()
+{
+	if (bHoldingTheFlag && Character && Character->IsLocallyControlled())
+	{
+		//持旗时蹲下
+		Character->Crouch();
+	}
 }

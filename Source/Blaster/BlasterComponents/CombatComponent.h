@@ -245,6 +245,11 @@ protected:
 	/// <param name="ActorToAttach"></param>
 	void AttachActorToLeftHand(AActor* ActorToAttach);
 	/// <summary>
+	/// 将旗帜添加到左手上
+	/// </summary>
+	/// <param name="Flag"></param>
+	void AttachFlagToLeftHand(AWeapon* Flag);
+	/// <summary>
 	/// 将武器添加到角色后背骨骼上
 	/// </summary>
 	/// <param name="ActorToAttach"></param>
@@ -543,7 +548,11 @@ private:
 	/// <summary>
 	/// 是否持有旗帜
 	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_HoldingTheFlag)
 	bool bHoldingTheFlag = false;
+
+	UFUNCTION()
+	void OnRep_HoldingTheFlag();
 
 public :
 	/// <summary>

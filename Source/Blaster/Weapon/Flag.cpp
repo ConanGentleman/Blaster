@@ -16,4 +16,7 @@ AFlag::AFlag()
 	GetAreaSphere()->SetupAttachment(FlagMesh);
 	//将拾取控件组件附加（绑定）到旗帜网格上
 	GetPickupWidget()->SetupAttachment(FlagMesh);
+	//忽略碰撞
+	FlagMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
