@@ -273,6 +273,8 @@ void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 	// 溶解时使碰撞体无效，禁用碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用胶囊体碰撞
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);//禁用网格碰撞
+	//禁用手榴弹的碰撞
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// 生成 淘汰机器人
 	if (ElimBotEffect)
@@ -408,7 +410,7 @@ void ABlasterCharacter::MulticastGainedTheLead_Implementation()
 		//生成特效
 		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			CrownSystem,
-			GetCapsuleComponent(),//附加到角色胶囊上
+			GetMesh(),//附加到角色网格上
 			FName(),
 			GetActorLocation() + FVector(0.f, 0.f, 110.f),//偏移位置加在头顶
 			GetActorRotation(),
@@ -1072,6 +1074,10 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 		{
 			Combat1->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
+		if (Combat1 && Combat1->SecondaryWeapon && Combat1->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat1->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
 	}
 	else
 	{
@@ -1080,6 +1086,10 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 		if (Combat1 && Combat1->EquippedWeapon && Combat1->EquippedWeapon->GetWeaponMesh())
 		{
 			Combat1->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+		if (Combat1 && Combat1->SecondaryWeapon && Combat1->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat1->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
