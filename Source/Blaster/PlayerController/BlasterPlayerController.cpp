@@ -16,6 +16,7 @@
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Components/Image.h"
 #include "Blaster/HUD/ReturnToMainMenu.h"
+#include "Blaster/BlasterTypes/Announcement.h"
 
 /// <summary>
 /// 广播某个玩家被击杀通知
@@ -781,7 +782,7 @@ void ABlasterPlayerController::HandleCooldown()
 			//开启冷却倒计时界面（与游戏预热倒计时共用一个界面）
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			//调整文字显示
-			FString AnnouncementText("New Match Starts In:");
+			FString AnnouncementText = Announcement::NewMatchStartsIn;
 			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 			
 			//获取游戏状态（最高分等信息
@@ -793,28 +794,8 @@ void ABlasterPlayerController::HandleCooldown()
 				//获取最高得分玩家数组（数组是因为可能有并列的情况）
 				TArray<ABlasterPlayerState*> TopPlayers = BlasterGameState->TopScoringPlayers;
 
-				FString InfoTextString;
-				//最高得分玩家数组没有数量，则没有人获胜
-				if (TopPlayers.Num() == 0)
-				{
-					InfoTextString = FString("There is no winner.");
-				}
-				else if (TopPlayers.Num() == 1 && TopPlayers[0] == BlasterPlayerState) //如果只有一个人，并且是自己
-				{
-					InfoTextString = FString("You are the winner!");
-				}
-				else if (TopPlayers.Num() == 1)//如果只有一个人，并且不是自己
-				{
-					InfoTextString = FString::Printf(TEXT("Winner: \n%s"), *TopPlayers[0]->GetPlayerName());
-				}
-				else if (TopPlayers.Num() > 1)//如果大于一个人，展示所有
-				{
-					InfoTextString = FString("Players tied for the win:\n");
-					for (auto TiedPlayer : TopPlayers)
-					{
-						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
-					}
-				}
+				FString InfoTextString = bShowTeamScores ? GetTeamsInfoText(BlasterGameState) : GetInfoText(TopPlayers);
+
 				BlasterHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
 			}
 		}
@@ -825,4 +806,82 @@ void ABlasterPlayerController::HandleCooldown()
 		BlasterCharacter->bDisableGameplay = true; //游戏冷却状态时，禁止一些输入操作
 		BlasterCharacter->GetCombat()->FireButtonPressed(false);//游戏冷却状态时，取消开火，避免一直处于开火状态
 	}
+}
+
+/// <summary>
+/// 获取个人竞技模式结束显示文本
+/// </summary>
+/// <param name="Players"></param>
+/// <returns></returns>
+FString ABlasterPlayerController::GetInfoText(const TArray<class ABlasterPlayerState*>& Players)
+{
+	ABlasterPlayerState* BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+	if (BlasterPlayerState == nullptr) return FString();
+	FString InfoTextString;
+	if (Players.Num() == 0) //最高得分玩家数组没有数量，则没有人获胜
+	{
+		InfoTextString = Announcement::ThereIsNoWinner;
+	}
+	else if (Players.Num() == 1 && Players[0] == BlasterPlayerState) //如果只有一个人，并且是自己
+	{
+		InfoTextString = Announcement::YouAreTheWinner;
+	}
+	else if (Players.Num() == 1)//如果只有一个人，并且不是自己
+	{
+		InfoTextString = FString::Printf(TEXT("Winner: \n%s"), *Players[0]->GetPlayerName());
+	}
+	else if (Players.Num() > 1)//如果大于一个人，展示所有
+	{
+		InfoTextString = Announcement::PlayersTiedForTheWin;
+		InfoTextString.Append(FString("\n"));
+		for (auto TiedPlayer : Players)
+		{
+			InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+		}
+	}
+
+	return InfoTextString;
+}
+
+/// <summary>
+/// 获取团队竞技结束文本
+/// </summary>
+/// <param name="BlasterGameState"></param>
+/// <returns></returns>
+FString ABlasterPlayerController::GetTeamsInfoText(ABlasterGameState* BlasterGameState)
+{
+	if (BlasterGameState == nullptr) return FString();
+	FString InfoTextString;
+
+	const int32 RedTeamScore = BlasterGameState->RedTeamScore;
+	const int32 BlueTeamScore = BlasterGameState->BlueTeamScore;
+
+	if (RedTeamScore == 0 && BlueTeamScore == 0)
+	{
+		InfoTextString = Announcement::ThereIsNoWinner;
+	}
+	else if (RedTeamScore == BlueTeamScore)
+	{
+		InfoTextString = FString::Printf(TEXT("%s\n"), *Announcement::TeamsTiedForTheWin);
+		InfoTextString.Append(Announcement::RedTeam);
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(Announcement::BlueTeam);
+		InfoTextString.Append(TEXT("\n"));
+	}
+	else if (RedTeamScore > BlueTeamScore)
+	{
+		InfoTextString = Announcement::RedTeamWins;
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d\n"), *Announcement::RedTeam, RedTeamScore));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d\n"), *Announcement::BlueTeam, BlueTeamScore));
+	}
+	else if (BlueTeamScore > RedTeamScore)
+	{
+		InfoTextString = Announcement::BlueTeamWins;
+		InfoTextString.Append(TEXT("\n"));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d\n"), *Announcement::BlueTeam, BlueTeamScore));
+		InfoTextString.Append(FString::Printf(TEXT("%s: %d\n"), *Announcement::RedTeam, RedTeamScore));
+	}
+
+	return InfoTextString;
 }

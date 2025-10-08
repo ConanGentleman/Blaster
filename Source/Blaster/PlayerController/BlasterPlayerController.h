@@ -226,6 +226,20 @@ protected:
 	/// </summary>
 	UFUNCTION()
 	void OnRep_ShowTeamScores();
+	
+	/// <summary>
+	/// 个人竞技获取最高得分玩家显示文本
+	/// </summary>
+	/// <param name="Players"></param>
+	/// <returns></returns>
+	FString GetInfoText(const TArray<class ABlasterPlayerState*>& Players);
+
+	/// <summary>
+	/// 团队竞技获取最高得分队伍显示文本
+	/// </summary>
+	/// <param name="BlasterGameState"></param>
+	/// <returns></returns>
+	FString GetTeamsInfoText(class ABlasterGameState* BlasterGameState);
 private:
 	//角色HUD
 	//加上UPROPERTY()的原因是让BlasterHUD初始化为nullptr，即与class ABlasterHUD* BlasterHUD=nullptr相同
