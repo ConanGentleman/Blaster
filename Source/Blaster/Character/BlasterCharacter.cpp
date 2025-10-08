@@ -707,6 +707,7 @@ void ABlasterCharacter::GrenadeButtonPressed()
 {
 	if (Combat1)
 	{
+		if (Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 		Combat1->ThrowGrenade();
 	}
 }
@@ -831,7 +832,7 @@ void ABlasterCharacter::EquipButtonPressed()
 		//	ServerEquipButtonPressed();
 
 		//}
-
+		if (Combat1->bHoldingTheFlag) return; //持有旗帜时不允许切换和捡起武器
 		if (Combat1->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
 		//是否能够播放切换武器蒙太奇动画
 		bool bSwap = Combat1->ShouldSwapWeapons() &&
@@ -874,6 +875,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 /// </summary>
 void ABlasterCharacter::CrouchButtonPressed()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作蹲下
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止蹲下
 	//Character自带有蹲下和蹲起的函数，蹲下成功会将变量bWantsToCrouch设置为true,并且自动调整胶囊体的大小，bWantsToCrouch是表示将要开始蹲下。
 	//此外，Character还存在有bIsCrouched变量，且为复制变量，且能通知OnRep_IsCrouched，因此每当服务器上设置bIsCrouched，该值就恢复知道客户端
@@ -889,6 +891,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 
 void ABlasterCharacter::ReloadButtonPressed()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止装填弹药
 	if (Combat1)
 	{
@@ -901,6 +904,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 /// </summary>
 void ABlasterCharacter::AimButtonPressed()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止瞄准
 	if (Combat1) {
 		Combat1->SetAiming(true);
@@ -911,6 +915,7 @@ void ABlasterCharacter::AimButtonPressed()
 /// </summary>
 void ABlasterCharacter::AimButtonReleased()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止取消瞄准
 	if (Combat1) {
 		Combat1->SetAiming(false);
@@ -1039,6 +1044,7 @@ void ABlasterCharacter::SimProxiesTurn()
 
 void ABlasterCharacter::Jump()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止跳跃
 	if (bIsCrouched) { //如果在蹲下的时候跳跃
 		UnCrouch();
@@ -1049,6 +1055,7 @@ void ABlasterCharacter::Jump()
 }
 void ABlasterCharacter::FireButtonPressed() 
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
 	if (Combat1) {
 		Combat1->FireButtonPressed(true);
@@ -1056,6 +1063,7 @@ void ABlasterCharacter::FireButtonPressed()
 }
 void ABlasterCharacter::FireButtonReleased()
 {
+	if (Combat1 && Combat1->bHoldingTheFlag) return; //持有旗帜时不允许操作
 	if (bDisableGameplay) return; //游戏冷却状态时，禁止开火
 	if (Combat1) {
 		Combat1->FireButtonPressed(false);
