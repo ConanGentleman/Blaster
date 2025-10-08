@@ -25,6 +25,8 @@ public:
 	/// </summary>
 	/// <param name="Exiting"></param>
 	virtual void Logout(AController* Exiting) override;
+	 
+	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage) override;
 protected:
 	/// <summary>
 	/// 当比赛（Match）正式开始时。这个调用是由游戏框架内部触发的，通常在你调用 StartMatch() 之后发生。

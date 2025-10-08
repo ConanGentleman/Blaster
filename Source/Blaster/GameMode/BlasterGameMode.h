@@ -41,6 +41,14 @@ public:
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 
 	void PlayerLeftGame(class ABlasterPlayerState* PlayerLeaving);
+	/// <summary>
+	/// 计算伤害（用于处理是否能对队友造成伤害
+	/// </summary>
+	/// <param name="Attacker">攻击者</param>
+	/// <param name="Victim">受伤者</param>
+	/// <param name="BaseDamage"></param>
+	/// <returns></returns>
+	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
 
 	/// <summary>
 	/// 预热时间（游戏开始前的等待时间）

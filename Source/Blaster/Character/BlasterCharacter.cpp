@@ -326,7 +326,7 @@ void ABlasterCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 /// </summary>
 void ABlasterCharacter::ElimTimerFinished()
 {
-	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	if (BlasterGameMode && !bLeftGame)
 	{
 		//调用游戏模式的角色重生
@@ -344,7 +344,7 @@ void ABlasterCharacter::ElimTimerFinished()
 /// </summary>
 void ABlasterCharacter::ServerLeaveGame_Implementation()
 {
-	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
 	if (BlasterGameMode && BlasterPlayerState)
 	{
@@ -392,8 +392,8 @@ void ABlasterCharacter::Destroyed()
 	{
 		ElimBotComponent->DestroyComponent();
 	}
-	//获取游戏状态（最高得分等信息）
-	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	//获取游戏模式（最高得分等信息）
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	//获取游戏匹配状态（如果不是正在游戏则销毁武器
 	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
 	if (Combat1 && Combat1->EquippedWeapon && bMatchNotInProgress)
@@ -713,8 +713,12 @@ void ABlasterCharacter::GrenadeButtonPressed()
 /// <param name="DamageCauser"></param>
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+	//获取游戏模式
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	//如果玩家死亡了，则不继续作用伤害了
-	if (bElimmed) return;
+	if (bElimmed || BlasterGameMode == nullptr) return;
+	//先判断是否打的是队友
+	Damage = BlasterGameMode->CalculateDamage(InstigatorController, Controller, Damage);
 
 	float DamageToHealth = Damage;
 	//如果有护盾先扣护盾
@@ -744,8 +748,6 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	//血量为0，则调用游戏模式中的淘汰函数
 	if (Health == 0.f)
 	{
-		//获取游戏模式
-		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
 		if (BlasterGameMode)
 		{
 			//获取当前角色（受害者）控制
@@ -1191,7 +1193,7 @@ void ABlasterCharacter::UpdateHUDAmmo()
 /// </summary>
 void ABlasterCharacter::SpawDefaultWeapon()
 {
-	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	UWorld* World = GetWorld();
 	//只在BlasterGameMode游戏模式下生成初始武器，在开始大厅不会
 	if (BlasterGameMode && World && !bElimmed && DefaultWeaponClass)

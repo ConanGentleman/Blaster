@@ -82,6 +82,18 @@ void ABlasterGameMode::OnMatchStateSet()
 	}
 }
 
+/// <summary>
+/// 计算伤害（用于处理是否能对队友造成伤害
+/// </summary>
+/// <param name="Attacker">攻击者</param>
+/// <param name="Victim">受伤者</param>
+/// <param name="BaseDamage"></param>
+/// <returns></returns>
+float ABlasterGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	return BaseDamage;
+}
+
 
 /// <summary>
 /// 玩家被淘汰（死亡）时调用的函数 （比如处理增加玩家得分之类的事情

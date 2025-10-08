@@ -90,3 +90,28 @@ void ATeamsGameMode::HandleMatchHasStarted()
 		}
 	}
 }
+
+/// <summary>
+/// 计算伤害（用于处理是否能对队友造成伤害
+/// </summary>
+/// <param name="Attacker">攻击者</param>
+/// <param name="Victim">受伤者</param>
+/// <param name="BaseDamage"></param>
+/// <returns></returns>
+float ATeamsGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	ABlasterPlayerState* AttackerPState = Attacker->GetPlayerState<ABlasterPlayerState>();
+	ABlasterPlayerState* VictimPState = Victim->GetPlayerState<ABlasterPlayerState>();
+	if (AttackerPState == nullptr || VictimPState == nullptr) return BaseDamage;
+	//如果是自己，则会造成伤害
+	if (VictimPState == AttackerPState)
+	{
+		return BaseDamage;
+	}
+	//如果是同队，则造成的伤害为0
+	if (AttackerPState->GetTeam() == VictimPState->GetTeam())
+	{
+		return 0.f;
+	}
+	return BaseDamage;
+}

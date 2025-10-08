@@ -638,6 +638,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 
+	/// <summary>
+	/// 所处游戏模式
+	/// </summary>
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
 public:	
 	/// <summary>
 	/// 用于在武器类中设置复制变量OverlappingWeapon
