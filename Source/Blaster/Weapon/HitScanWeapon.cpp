@@ -56,8 +56,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						BlasterCharacter,//击中的角色
 						Start,
 						HitTarget,
-						BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,//击中时间等于服务器时间-从客户端（服务端）传到服务器（客户端）的时间
-						this
+						BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime//击中时间等于服务器时间-从客户端（服务端）传到服务器（客户端）的时间
 					);
 				}
 			}

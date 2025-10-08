@@ -158,8 +158,8 @@ public:
 		ABlasterCharacter* HitCharacter, //击中的玩家
 		const FVector_NetQuantize& TraceStart,//检测判定开始位置
 		const FVector_NetQuantize& HitLocation,//击中位置
-		float HitTime, //击中的时间用于倒带算法倒回到HitTime进行计算
-		class AWeapon* DamageCauser //造成击中的武器
+		float HitTime //击中的时间用于倒带算法倒回到HitTime进行计算
+		//class AWeapon* DamageCauser //造成击中的武器
 	);
 
 	/// <summary>
