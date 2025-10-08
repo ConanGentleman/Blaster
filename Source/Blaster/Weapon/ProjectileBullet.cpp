@@ -59,7 +59,9 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)
 			{
 				//命中时施加伤害，使用ue自带的伤害函数。参数：受伤害的actor，伤害值，造成此伤害的控制器（例如射击武器的玩家），实际造成伤害的actor，描述所造成上海的类
-				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				const float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+
+				UGameplayStatics::ApplyDamage(OtherActor, DamageToCause, OwnerController, this, UDamageType::StaticClass());
 				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 				return;
 			}

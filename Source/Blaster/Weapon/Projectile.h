@@ -44,8 +44,18 @@ public:
 
 	/// <summary>
 	/// 子弹伤害（武器伤害直接复制给子弹，不通过蓝图设置了
+	/// Only set this for Grenades and Rockets 仅为手榴弹和火箭设置此项
 	/// </summary>
+	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
+
+	
+	/// <summary>
+	/// 子弹击中头部的伤害（武器伤害直接复制给子弹，不通过蓝图设置了
+	/// /Doesn't matter for Grenades and Rockets 不适用于 Grenades 和 Rockets武器
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 40.f;
 
 protected:
 	virtual void BeginPlay() override;

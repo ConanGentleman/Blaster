@@ -48,6 +48,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget) {
 					SpawnedProjectile->bUseServerSideRewind = false;
 					//产生复制子弹变量后直接将武器的伤害设置为子弹伤害
 					SpawnedProjectile->Damage = Damage;
+					SpawnedProjectile->HeadShotDamage = HeadShotDamage;
 				}
 				else // server, not locally controlled - spawn non-replicated projectile, SSR  如果是服务器且不为本地控制，生成不可进行复制的子弹，且使用倒带算法，这样就不会在服务器上发送服务器得分请求
 				{
@@ -64,7 +65,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget) {
 					// 倒带算法需要的如下因此信息需要存储在子弹上面
 					SpawnedProjectile->TraceStart = SocketTransform.GetLocation();
 					SpawnedProjectile->InitialVelocity = SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->InitialSpeed;
-					SpawnedProjectile->Damage = Damage;//客户端这里是否赋值没啥必要，因为是服务器计算伤害
+					//SpawnedProjectile->Damage = Damage;//客户端这里是否赋值没啥必要，因为是服务器计算伤害
 				}
 				else // client, not locally controlled - spawn non-replicated projectile, no SSR 如果是客户端且本地控制，生成不可进行复制的子弹，且不开启倒带算法
 				{
@@ -81,6 +82,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget) {
 				SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 				SpawnedProjectile->bUseServerSideRewind = false;
 				SpawnedProjectile->Damage = Damage;
+				SpawnedProjectile->HeadShotDamage = HeadShotDamage;
 			}
 		}
 	}
