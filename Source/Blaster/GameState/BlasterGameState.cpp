@@ -9,6 +9,8 @@ void ABlasterGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//注册复制变量
 	DOREPLIFETIME(ABlasterGameState, TopScoringPlayers);
+	DOREPLIFETIME(ABlasterGameState, RedTeamScore);
+	DOREPLIFETIME(ABlasterGameState, BlueTeamScore);
 }
 /// <summary>
 /// 更新最高分
@@ -31,4 +33,12 @@ void ABlasterGameState::UpdateTopScore(class ABlasterPlayerState* ScoringPlayer)
 		TopScoringPlayers.AddUnique(ScoringPlayer);
 		TopScore = ScoringPlayer->GetScore();
 	}
+}
+
+void ABlasterGameState::OnRep_RedTeamScore()
+{
+}
+
+void ABlasterGameState::OnRep_BlueTeamScore()
+{
 }

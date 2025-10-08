@@ -30,6 +30,37 @@ public:
 	/// </summary>
 	UPROPERTY(Replicated)
 	TArray<ABlasterPlayerState*> TopScoringPlayers;
+
+
+	/**
+	* Teams
+	*/
+	TArray<ABlasterPlayerState*> RedTeam;
+	TArray<ABlasterPlayerState*> BlueTeam;
+
+	/// <summary>
+	/// 红队分数
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
+	float RedTeamScore = 0.f;
+
+	/// <summary>
+	/// 蓝队分数
+	/// </summary>
+	UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore)
+	float BlueTeamScore = 0.f;
+
+	/// <summary>
+	/// 请求红队分数（复制变量赋值回调
+	/// </summary>
+	UFUNCTION()
+	void OnRep_RedTeamScore();
+
+	/// <summary>
+	/// 请求蓝队分数（复制变量赋值回调
+	/// </summary>
+	UFUNCTION()
+	void OnRep_BlueTeamScore();
 private:
 
 	float TopScore = 0.f;
