@@ -110,6 +110,24 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
+
+	/// <summary>
+	/// 死亡通知持续时间
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	float ElimAnnouncementTime = 2.5f;
+
+	/// <summary>
+	/// 死亡通知完成（回调函数
+	/// </summary>
+	UFUNCTION()
+	void ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);
+
+	/// <summary>
+	/// 死亡通知数组
+	/// </summary>
+	UPROPERTY()
+	TArray<UElimAnnouncement*> ElimMessages;
 public:
 	/// <summary>
 	/// 设置准星贴图
