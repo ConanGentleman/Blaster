@@ -1348,3 +1348,13 @@ bool ABlasterCharacter::IsLocallyReloading()
 	if (Combat1 == nullptr) return false;
 	return Combat1->bLocallyReloading;
 }
+
+/// <summary>
+/// 是否持有旗帜
+/// </summary>
+/// <returns></returns>
+bool ABlasterCharacter::IsHoldingTheFlag() const
+{
+	if (Combat1 == nullptr) return false;
+	return Combat1->bHoldingTheFlag;
+}

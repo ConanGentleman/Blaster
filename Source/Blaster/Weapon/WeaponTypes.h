@@ -42,6 +42,10 @@ enum class EWeaponType : uint8
 	/// 榴弹发射器
 	/// </summary>
 	EWT_GrenadeLauncher UMETA(DisplayName = "Grenade Launcher"),
+	/// <summary>
+	/// 旗帜
+	/// </summary>
+	EWT_Flag UMETA(DisplayName = "Flag"),
 
 	/// <summary>
 	/// 枚举数量

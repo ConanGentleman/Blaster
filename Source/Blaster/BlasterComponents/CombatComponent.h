@@ -540,6 +540,11 @@ private:
 	/// </summary>
 	void UpdateHUDGrenades();
 
+	/// <summary>
+	/// 是否持有旗帜
+	/// </summary>
+	bool bHoldingTheFlag = false;
+
 public :
 	/// <summary>
 	/// 获取手榴弹数量

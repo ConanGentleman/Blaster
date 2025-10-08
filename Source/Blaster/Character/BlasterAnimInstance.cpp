@@ -44,6 +44,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 	//是否被淘汰（或死亡）
 	bElimmed = BlasterCharacter->IsElimmed();
+	//是否持有旗帜
+	bHoldingTheFlag = BlasterCharacter->IsHoldingTheFlag();
 
 	//设置拿着装备的混合动画值
 	//自带的获取基础目标旋转的函数
