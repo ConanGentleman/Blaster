@@ -345,7 +345,8 @@ void AWeapon::OnDropped()
 	//开启武器网格碰撞
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果
+	//在这里执行下面三行的原因是因为冲锋枪EWT_SubmachineGun 会设置为特殊的物理和碰撞效果 
+	// 2025/10/10注释 感觉不是因为冲锋枪的原因，是因为丢弃后本身就要这样设置
 	//能够丢弃武器，并且丢弃时会掉到地上，所以设置合理的碰撞通道。即对所有通道的碰撞相应进行阻止
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	//但是碰撞忽略Pawn
@@ -472,7 +473,7 @@ void AWeapon::Dropped()
 	WeaponMesh->DetachFromComponent(DetachRules);
 	//设置所有者为空
 	SetOwner(nullptr);
-	//武器被丢弃后就不应该由所有者了
+	//武器被丢弃后就不应该有所有者了
 	BlasterOwnerCharacter = nullptr;
 	BlasterOwnerController = nullptr;
 }

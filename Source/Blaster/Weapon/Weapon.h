@@ -92,9 +92,9 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 
 	/// <summary>
-	/// 丢弃武器
+	/// 丢弃武器(与OnDropped 区别在Dropped用于解除绑定的相关内容，如绑定的网格和所有者
 	/// </summary>
-	void Dropped();
+	virtual void Dropped();
 
 	/// <summary>
 	/// 添加子弹
@@ -192,7 +192,7 @@ protected:
 	/// </summary>
 	virtual void OnEquipped();
 	/// <summary>
-	/// 丢下武器
+	/// 丢下武器 (与Dropped 区别在OnDropped是由Dropped设置weaponstate触发的，且用于处理武器自身的属性还原设置
 	/// </summary>
 	virtual void OnDropped();
 	/// <summary>

@@ -554,6 +554,9 @@ private:
 	UFUNCTION()
 	void OnRep_HoldingTheFlag();
 
+	UPROPERTY()
+	AWeapon* TheFlag;
+
 public :
 	/// <summary>
 	/// 获取手榴弹数量

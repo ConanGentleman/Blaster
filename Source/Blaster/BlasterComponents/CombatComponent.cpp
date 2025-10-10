@@ -365,12 +365,14 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		Character->Crouch();
 		//持有旗帜
 		bHoldingTheFlag = true;
-		//旗帜绑定到左手
-		AttachFlagToLeftHand(WeaponToEquip);
 		//设置武器装备状态
 		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		//旗帜绑定到左手
+		AttachFlagToLeftHand(WeaponToEquip);
 		//设置所有者
 		WeaponToEquip->SetOwner(Character);
+		//旗帜
+		TheFlag = WeaponToEquip;
 	}
 	else
 	{
