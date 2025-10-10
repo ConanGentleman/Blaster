@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Weapon.generated.h"
 
 /// <summary>
@@ -351,6 +352,12 @@ private:
 	/// </summary>
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+
+	/// <summary>
+	/// 所属队伍（只有旗帜会用）
+	/// </summary>
+	UPROPERTY(EditAnywhere)
+	ETeam Team;
 
 public:	
 	///设置武器状态 

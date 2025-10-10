@@ -132,6 +132,9 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (BlasterCharacter)
 	{
 		//PickupWidget->SetVisibility(true);
+		//碰撞的是对方的旗帜则无响应
+		if (WeaponType == EWeaponType::EWT_Flag && BlasterCharacter->GetTeam() != Team) return;
+		if (BlasterCharacter->IsHoldingTheFlag()) return;
 		BlasterCharacter->SetOverlappingWeapon(this);//设置OverlappingWeapon，因为刚开始BlasterCharacter中的OverlappingWeapon为空
 	}
 }
@@ -149,6 +152,9 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	if (BlasterCharacter)
 	{
 		//PickupWidget->SetVisibility(true);
+		//碰撞的是对方的旗帜则无响应
+		if (WeaponType == EWeaponType::EWT_Flag && BlasterCharacter->GetTeam() != Team) return;
+		if (BlasterCharacter->IsHoldingTheFlag()) return;
 		BlasterCharacter->SetOverlappingWeapon(nullptr);//设置OverlappingWeapon，因为离开了 所以为空
 	}
 }
