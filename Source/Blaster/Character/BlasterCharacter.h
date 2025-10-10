@@ -197,6 +197,16 @@ protected:
 	void DropOrDestroyWeapons();
 
 	/// <summary>
+	/// 设置玩家出生点
+	/// </summary>
+	void SetSpawnPoint();
+
+	/// <summary>
+	///玩家状态初始化（血量、护盾、队伍、出生点
+	/// </summary>
+	void OnPlayerStateInitialized();
+
+	/// <summary>
 	/// 用于接收来自子弹类（如ProjectileBullet）中的ApplyDamage委托的回调函数。
 	/// 必须添加UFUNCTION()
 	/// </summary>
