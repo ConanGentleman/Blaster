@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Blaster/Character/BlasterCharacter.h"
 
 AFlag::AFlag()
 {
@@ -36,6 +37,37 @@ void AFlag::Dropped()
 	BlasterOwnerController = nullptr;
 }
 
+/// <summary>
+/// 重置旗帜位置（旗帜运回得分后，需要重置回地方位置）
+/// </summary>
+void AFlag::ResetFlag()
+{
+	ABlasterCharacter* FlagBearer = Cast<ABlasterCharacter>(GetOwner());
+	//清掉所属玩家的持旗状态
+	if (FlagBearer)
+	{
+		FlagBearer->SetHoldingTheFlag(false);
+		//设置碰撞的武器为null，不然重置旗帜后，玩家尽管玩家没有碰撞到任何武器，依旧可以按E捡起
+		FlagBearer->SetOverlappingWeapon(nullptr);
+		FlagBearer->UnCrouch();
+	}
+
+	if (!HasAuthority()) return;
+	//设置相关碰撞属性
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	FlagMesh->DetachFromComponent(DetachRules);
+	SetWeaponState(EWeaponState::EWS_Initial);//旗帜置为初始状态
+	//旗帜设置为初始状态后并不会触发OnWeaponStateSet函数中的case，因此这里需要手动设置一下碰撞参数
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetAreaSphere()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	//清空所属玩家
+	SetOwner(nullptr);
+	BlasterOwnerCharacter = nullptr;
+	BlasterOwnerController = nullptr;
+	//重置回初始位置
+	SetActorTransform(InitialTransform);
+}
+
 void AFlag::OnEquipped()
 {
 	//装备旗帜后，隐藏其文字提示
@@ -48,7 +80,8 @@ void AFlag::OnEquipped()
 	//关闭武器受重力影响
 	FlagMesh->SetEnableGravity(false);
 	//设置网格无法碰撞
-	FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	//禁用深度颜色（轮廓）
 	EnableCustomDepth(false);
 }
@@ -83,4 +116,11 @@ void AFlag::OnDropped()
 	FlagMesh->MarkRenderStateDirty();
 	//丢弃旗帜时开启轮廓显示
 	EnableCustomDepth(true);
+
+}
+
+void AFlag::BeginPlay()
+{
+	Super::BeginPlay();
+	InitialTransform = GetActorTransform();
 }

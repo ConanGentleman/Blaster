@@ -558,6 +558,9 @@ void ABlasterCharacter::RotateInPlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
+	//由于上面几行持旗代码会禁用bUseControllerRotationYaw，开启bOrientRotationToMovement，这里需要还原一下
+	if (Combat1 && Combat1->EquippedWeapon) GetCharacterMovement()->bOrientRotationToMovement = false;
+	if (Combat1 && Combat1->EquippedWeapon) bUseControllerRotationYaw = true;
 	if (bDisableGameplay)//游戏冷却状态时，禁止对角色本身进行原地旋转
 	{
 		bUseControllerRotationYaw = false;
@@ -1428,4 +1431,10 @@ ETeam ABlasterCharacter::GetTeam()
 	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
 	if (BlasterPlayerState == nullptr) return ETeam::ET_NoTeam;
 	return BlasterPlayerState->GetTeam();
+}
+
+void ABlasterCharacter::SetHoldingTheFlag(bool bHolding)
+{
+	if (Combat1 == nullptr) return;
+	Combat1->bHoldingTheFlag = bHolding;
 }

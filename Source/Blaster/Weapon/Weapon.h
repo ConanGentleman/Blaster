@@ -383,4 +383,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
+
+	FORCEINLINE ETeam GetTeam() const { return Team; }
 };
