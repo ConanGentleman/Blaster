@@ -22,6 +22,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer) {
 	if (GameInstance)
 	{
 		UMultiplayerSessionsSubsystem* Subsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+		//确保会话系统有效（断言
 		check(Subsystem);
 
 		if (NumberOfPlayers == Subsystem->DesiredNumPublicConnections)
