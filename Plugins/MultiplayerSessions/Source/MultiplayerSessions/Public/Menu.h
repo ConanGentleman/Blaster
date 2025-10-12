@@ -56,11 +56,17 @@ private:
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 	/// <summary>
 	/// 最大公共连接数 {4}代表设置默认值为4
+	/// UPROPERTY -- 启用引擎反射
+	/// BlueprintReadWrite 授予蓝图读取和写入该变量的权限
+	/// meta = (AllowPrivateAccess = "true")：确保即使蓝图权限受限，C++类内部的代码也始终能访问这个变量。它主要解决的是UHT编译检查时可能出现的权限冲突问题
+	/// 这个组合非常常见，用于创建那些既需要被蓝图控制，又需要在C++逻辑中被使用的游戏属性（如生命值、速度、状态等）
 	/// </summary>
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	int32 NumPublicConnections{4};
 	/// <summary>
 	/// 匹配类型
 	/// </summary>
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FString MatchType{TEXT("FreeForAll")};
 	/// <summary>
 	/// 游戏大厅路径
