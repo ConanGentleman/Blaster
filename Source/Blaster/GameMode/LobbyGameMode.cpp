@@ -3,6 +3,7 @@
 
 #include "LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
+#include "MultiplayerSessionsSubsystem.h"
 
 /// <summary>
 /// 每当有人加入游戏时就会调用该函数
@@ -17,13 +18,34 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer) {
 	//但在跳转到游戏场景时，需要优先加载场景，因此会先跳转到过度场景，再跳转到游戏场景
 	//过度场景（任意Map都行）用于等待游戏场景的加载，待加载完成后，所有玩家再跳转到加载场景（这个过程由UE提供，可在项目设置中的transition设置跳转地图即可）
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
-	if (NumberOfPlayers == 2) {
-		UWorld* World = GetWorld();
-		if (World) {
-			//进行无缝旅游（无缝代表在旅游时不会先断开，再连接相同的服务器）
-			bUseSeamlessTravel = true;
-			//调用服务器旅行来使所有已连接的客户端旅游到游戏地图
-			World->ServerTravel(FString("/Game/Maps/BlasterMap?listen"));
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		UMultiplayerSessionsSubsystem* Subsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+		check(Subsystem);
+
+		if (NumberOfPlayers == Subsystem->DesiredNumPublicConnections)
+		{
+			UWorld* World = GetWorld();
+			if (World) {
+				//进行无缝旅游（无缝代表在旅游时不会先断开，再连接相同的服务器）
+				bUseSeamlessTravel = true;
+
+				FString MatchType = Subsystem->DesiredMatchType;
+				if (MatchType == "FreeForAll")
+				{
+					//调用服务器旅行来使所有已连接的客户端旅游到游戏地图
+					World->ServerTravel(FString("/Game/Maps/BlasterMap?listen"));
+				}
+				else if (MatchType == "Teams")
+				{
+					World->ServerTravel(FString("/Game/Maps/Teams?listen"));
+				}
+				else if (MatchType == "CaptureTheFlag")
+				{
+					World->ServerTravel(FString("/Game/Maps/CaptureTheFlag?listen"));
+				}
+			}
 		}
 	}
 

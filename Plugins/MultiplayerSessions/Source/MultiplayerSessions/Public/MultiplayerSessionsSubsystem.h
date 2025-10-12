@@ -72,6 +72,15 @@ public:
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 
+	/// <summary>
+	/// 对局玩家人数上限
+	/// </summary>
+	int32 DesiredNumPublicConnections{};
+	/// <summary>
+	/// 对局类型（个人、团队、夺旗）
+	/// </summary>
+	FString DesiredMatchType{};
+
 protected:
 
 	//
