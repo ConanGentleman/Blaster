@@ -744,7 +744,7 @@ void UCombatComponent::LaunchGrenade()
 /// <param name="Target">FVector_NetQuantize 类型用于网络同步，且精度没有FVector高但是网络带宽占用较小 UPROPERTY(Replicated) 或其他复制逻辑（如 RPC）使用</param>
 void UCombatComponent::ServerLaunchGrenade_Implementation(const FVector_NetQuantize & Target)
 {
-	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
+	if (Character && GrenadeClass && Character->GetAttachedGrenade())
 	{
 		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation(); //手榴弹开始的位置
 		FVector ToTarget = Target - StartingLocation; //射线检测到的目标位置（准星瞄准方向
